@@ -12,6 +12,10 @@ spec:
       labels:
         app: surveydocument
     spec:
+      # initContainers:
+      #   - name: wait-for-mysql
+      #     image: busybox
+      #     command: ['sh', '-c', 'until nslookup mysql:3306; do echo waiting for myweb-mysql; sleep 2; done;'] 
       containers:
         - name: surveydocument
           image: hamgeonwook/surveydocument:latest

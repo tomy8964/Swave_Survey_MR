@@ -12,6 +12,10 @@ spec:
       labels:
         app: surveyanalyze
     spec:
+      # initContainers:
+      #   - name: wait-for-surveyanswer
+      #     image: busybox
+      #     command: ['sh', '-c', 'until nslookup surveyanswer-service; do echo waiting for surveyanswer; sleep 2; done;']
       containers:
         - name: surveyanalyze
           image: hamgeonwook/surveyanalyze:latest

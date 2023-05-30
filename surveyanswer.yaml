@@ -12,6 +12,10 @@ spec:
       labels:
         app: surveyanswer
     spec:
+      # initContainers:
+      #   - name: wait-for-surveydocument
+      #     image: busybox
+      #     command: ['sh', '-c', 'until ping surveydocument-service; do echo waiting for surveydocument; sleep 2; done;']
       containers:
         - name: surveyanswer
           image: hamgeonwook/surveyanswer:latest

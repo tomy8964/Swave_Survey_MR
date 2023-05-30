@@ -5,6 +5,7 @@
 #### demo2 포드에 들어가서 curl로 demo1-service:9002/api/resource 요청 받음
 # Spring Cloud Gateway로 JWT 토큰 인증
 ## 외부 요청 -> Ingress -> FrontEnd -> Gateway -> BackEnd (백엔드끼리의 통신도 Gateway를 통해서)
+![](2023-05-31-00-44-06.png)
  SWAVE project to MSA
  https://malwareanalysis.tistory.com/91
  https://blog.naver.com/alice_k106/221502890249
