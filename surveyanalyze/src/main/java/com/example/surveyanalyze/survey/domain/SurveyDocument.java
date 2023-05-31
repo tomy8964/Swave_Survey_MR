@@ -38,31 +38,13 @@ public class SurveyDocument {
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionDocument> questionDocumentList;
 
-    @ManyToOne
-    @JsonIgnore // 순환참조 방지
-    @JoinColumn(name = "survey_id")
-    private Survey survey;
 
     @Builder
-    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, Survey survey, String title, int type, String description, List<QuestionDocument> questionDocumentList) {
-        this.survey = survey;
+    public SurveyDocument(int countAnswer, String title, int type, String description, List<QuestionDocument> questionDocumentList) {
         this.title = title;
         this.type = type;
         this.description = description;
         this.questionDocumentList = questionDocumentList;
-//        this.surveyAnswerList = surveyAnswerList;
         this.countAnswer = countAnswer;
     }
-
-//    public void setAnswer(SurveyAnswer surveyAnswer) {
-//        this.surveyAnswerList.add(surveyAnswer);
-//    }
-    // 문항 list 에 넣어주기
-    public void setQuestion(QuestionDocument questionDocument) {
-        this.questionDocumentList.add(questionDocument);
-    }
-    // 문항 analyze 에 넣어주기
-//    public void setAnalyze(SurveyAnalyze surveyAnalyze) {
-//        this.surveyAnalyze=surveyAnalyze;
-//    }
 }

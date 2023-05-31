@@ -8,12 +8,12 @@ server:
 #    service-url:
 #      defaultZone: http://localhost:8761/eureka
 
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql:3306/surveydb?serverTimezone=Asia/Seoul
-    username: root
-    password: admin
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://mysql:3306/surveydb?serverTimezone=Asia/Seoul
+#    username: root
+#    password: admin
 
   jpa:
     hibernate:
@@ -32,18 +32,14 @@ spring:
 #            preLogger: true
 #            postLogger: true
       routes:
-#        - id: user-service
-#          uri: lb://USER-SERVICE
-#          predicates:
-#            - Path=/user-service/**
         - id: survey-analyze
-          uri: http://surveyanalyze-service:8084/
+          uri: http://surveyanalyze-service:8080/
           predicates:
             - Path=/analyze/internal/**
             - Method=GET,POST
 
         - id: survey-analyze
-          uri: http://surveyanalyze-service:8084/
+          uri: http://surveyanalyze-service:8080/
           predicates:
             - Path=/analyze/external/**
             - Method=GET,POST
@@ -51,49 +47,33 @@ spring:
             - AuthorizationHeaderFilter
 
         - id: survey-answer
-          uri: http://surveyanswer-service:8083/
+          uri: http://surveyanswer-service:8080/
           predicates:
             - Path=/survey/external/**
             - Method=GET,POST
         - id: survey-answer
-          uri: http://surveyanswer-service:8083/
+          uri: http://surveyanswer-service:8080/
           predicates:
             - Path=/survey/internal/**
             - Method=GET,POST
         - id: surveydocument
-          uri: http://surveydocument-service:8082/
+          uri: http://surveydocument-service:8080/
           predicates:
             - Path=/api/external/**
             - Method=GET,POST
           filters:
             - AuthorizationHeaderFilter
         - id: surveydocument
-          uri: http://surveydocument-service:8082/
+          uri: http://surveydocument-service:8080/
           predicates:
             - Path=/api/internal/**
             - Method=GET,POST
 
         - id: surveydocument
-          uri: http://surveydocument-service:8082/
+          uri: http://surveydocument-service:8080/
           predicates:
             - Path=/api/oauth/**
             - Method=GET,POST
-
-        - id: first-service
-          uri: http://localhost:8081/
-          predicates:
-            - Path=/first-service/**
-            - Method=GET,POST
-          filters:
-#            - AddRequestHeader=second-request, second-request-header2
-#            - AddResponseHeader=second-response, second-response-header2
-            - name: CustomFilter
-#            - name: LoggingFilter
-            - name: AuthorizationHeaderFilter
-              args:
-                baseMessage: Hi, there
-                preLogger: true
-                postLogger: true
 
 
 management:

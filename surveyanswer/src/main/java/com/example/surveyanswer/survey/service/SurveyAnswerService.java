@@ -1,6 +1,12 @@
 package com.example.surveyanswer.survey.service;
 
-import com.example.surveyanswer.survey.domain.*;
+import com.example.surveyanswer.survey.domain.SurveyAnswer;
+import com.example.surveyanswer.survey.domain.QuestionAnswer;
+import com.example.surveyanswer.survey.domain.SurveyDocument;
+import com.example.surveyanswer.survey.domain.QuestionDocument;
+import com.example.surveyanswer.survey.domain.Choice;
+import com.example.surveyanswer.survey.domain.WordCloud;
+
 import com.example.surveyanswer.survey.exception.InvalidTokenException;
 import com.example.surveyanswer.survey.repository.questionAnswer.QuestionAnswerRepository;
 import com.example.surveyanswer.survey.repository.surveyAnswer.SurveyAnswerRepository;
@@ -186,19 +192,6 @@ public class SurveyAnswerService {
 
         log.info(String.valueOf(surveyDetailDto));
         return surveyDetailDto;
-    }
-
-    public static Map<String, Integer> countWords(String text) {
-        String[] words = text.split("\\s+");
-        Map<String, Integer> wordCount = new HashMap<>();
-
-        for (String word : words) {
-            if (!word.isEmpty()) {
-                wordCount.put(word, wordCount.getOrDefault(word, 0) + 1);
-            }
-        }
-
-        return wordCount;
     }
 
     private static void restAPItoAnalyzeController(Long surveyDocumentId) {

@@ -3,6 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/apigateway-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/apigateway-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.example.apigateway-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.example.apigateway-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.example.surveyanalyze.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.example.surveyanalyze.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.example.surveyanswer.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.example.surveyanswer.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.example.surveydocument.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.example.surveydocument.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/gateway.iml" filepath="$PROJECT_DIR$/.idea/gateway.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/surveyanalyze.main.iml" filepath="$PROJECT_DIR$/.idea/modules/surveyanalyze.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/surveyanswer.main.iml" filepath="$PROJECT_DIR$/.idea/modules/surveyanswer.main.iml" />
