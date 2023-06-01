@@ -1,0 +1,67 @@
+## Current Server Profile Setting
+server:
+  port: 8080
+
+  jpa:
+    hibernate:
+      ddl-auto: update #create update none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: survey-analyze
+          uri: http://surveyanalyze-service:8080/
+          predicates:
+            - Path=/analyze/internal/**
+            - Method=GET,POST
+
+        - id: survey-analyze
+          uri: http://surveyanalyze-service:8080/
+          predicates:
+            - Path=/analyze/external/**
+            - Method=GET,POST
+          filters:
+            - AuthorizationHeaderFilter
+
+        - id: survey-answer
+          uri: http://surveyanswer-service:8080/
+          predicates:
+            - Path=/survey/external/**
+            - Method=GET,POST
+        - id: survey-answer
+          uri: http://surveyanswer-service:8080/
+          predicates:
+            - Path=/survey/internal/**
+            - Method=GET,POST
+        - id: surveydocument
+          uri: http://surveydocument-service:8080/
+          predicates:
+            - Path=/api/external/**
+            - Method=GET,POST
+          filters:
+            - AuthorizationHeaderFilter
+        - id: surveydocument
+          uri: http://surveydocument-service:8080/
+          predicates:
+            - Path=/api/internal/**
+            - Method=GET,POST
+
+        - id: surveydocument
+          uri: http://surveydocument-service:8080/
+          predicates:
+            - Path=/api/oauth/**
+            - Method=GET,POST
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, httptrace
+
+token:
+  expiration-time: 86400000 # 하루짜리 토큰 생성
+  secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan

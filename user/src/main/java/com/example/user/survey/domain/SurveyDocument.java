@@ -1,8 +1,11 @@
-package com.example.surveyanswer.survey.domain;
+package com.example.user.survey.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -38,8 +41,14 @@ public class SurveyDocument {
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionDocument> questionDocumentList;
 
+    @ManyToOne
+    @JsonIgnore // 순환참조 방지
+    @JoinColumn(name = "survey_id")
+    private Survey survey;
+
     @Builder
-    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, String title, int type, String description, List<QuestionDocument> questionDocumentList) {
+    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, Survey survey, String title, int type, String description, List<QuestionDocument> questionDocumentList) {
+        this.survey = survey;
         this.title = title;
         this.type = type;
         this.description = description;

@@ -1,0 +1,88 @@
+## Current Server Profile Setting
+server:
+  port: 8080
+
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka
+
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://mysql:3306/surveydb?serverTimezone=Asia/Seoul
+#    username: root
+#    password: admin
+
+  jpa:
+    hibernate:
+      ddl-auto: update #create update none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+#      default-filters:
+#        - name: GlobalFilter
+#          args:
+#            baseMessage: Spring Cloud Gateway Global Filter
+#            preLogger: true
+#            postLogger: true
+      routes:
+        - id: survey-analyze
+          uri: http://localhost:8084/
+          predicates:
+            - Path=/analyze/internal/**
+            - Method=GET,POST
+
+        - id: survey-analyze
+          uri: http://localhost:8084/
+          predicates:
+            - Path=/analyze/external/**
+            - Method=GET,POST
+          filters:
+            - AuthorizationHeaderFilter
+
+        - id: survey-answer
+          uri: http://localhost:8083/
+          predicates:
+            - Path=/survey/external/**
+            - Method=GET,POST
+        - id: survey-answer
+          uri: http://localhost:8083/
+          predicates:
+            - Path=/survey/internal/**
+            - Method=GET,POST
+        - id: surveydocument
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/api/external/**
+            - Method=GET,POST
+          filters:
+            - AuthorizationHeaderFilter
+        - id: surveydocument
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/api/internal/**
+            - Method=GET,POST
+
+        - id: surveydocument
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/api/oauth/**
+            - Method=GET,POST
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, httptrace
+
+token:
+  expiration-time: 86400000 # 하루짜리 토큰 생성
+  secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan
