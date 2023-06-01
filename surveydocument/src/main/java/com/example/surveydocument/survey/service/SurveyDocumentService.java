@@ -2,6 +2,7 @@ package com.example.surveydocument.survey.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.surveydocument.restAPI.service.RestApiSurveyDocumentService;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
@@ -51,19 +52,17 @@ public class SurveyDocumentService {
     private final QuestionDocumentRepository questionDocumentRepository;
     private final ChoiceRepository choiceRepository;
     private final WordCloudRepository wordCloudRepository;
-
+    private final RestApiSurveyDocumentService apiService;
     private static String gateway="gateway-service:8080";
 
     @Transactional
     public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
 
         // 유저 정보 받아오기
-//        checkInvalidToken(request);
-        log.info("유저 정보 받아옴");
+        // User Module 에서 현재 유저 가져오기
+        User getUser = apiService.getCurrentUserFromUser();
+        Survey userSurvey = getUser.getSurvey();
 
-        // 유저 정보에 해당하는 Survey 저장소 가져오기
-        log.info(String.valueOf(request));
-        Survey userSurvey = userService.getUser(request).getSurvey();
         if(userSurvey == null) {
             userSurvey = Survey.builder()
                     .user(userService.getUser(request))
@@ -119,12 +118,8 @@ public class SurveyDocumentService {
         userSurvey.setDocument(surveyDocument);
         surveyRepository.flush();
 
-//        // 스냅샷 이미지 저장하기
-//        // 172.16.210.25 : Image DB VM 접속하기
-//        InetAddress imageVM = Inet4Address.getByAddress(new byte[]{(byte) 172, 16, (byte) 210, 25});
-//
-//        // 스냅샷 찍기
-//        GrapzIt
+        // User Module 에 저장된 Survey 보내기
+        apiService.sendSurveyToUser(userSurvey);
     }
 
     public void captureSnapshot() {
@@ -227,7 +222,7 @@ public class SurveyDocumentService {
                 // 주관식 답변들 리스트
 //                List<QuestionAnswer> questionAnswersByCheckAnswerId = questionAnswerRepository.findQuestionAnswersByCheckAnswerId(questionDocument.getId());
                 //REST API GET questionAnswersByCheckAnswerId
-                List<QuestionAnswer> questionAnswersByCheckAnswerId = getQuestionAnswersByCheckAnswerId(questionDocument.getId());
+                List<QuestionAnswer> questionAnswersByCheckAnswerId = apiService.getQuestionAnswersByCheckAnswerId(questionDocument.getId());
                 for (QuestionAnswer questionAnswer : questionAnswersByCheckAnswerId) {
                     // 그 중에 주관식 답변만
                     if (questionAnswer.getQuestionType() == 0) {
@@ -270,37 +265,37 @@ public class SurveyDocumentService {
         return surveyDetailDto;
     }
 
-    private List<QuestionAnswer> getQuestionAnswersByCheckAnswerId(Long id) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("GET questionAnswer List by checkAnswerId");
-        WebClient webClient = WebClient.create();
-
-        // Define the API URL
-        String apiUrl = "http://"+ gateway +"/survey/internal/getQuestionAnswerByCheckAnswerId/"+ id;
-
-        // Make a GET request to the API and retrieve the response
-        List<QuestionAnswer> questionAnswerList = webClient.get()
-                .uri(apiUrl)
-                .header("Authorization", "NotNull")
-                .retrieve()
-                .bodyToMono(String.class)
-                .map(responseBody -> {
-                    ObjectMapper mapper = new ObjectMapper();
-                    try {
-                        return mapper.readValue(responseBody, new TypeReference<List<QuestionAnswer>>() {});
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .blockOptional()
-                .orElse(null);
-
-        // Process the response as needed
-        System.out.println("Request: " + questionAnswerList);
-
-        return questionAnswerList;
-    }
+//    private List<QuestionAnswer> getQuestionAnswersByCheckAnswerId(Long id) {
+//        //REST API로 분석 시작 컨트롤러로 전달
+//        // Create a WebClient instance
+//        log.info("GET questionAnswer List by checkAnswerId");
+//        WebClient webClient = WebClient.create();
+//
+//        // Define the API URL
+//        String apiUrl = "http://"+ gateway +"/survey/internal/getQuestionAnswerByCheckAnswerId/"+ id;
+//
+//        // Make a GET request to the API and retrieve the response
+//        List<QuestionAnswer> questionAnswerList = webClient.get()
+//                .uri(apiUrl)
+//                .header("Authorization", "NotNull")
+//                .retrieve()
+//                .bodyToMono(String.class)
+//                .map(responseBody -> {
+//                    ObjectMapper mapper = new ObjectMapper();
+//                    try {
+//                        return mapper.readValue(responseBody, new TypeReference<List<QuestionAnswer>>() {});
+//                    } catch (JsonProcessingException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                })
+//                .blockOptional()
+//                .orElse(null);
+//
+//        // Process the response as needed
+//        System.out.println("Request: " + questionAnswerList);
+//
+//        return questionAnswerList;
+//    }
 
     public Choice getChoice(Long id) {
         Optional<Choice> byId = choiceRepository.findById(id);

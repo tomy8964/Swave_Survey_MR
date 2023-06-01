@@ -15,7 +15,7 @@ server:
 #    url: jdbc:mysql://mysql:3306/surveydb?serverTimezone=Asia/Seoul
 #    username: root
 #    password: admin
-
+spring:
   jpa:
     hibernate:
       ddl-auto: update #create update none
@@ -57,6 +57,7 @@ server:
           predicates:
             - Path=/survey/internal/**
             - Method=GET,POST
+
         - id: surveydocument
           uri: http://localhost:8082/
           predicates:
@@ -69,11 +70,21 @@ server:
           predicates:
             - Path=/api/internal/**
             - Method=GET,POST
-
         - id: surveydocument
           uri: http://localhost:8082/
           predicates:
             - Path=/api/oauth/**
+            - Method=GET,POST
+
+        - id: user
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/user/external/** # 프론트에서 요청
+            - Method=GET,POST
+        - id: user
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/user/internal/** # 모듈간 통신
             - Method=GET,POST
 
 
