@@ -6,6 +6,7 @@ import com.example.surveyanalyze.survey.response.SurveyDetailDto;
 import com.example.surveyanalyze.survey.service.SurveyAnalyzeService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +24,7 @@ public class SurveyAnalyzeInternalController {
     }
 
     // 설문 분석 시작
+    @Cacheable(value = "/research/analyze/create", key = "#id")
     @PostMapping(value = "/research/analyze/create")
     public String saveAnalyze(@RequestBody String surveyId) {
         // 설문 분석 -> 저장 (python)
