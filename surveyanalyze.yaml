@@ -23,6 +23,10 @@ spec:
           ports:
             - containerPort: 8080
               protocol: TCP
+        - name: redis-container
+          image: redis:latest
+          ports:
+            - containerPort: 6379
 
 ---
 apiVersion: v1
