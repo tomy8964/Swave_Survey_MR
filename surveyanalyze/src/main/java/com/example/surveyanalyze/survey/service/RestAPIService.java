@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.List;
@@ -24,7 +25,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RestAPIService {
-    private static String gateway = "localhost:8080";
+
+    @Value("${gateway.host}")
+    private String gateway;
 
     public SurveyDocument getSurveyDocument(Long surveyDocumentId) {
         //REST API로 분석 시작 컨트롤러로 전달

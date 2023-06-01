@@ -3,6 +3,7 @@ package com.example.surveyanswer.survey.service;
 import com.example.surveyanswer.survey.domain.SurveyDocument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -11,7 +12,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 public class RestAPIService {
 
-    private static String gateway="localhost:8080";
+    @Value("${gateway.host}")
+    private String gateway;
 
     public WebClient webClient = WebClient.create();
 
@@ -88,7 +90,8 @@ public class RestAPIService {
         log.info("GET SurveyDocument");
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/"+surveyDocumentId;
+        String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/" + surveyDocumentId;
+        log.info(apiUrl);
 
         // Make a GET request to the API and retrieve the response
         SurveyDocument get = webClient.get()
