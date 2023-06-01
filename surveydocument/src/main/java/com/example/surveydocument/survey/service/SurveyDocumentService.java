@@ -46,7 +46,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class SurveyDocumentService {
-    private final UserService2 userService;
     private final SurveyRepository surveyRepository;
     private final SurveyDocumentRepository surveyDocumentRepository;
     private final QuestionDocumentRepository questionDocumentRepository;
@@ -65,7 +64,7 @@ public class SurveyDocumentService {
 
         if(userSurvey == null) {
             userSurvey = Survey.builder()
-                    .user(userService.getUser(request))
+                    .user(getUser)
                     .surveyDocumentList(new ArrayList<>())
                     .build();
             surveyRepository.save(userSurvey);
@@ -122,28 +121,21 @@ public class SurveyDocumentService {
         apiService.sendSurveyToUser(userSurvey);
     }
 
-    public void captureSnapshot() {
-
-    }
-
     // gird method 로 SurveyDocument 조회
     public List<SurveyDocument> readSurveyListByGrid(HttpServletRequest request, PageRequestDto pageRequest) {
 
-        User user = userService.getUser(request);
+        // User Module 에서 현재 유저 가져오기
+        User getUser = apiService.getCurrentUserFromUser();
 
-        return surveyRepository.getSurveyDocumentListGrid(user, pageRequest);
+        return surveyRepository.getSurveyDocumentListGrid(getUser, pageRequest);
     }
 
     // list method 로 SurveyDocument 조회
     public Page<SurveyDocument> readSurveyList(HttpServletRequest request, PageRequestDto pageRequest) throws Exception {
 
-        checkInvalidToken(request);
 
-        User user = userService.getUser(request);
-        // gird 일 경우 그냥 다 보여주기
-//        if(pageRequest.getMethod().equals("grid")) {
-//            return surveyRepository.getSurveyDocumentListGrid();
-//        }
+        // User Module 에서 현재 유저 가져오기
+        User getUser = apiService.getCurrentUserFromUser();
 
         PageRequest page = PageRequest.builder()
                 .page(pageRequest.getPage())
@@ -159,16 +151,11 @@ public class SurveyDocumentService {
         // 4. sort on How : ascending or descending
         Pageable pageable = page.of(page.getSortProperties(), page.getDirection(page.getDirect()));
 
-        return surveyRepository.surveyDocumentPaging(user, pageable);
+        return surveyRepository.surveyDocumentPaging(getUser, pageable);
     }
 
     public SurveyDetailDto readSurveyDetail(HttpServletRequest request, Long id) throws InvalidTokenException {
 
-        checkInvalidToken(request);
-//        User user = userService.getUser(request);
-//
-//        surveyRepository.findByUser(user.getId())
-//                .getSurveyDocumentList().get()
         return getSurveyDetailDto(id);
     }
 
@@ -186,15 +173,6 @@ public class SurveyDocumentService {
             findChoice.get().setCount(findChoice.get().getCount() + 1);
             choiceRepository.flush();
         }
-    }
-
-    // 회원 유효성 검사, token 존재하지 않으면 예외처리
-    private static void checkInvalidToken(HttpServletRequest request) throws InvalidTokenException {
-        if(request.getHeader("Authorization") == null) {
-            log.info("error");
-            throw new InvalidTokenException();
-        }
-        log.info("토큰 체크 완료");
     }
 
     // SurveyDocument Response 보낼 SurveyDetailDto로 변환하는 메서드
@@ -220,8 +198,7 @@ public class SurveyDocumentService {
             List<ChoiceDetailDto> choiceDtos = new ArrayList<>();
             if (questionDocument.getQuestionType() == 0) {
                 // 주관식 답변들 리스트
-//                List<QuestionAnswer> questionAnswersByCheckAnswerId = questionAnswerRepository.findQuestionAnswersByCheckAnswerId(questionDocument.getId());
-                //REST API GET questionAnswersByCheckAnswerId
+                // REST API GET questionAnswersByCheckAnswerId
                 List<QuestionAnswer> questionAnswersByCheckAnswerId = apiService.getQuestionAnswersByCheckAnswerId(questionDocument.getId());
                 for (QuestionAnswer questionAnswer : questionAnswersByCheckAnswerId) {
                     // 그 중에 주관식 답변만
@@ -265,38 +242,6 @@ public class SurveyDocumentService {
         return surveyDetailDto;
     }
 
-//    private List<QuestionAnswer> getQuestionAnswersByCheckAnswerId(Long id) {
-//        //REST API로 분석 시작 컨트롤러로 전달
-//        // Create a WebClient instance
-//        log.info("GET questionAnswer List by checkAnswerId");
-//        WebClient webClient = WebClient.create();
-//
-//        // Define the API URL
-//        String apiUrl = "http://"+ gateway +"/survey/internal/getQuestionAnswerByCheckAnswerId/"+ id;
-//
-//        // Make a GET request to the API and retrieve the response
-//        List<QuestionAnswer> questionAnswerList = webClient.get()
-//                .uri(apiUrl)
-//                .header("Authorization", "NotNull")
-//                .retrieve()
-//                .bodyToMono(String.class)
-//                .map(responseBody -> {
-//                    ObjectMapper mapper = new ObjectMapper();
-//                    try {
-//                        return mapper.readValue(responseBody, new TypeReference<List<QuestionAnswer>>() {});
-//                    } catch (JsonProcessingException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                })
-//                .blockOptional()
-//                .orElse(null);
-//
-//        // Process the response as needed
-//        System.out.println("Request: " + questionAnswerList);
-//
-//        return questionAnswerList;
-//    }
-
     public Choice getChoice(Long id) {
         Optional<Choice> byId = choiceRepository.findById(id);
         return byId.get();
@@ -330,5 +275,61 @@ public class SurveyDocumentService {
         Optional<SurveyDocument> byId = surveyDocumentRepository.findById(id);
         byId.get().setCountAnswer(byId.get().getCountAnswer() + 1);
         surveyDocumentRepository.flush();
+    }
+
+    public void updateSurvey(SurveyRequestDto requestDto, Long surveyId) {
+        SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyId).orElseGet(null);
+
+        // User Module 로 부터 현재 유저 정보 가져오기
+        User currentUser = apiService.getCurrentUserFromUser();
+
+        // 유저 확인 검사
+        if(!surveyDocument.getSurvey().getUser().equals(currentUser)) {
+            // todo: User 확인 Exception 처리
+        }
+
+        // 초기 값 수정
+        surveyDocument.setTitle(requestDto.getTitle());
+        surveyDocument.setDescription(requestDto.getDescription());
+        surveyDocument.setType(requestDto.getType());
+
+        // Question List 수정
+        // survey document 의 Question List 초기화
+        surveyDocument.getQuestionDocumentList().clear();
+        for (QuestionRequestDto questionRequestDto : requestDto.getQuestionRequest()) {
+            QuestionDocument question = QuestionDocument.builder()
+                    .surveyDocument(surveyDocument)
+                    .title(questionRequestDto.getTitle())
+                    .questionType(questionRequestDto.getType())
+                    .build();
+            questionDocumentRepository.save(question);
+
+            if(questionRequestDto.getType() == 0) continue; // 주관식
+
+            // 객관식, 찬부식일 경우 선지 저장
+            question.setChoiceList(new ArrayList<>());
+            for(ChoiceRequestDto choiceRequestDto: questionRequestDto.getChoiceList()) {
+                Choice choice = Choice.builder()
+                        .question_id(question)
+                        .title(choiceRequestDto.getChoiceName())
+                        .count(0)
+                        .build();
+                choiceRepository.save(choice);
+                question.setChoice(choice);
+            }
+
+            surveyDocument.setQuestion(question);
+        }
+        surveyDocumentRepository.save(surveyDocument);
+
+    }
+
+    public void deleteSurvey(Long id) {
+        SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElseGet(null);
+        surveyDocument.setDeleted(true);
+    }
+
+    public void managementSurvey(Long id) {
+
     }
 }

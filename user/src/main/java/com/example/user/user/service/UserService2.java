@@ -11,6 +11,7 @@ import com.example.user.util.OAuth.JwtProperties;
 import com.example.user.util.OAuth.OauthToken;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -23,11 +24,10 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService2 {
-    @Autowired
-    OAuthService oAuthService;
-    @Autowired
-    UserRepository userRepository;
+    private final OAuthService oAuthService;
+    private final UserRepository userRepository;
 
     public List<SurveyMyPageDto> mySurveyList(HttpServletRequest request) {
         List<SurveyMyPageDto> surveyMyPageDtos = new ArrayList<>();
@@ -53,10 +53,9 @@ public class UserService2 {
         return user;
     }
 
-    public ResponseEntity<Object> getCurrentUser(HttpServletRequest request) throws Exception {
-        User user = getUser(request);
-        System.out.println(user.getEmail());
-        return ResponseEntity.ok().body(user);
+    public User getCurrentUser(HttpServletRequest request) {
+        Long userCode = (Long) request.getAttribute("userCode");
+        return userRepository.findByUserCode(userCode).orElseThrow(UserNotFoundException::new);
     }
 
     public ResponseEntity getLogin(String code,String provider){
@@ -66,6 +65,7 @@ public class UserService2 {
         headers.add(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
         return ResponseEntity.ok().headers(headers).body("\"success\"");
     }
+
     public String updateMyPage(HttpServletRequest request, UserUpdateRequest userUpdateRequest) throws ServletException {
         Long userId =getUser(request).getUserCode();
         Optional<User> optionalUser = userRepository.findByUserCode(userId);
@@ -79,14 +79,5 @@ public class UserService2 {
         }
         return "success";
     }
-
-//    private static void checkInvalidToken(HttpServletRequest request) throws InvalidTokenException {
-//        if(request.getHeader("Authorization") == null) {
-//            log.info("error");
-//            throw new InvalidTokenException();
-//        }
-//        log.info("토큰 체크 완료");
-//    }
-
 
 }
