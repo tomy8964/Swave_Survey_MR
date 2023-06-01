@@ -29,7 +29,7 @@ public class SurveyAnalyzeExternalController {
         return surveyService.getSurveyDetailDto(id);
     }
 
-    // 설문 응답 조회
+    // 분석 응답 조회
     @GetMapping(value = "/response/{id}")
     public SurveyDetailDto readResponse(@PathVariable Long id) {
         return surveyService.getSurveyDetailDto(id);
