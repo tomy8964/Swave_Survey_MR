@@ -44,7 +44,7 @@ public class SurveyAnalyzeService {
     private final QuestionAnalyzeRepository questionAnalyzeRepository;
     private final SurveyAnalyzeRepository surveyAnalyzeRepository;
 
-    private static String gateway = "gateway-service:8080";
+    private static String gateway = "localhost:8080";
 
     // 파이썬에 DocumentId 보내주고 분석결과 Entity에 매핑해서 저장
     public void analyze(String stringId) throws InvalidPythonException {

@@ -1,26 +1,20 @@
 package com.example.surveyanswer.survey.service;
 
-import com.example.surveyanswer.survey.domain.SurveyAnswer;
-import com.example.surveyanswer.survey.domain.QuestionAnswer;
-import com.example.surveyanswer.survey.domain.SurveyDocument;
-import com.example.surveyanswer.survey.domain.QuestionDocument;
-import com.example.surveyanswer.survey.domain.Choice;
-import com.example.surveyanswer.survey.domain.WordCloud;
-
+import com.example.surveyanswer.survey.domain.*;
 import com.example.surveyanswer.survey.exception.InvalidTokenException;
 import com.example.surveyanswer.survey.repository.questionAnswer.QuestionAnswerRepository;
 import com.example.surveyanswer.survey.repository.surveyAnswer.SurveyAnswerRepository;
 import com.example.surveyanswer.survey.response.*;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
 
@@ -31,7 +25,13 @@ public class SurveyAnswerService {
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final QuestionAnswerRepository questionAnswerRepository;
 
-    private static String gateway="gateway-service:8080";
+    private static String gateway="localhost:8080";
+
+    public WebClient webClient = WebClient.create();
+
+    public void setWebClient(String baseurl) {
+        this.webClient = WebClient.create(baseurl);
+    }
 
     // 설문 응답 참여
     public SurveyDetailDto getParticipantSurvey(Long id){
@@ -194,11 +194,10 @@ public class SurveyAnswerService {
         return surveyDetailDto;
     }
 
-    private static void restAPItoAnalyzeController(Long surveyDocumentId) {
+    private void restAPItoAnalyzeController(Long surveyDocumentId) {
         //REST API로 분석 시작 컨트롤러로 전달
         // Create a WebClient instance
         log.info("응답 저장 후 -> 분석 시작 REST API 전달");
-        WebClient webClient = WebClient.create();
 
         // Define the API URL
         String apiUrl = "http://" + gateway + "/analyze/internal/research/analyze/create";
@@ -216,11 +215,10 @@ public class SurveyAnswerService {
         System.out.println("Request: " + post);
     }
 
-    private static void giveChoiceIdToCount(Long choiceId) {
+    private void giveChoiceIdToCount(Long choiceId) {
         //REST API로 분석 시작 컨트롤러로 전달
         // Create a WebClient instance
         log.info("응답 저장 후 -> 분석 시작 REST API 전달");
-        WebClient webClient = WebClient.create();
 
         // Define the API URL
         String apiUrl = "http://" + gateway + "/api/internal/count/"+choiceId;
@@ -238,11 +236,10 @@ public class SurveyAnswerService {
         System.out.println("Request: " + post);
     }
 
-    private static void giveDocumentIdtoCountAnswer(Long surveyDocumentId) {
+    private void giveDocumentIdtoCountAnswer(Long surveyDocumentId) {
         //REST API로 분석 시작 컨트롤러로 전달
         // Create a WebClient instance
         log.info("응답 저장 후 -> 분석 시작 REST API 전달");
-        WebClient webClient = WebClient.create();
 
         // Define the API URL
         String apiUrl = "http://" + gateway + "/api/internal/countAnswer/"+surveyDocumentId;
@@ -260,11 +257,10 @@ public class SurveyAnswerService {
         System.out.println("Request: " + post);
     }
 
-    private static SurveyDocument getSurveyDocument(Long surveyDocumentId) {
+    private SurveyDocument getSurveyDocument(Long surveyDocumentId) {
         //REST API로 분석 시작 컨트롤러로 전달
         // Create a WebClient instance
         log.info("GET SurveyDocument");
-        WebClient webClient = WebClient.create();
 
         // Define the API URL
         String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/"+surveyDocumentId;
