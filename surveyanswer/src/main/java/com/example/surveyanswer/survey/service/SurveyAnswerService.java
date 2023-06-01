@@ -6,17 +6,12 @@ import com.example.surveyanswer.survey.repository.questionAnswer.QuestionAnswerR
 import com.example.surveyanswer.survey.repository.surveyAnswer.SurveyAnswerRepository;
 import com.example.surveyanswer.survey.response.*;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.List;
-
-//import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
 
 @Service
 @RequiredArgsConstructor
@@ -24,14 +19,7 @@ import java.util.List;
 public class SurveyAnswerService {
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final QuestionAnswerRepository questionAnswerRepository;
-
-    private static String gateway="localhost:8080";
-
-    public WebClient webClient = WebClient.create();
-
-    public void setWebClient(String baseurl) {
-        this.webClient = WebClient.create(baseurl);
-    }
+    private final RestAPIService restAPIService;
 
     // 설문 응답 참여
     public SurveyDetailDto getParticipantSurvey(Long id){
@@ -75,7 +63,7 @@ public class SurveyAnswerService {
                 if (questionAnswer.getCheckAnswerId() != null) {
 //                    Optional<Choice> findChoice = choiceRepository.findById(questionAnswer.getCheckAnswerId());
     //                Optional<Choice> findChoice = choiceRepository.findByTitle(questionAnswer.getCheckAnswer());
-                    giveChoiceIdToCount(questionAnswer.getCheckAnswerId());
+                    restAPIService.giveChoiceIdToCount(questionAnswer.getCheckAnswerId());
 
 //                    if (findChoice.isPresent()) {
 //                        //todo: querydsl로 변경
@@ -89,14 +77,14 @@ public class SurveyAnswerService {
         surveyAnswerRepository.flush();
 
         //count Answer
-        giveDocumentIdtoCountAnswer(surveyDocumentId);
+        restAPIService.giveDocumentIdtoCountAnswer(surveyDocumentId);
         // 저장된 설문 응답을 Survey 에 연결 및 저장
 //        surveyDocument.setAnswer(surveyAnswer);
 //        surveyDocumentRepository.flush();
 
         //REST API to survey analyze controller
         //todo:응답 할때 다시 수정
-        restAPItoAnalyzeController(surveyDocumentId);
+        restAPIService.restAPItoAnalyzeController(surveyDocumentId);
     }
 
     // todo : 분석 응답 리스트 불러오기
@@ -129,7 +117,7 @@ public class SurveyAnswerService {
     // SurveyDocument Response 보낼 SurveyDetailDto로 변환하는 메서드
     private SurveyDetailDto getSurveyDetailDto(Long surveyDocumentId) {
 //        SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).get();
-        SurveyDocument surveyDocument = getSurveyDocument(surveyDocumentId);
+        SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
 
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
 
@@ -192,91 +180,6 @@ public class SurveyAnswerService {
 
         log.info(String.valueOf(surveyDetailDto));
         return surveyDetailDto;
-    }
-
-    private void restAPItoAnalyzeController(Long surveyDocumentId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("응답 저장 후 -> 분석 시작 REST API 전달");
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/analyze/internal/research/analyze/create";
-
-        // Make a GET request to the API and retrieve the response
-        String post = webClient.post()
-                .uri(apiUrl)
-                .header("Authorization","NouNull")
-                .bodyValue(String.valueOf(surveyDocumentId))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + post);
-    }
-
-    private void giveChoiceIdToCount(Long choiceId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("응답 저장 후 -> 분석 시작 REST API 전달");
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/count/"+choiceId;
-
-        // Make a GET request to the API and retrieve the response
-        String post = webClient.post()
-                .uri(apiUrl)
-                .header("Authorization","NouNull")
-                .bodyValue(String.valueOf(choiceId))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + post);
-    }
-
-    private void giveDocumentIdtoCountAnswer(Long surveyDocumentId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("응답 저장 후 -> 분석 시작 REST API 전달");
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/countAnswer/"+surveyDocumentId;
-
-        // Make a GET request to the API and retrieve the response
-        String post = webClient.post()
-                .uri(apiUrl)
-                .header("Authorization","NouNull")
-                .bodyValue(String.valueOf(surveyDocumentId))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + post);
-    }
-
-    private SurveyDocument getSurveyDocument(Long surveyDocumentId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("GET SurveyDocument");
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/"+surveyDocumentId;
-
-        // Make a GET request to the API and retrieve the response
-        SurveyDocument get = webClient.get()
-                .uri(apiUrl)
-                .header("Authorization","NotNull")
-                .retrieve()
-                .bodyToMono(SurveyDocument.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + get);
-
-        return get;
     }
 
     public List<QuestionAnswer> getQuestionAnswerByCheckAnswerId(Long id) {
