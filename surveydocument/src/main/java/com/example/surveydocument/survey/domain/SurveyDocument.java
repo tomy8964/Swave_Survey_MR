@@ -14,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 public class SurveyDocument {
 
+    //todo : soft delete 쿼리 조회 되게 만들어주기
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_document_id")
     private Long id;
@@ -25,19 +27,21 @@ public class SurveyDocument {
     private String description;
     @Column(name = "accept_response")
     private boolean acceptResponse;
-    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_start_date")
-    private Date startDate;
-    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_deadline")
-    private Date deadline;
+
     @Column(name = "url")
     private String url;
     @Column(name = "answer_count")
     private int countAnswer;
 
+    private boolean isDeleted = false;
+
+    @OneToOne
+    @JoinColumn(name = "Date_id")
+    private DateManagement date;
+
     @Column(name = "content")
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionDocument> questionDocumentList;
-
     @ManyToOne
     @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "survey_id")
