@@ -5,13 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SurveyDetailDto {
+public class SurveyDetailDto implements Serializable {
     private Long id;
     private String title;
     private String description;

@@ -1,7 +1,12 @@
 ## Current Server Profile Setting
+
+server:
+  port: 8080
+## Current Server Profile Setting
 server:
   port: 8080
 
+spring:
   jpa:
     hibernate:
       ddl-auto: update #create update none
@@ -65,3 +70,5 @@ management:
 token:
   expiration-time: 86400000 # 하루짜리 토큰 생성
   secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan
+  secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan
+---

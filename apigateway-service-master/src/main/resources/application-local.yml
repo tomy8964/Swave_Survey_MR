@@ -26,6 +26,7 @@ spring:
     name: apigateway-service
   cloud:
     gateway:
+
 #      default-filters:
 #        - name: GlobalFilter
 #          args:
@@ -48,16 +49,17 @@ spring:
             - AuthorizationHeaderFilter
 
         - id: survey-answer
+        - id: surveyanswer
           uri: http://localhost:8083/
           predicates:
             - Path=/survey/external/**
             - Method=GET,POST
         - id: survey-answer
+        - id: surveyanswer
           uri: http://localhost:8083/
           predicates:
             - Path=/survey/internal/**
             - Method=GET,POST
-
         - id: surveydocument
           uri: http://localhost:8082/
           predicates:
@@ -87,7 +89,6 @@ spring:
             - Path=/user/internal/** # 모듈간 통신
             - Method=GET,POST
 
-
 management:
   endpoints:
     web:
@@ -96,4 +97,7 @@ management:
 
 token:
   expiration-time: 86400000 # 하루짜리 토큰 생성
+
   secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan
+  secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan
+---

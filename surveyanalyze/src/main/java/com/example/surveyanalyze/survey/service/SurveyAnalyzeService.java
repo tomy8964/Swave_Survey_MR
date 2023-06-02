@@ -10,8 +10,6 @@ import com.example.surveyanalyze.survey.repository.compareAnlayze.CompareAnalyze
 import com.example.surveyanalyze.survey.repository.questionAnlayze.QuestionAnalyzeRepository;
 import com.example.surveyanalyze.survey.repository.surveyAnalyze.SurveyAnalyzeRepository;
 import com.example.surveyanalyze.survey.response.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +19,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -43,8 +40,8 @@ public class SurveyAnalyzeService {
     private final ChoiceAnalyzeRepository choiceAnalyzeRepository;
     private final QuestionAnalyzeRepository questionAnalyzeRepository;
     private final SurveyAnalyzeRepository surveyAnalyzeRepository;
+    private final RestAPIService restAPIService;
 
-    private static String gateway = "gateway-service:8080";
 
     // 파이썬에 DocumentId 보내주고 분석결과 Entity에 매핑해서 저장
     public void analyze(String stringId) throws InvalidPythonException {
@@ -133,7 +130,7 @@ public class SurveyAnalyzeService {
             surveyAnalyzeRepository.save(surveyAnalyze);
 
             //get surveyDocument
-            SurveyDocument surveyDocument = getSurveyDocument(surveyDocumentId);
+            SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
 
             int p = 0;
             for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
@@ -205,8 +202,8 @@ public class SurveyAnalyzeService {
                     Long choiceId = Long.valueOf((Integer) dataList.get(0));
                     AprioriAnalyze aprioriAnalyze;
                     //get Choice
-                    Choice choice = getChoice(choiceId);
-                    QuestionDocument questionDocument1 =getQuestionByChoiceId(choiceId);
+                    Choice choice = restAPIService.getChoice(choiceId);
+                    QuestionDocument questionDocument1 = restAPIService.getQuestionByChoiceId(choiceId);
 //                    QuestionDocument questionDocument1 = getQuestionDocument(choice.getQuestion_id().getId());
                     aprioriAnalyze = AprioriAnalyze.builder()
                             .choiceId(choiceId)
@@ -224,7 +221,7 @@ public class SurveyAnalyzeService {
                         ChoiceAnalyze choiceAnalyze = new ChoiceAnalyze();
                         double support = Math.round((double) subList.get(0) *1000) / 1000.0;
                         Long choiceId2 = Long.valueOf((Integer) subList.get(1));
-                        Choice choice1 = getChoice(choiceId2);
+                        Choice choice1 = restAPIService.getChoice(choiceId2);
                         choiceAnalyze = choiceAnalyze.builder()
                                 .choiceTitle(choice1.getTitle())
                                 .support(support)
@@ -268,7 +265,7 @@ public class SurveyAnalyzeService {
     public void wordCloud(String stringId) {
         long surveyDocumentId = Long.parseLong(stringId);
         // 값 분리해서 Analyze DB에 저장
-        SurveyDocument surveyDocument = getSurveyDocument(surveyDocumentId);
+        SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
         List<QuestionDocument> questionDocumentList = surveyDocument.getQuestionDocumentList();
         for (QuestionDocument questionDocument : questionDocumentList) {
             if (questionDocument.getQuestionType() != 0) {
@@ -276,7 +273,7 @@ public class SurveyAnalyzeService {
             }
             // 주관식 문항의 id로 그 주관식 문항에 대답한 questionAnswerList를 찾아옴
             // get questionAnswers By CheckAnswerId
-            List<QuestionAnswer> questionAnswersByCheckAnswerId = getQuestionAnswerByCheckAnswerId(questionDocument.getId());
+            List<QuestionAnswer> questionAnswersByCheckAnswerId = restAPIService.getQuestionAnswerByCheckAnswerId(questionDocument.getId());
 //            List<QuestionAnswer> questionAnswersByCheckAnswerId = questionAnswerRepository.findQuestionAnswersByCheckAnswerId(questionDocument.getId());
 
             //wordCloud 분석
@@ -348,7 +345,7 @@ public class SurveyAnalyzeService {
 
             // post to questionDocument to set WordCloudList
             Long id = questionDocument.getId();
-            postToQuestionToSetWordCloud(id, wordCloudDtos);
+            restAPIService.postToQuestionToSetWordCloud(id, wordCloudDtos);
 //            questionDocument.setWordCloudList(wordCloudList);
 //            questionDocumentRepository.flush();
         }
@@ -427,7 +424,7 @@ public class SurveyAnalyzeService {
     // SurveyDocument Response 보낼 SurveyDetailDto로 변환하는 메서드
     public SurveyDetailDto getSurveyDetailDto(Long surveyDocumentId) {
 //        SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).get();
-        SurveyDocument surveyDocument = getSurveyDocument(surveyDocumentId);
+        SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
 
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
 
@@ -451,7 +448,7 @@ public class SurveyAnalyzeService {
             if (questionDocument.getQuestionType() == 0) {
                 // 주관식 답변들 리스트
 //                List<QuestionAnswer> questionAnswersByCheckAnswerId = questionAnswerRepository.findQuestionAnswersByCheckAnswerId(questionDocument.getId());
-                List<QuestionAnswer> questionAnswersByCheckAnswerId = getQuestionAnswerByCheckAnswerId(questionDocument.getId());
+                List<QuestionAnswer> questionAnswersByCheckAnswerId = restAPIService.getQuestionAnswerByCheckAnswerId(questionDocument.getId());
                 for (QuestionAnswer questionAnswer : questionAnswersByCheckAnswerId) {
                     // 그 중에 주관식 답변만
                     if (questionAnswer.getQuestionType() == 0) {
@@ -596,154 +593,6 @@ public class SurveyAnalyzeService {
         }
 
         return wordCount;
-    }
-
-    private static SurveyDocument getSurveyDocument(Long surveyDocumentId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("GET SurveyDocument");
-        WebClient webClient = WebClient.builder()
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(-1))
-                .build();
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/"+surveyDocumentId;
-
-        // Make a GET request to the API and retrieve the response
-        SurveyDocument get = webClient.get()
-                .uri(apiUrl)
-                .header("Authorization","NotNull")
-                .retrieve()
-                .bodyToMono(SurveyDocument.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + get);
-
-        return get;
-    }
-
-    private static Choice getChoice(Long choiceId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("GET Choice");
-        WebClient webClient = WebClient.create();
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getChoice/"+ choiceId;
-
-        // Make a GET request to the API and retrieve the response
-        Choice get = webClient.get()
-                .uri(apiUrl)
-                .header("Authorization","NotNull")
-                .retrieve()
-                .bodyToMono(Choice.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + get);
-
-        return get;
-    }
-
-    private static QuestionDocument getQuestionDocument(Long questionId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("GET question");
-        WebClient webClient = WebClient.create();
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getQuestion/"+ questionId;
-
-        // Make a GET request to the API and retrieve the response
-        QuestionDocument get = webClient.get()
-                .uri(apiUrl)
-                .header("Authorization","NotNull")
-                .retrieve()
-                .bodyToMono(QuestionDocument.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + get);
-
-        return get;
-    }
-
-    private QuestionDocument getQuestionByChoiceId(Long choiceId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("GET question by choiceId");
-        WebClient webClient = WebClient.create();
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getQuestionByChoiceId/"+ choiceId;
-
-        // Make a GET request to the API and retrieve the response
-        QuestionDocument get = webClient.get()
-                .uri(apiUrl)
-                .header("Authorization","NotNull")
-                .retrieve()
-                .bodyToMono(QuestionDocument.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + get);
-
-        return get;
-    }
-
-    private List<QuestionAnswer> getQuestionAnswerByCheckAnswerId(Long id) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("GET questionAnswer List by checkAnswerId");
-        WebClient webClient = WebClient.create();
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/survey/internal/getQuestionAnswerByCheckAnswerId/"+ id;
-
-        // Make a GET request to the API and retrieve the response
-        List<QuestionAnswer> questionAnswerList = webClient.get()
-                .uri(apiUrl)
-                .header("Authorization", "NotNull")
-                .retrieve()
-                .bodyToMono(String.class)
-                .map(responseBody -> {
-                    ObjectMapper mapper = new ObjectMapper();
-                    try {
-                        return mapper.readValue(responseBody, new TypeReference<List<QuestionAnswer>>() {});
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .blockOptional()
-                .orElse(null);
-
-        // Process the response as needed
-        System.out.println("Request: " + questionAnswerList);
-
-        return questionAnswerList;
-    }
-
-    private void postToQuestionToSetWordCloud(Long id, List<WordCloudDto> wordCloudList) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("GET question by choiceId");
-        WebClient webClient = WebClient.create();
-
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/setWordCloud/"+ id;
-
-        // Make a GET request to the API and retrieve the response
-        String response = webClient.post()
-                .uri(apiUrl)
-                .header("Authorization", "NotNull")
-                .bodyValue(wordCloudList)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        // Process the response as needed
-        System.out.println("Request: " + response);
     }
 
 }

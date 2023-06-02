@@ -5,6 +5,7 @@ import com.example.surveyanswer.survey.response.SurveyDetailDto;
 import com.example.surveyanswer.survey.response.SurveyResponseDto;
 import com.example.surveyanswer.survey.service.SurveyAnswerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class SurveyAnswerExternalController {
     }
 
     // 설문 참여
+    @Cacheable(value = "load-survey", key = "#id")
     @GetMapping(value = "/load/{id}")
     public SurveyDetailDto participateSurvey(@PathVariable Long id) {
         return surveyService.getParticipantSurvey(id);

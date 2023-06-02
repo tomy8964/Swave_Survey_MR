@@ -5,6 +5,7 @@ import com.example.surveyanswer.survey.response.SurveyDetailDto;
 import com.example.surveyanswer.survey.response.SurveyResponseDto;
 import com.example.surveyanswer.survey.service.SurveyAnswerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,16 +19,16 @@ public class SurveyAnswerInternalController {
     private final SurveyAnswerService surveyService;
 
     // getQuestionAnswer
+    @Cacheable(value = "getQuestionAnswer", key = "#id")
     @GetMapping(value = "/question/list/{id}")
     public List<QuestionAnswer> getQuestionAnswers(@PathVariable Long id){
         return surveyService.getQuestionAnswers(id);
     }
 
     // getQuestionAnswerByCheckAnswerId
+    @Cacheable(value = "getQuestionAnswerByCheckAnswerId", key = "#id")
     @GetMapping(value = "/getQuestionAnswerByCheckAnswerId/{id}")
     public List<QuestionAnswer> getQuestionAnswerByCheckAnswerId(@PathVariable Long id){
         return surveyService.getQuestionAnswerByCheckAnswerId(id);
     }
-
-
 }

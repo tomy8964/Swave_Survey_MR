@@ -51,8 +51,11 @@ public class SurveyDocumentService {
     private final QuestionDocumentRepository questionDocumentRepository;
     private final ChoiceRepository choiceRepository;
     private final WordCloudRepository wordCloudRepository;
+
     private final RestApiSurveyDocumentService apiService;
     private static String gateway="gateway-service:8080";
+
+    private static String gateway="localhost:8080";
 
     @Transactional
     public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
