@@ -13,6 +13,7 @@ server:
 #    service-url:
 #      defaultZone: http://localhost:8761/eureka
 
+spring:
 #  datasource:
 #    driver-class-name: com.mysql.cj.jdbc.Driver
 #    url: jdbc:mysql://localhost:3306/surveydb?serverTimezone=Asia/Seoul
