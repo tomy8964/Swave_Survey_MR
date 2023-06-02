@@ -17,13 +17,6 @@ public class SurveyAnalyzeExternalController {
 
     private final SurveyAnalyzeService surveyService;
 
-    @GetMapping(value = "/test")
-    public String test() {
-
-        return"test";
-    }
-
-
     // 분석 문항
     @Cacheable(value = "/research/survey/load/{id}", key = "#id")
     @GetMapping(value = "/research/survey/load/{id}")

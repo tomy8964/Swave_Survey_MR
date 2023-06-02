@@ -15,6 +15,9 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 
 import java.time.Duration;
 
@@ -49,5 +52,12 @@ public class RedisRepositoryConfig extends CachingConfigurerSupport {
 
         builder.cacheDefaults(configuration);
         return builder.build();
+    }
+
+    @Bean
+    public RedissonClient redissonClient() {
+        Config config = new Config();
+        config.useSingleServer().setAddress("redis://" + redisProperties.getHost() + ":" + redisProperties.getPort());
+        return Redisson.create(config);
     }
 }
