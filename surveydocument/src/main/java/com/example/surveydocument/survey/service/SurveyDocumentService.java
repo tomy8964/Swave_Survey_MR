@@ -53,7 +53,7 @@ public class SurveyDocumentService {
     private final WordCloudRepository wordCloudRepository;
 
     private final RestApiSurveyDocumentService apiService;
-    private static String gateway="gateway-service:8080";
+//    private static String gateway="gateway-service:8080";
 
     private static String gateway="localhost:8080";
 
