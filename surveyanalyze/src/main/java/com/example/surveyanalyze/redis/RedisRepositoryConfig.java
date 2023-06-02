@@ -1,9 +1,6 @@
 package com.example.surveyanalyze.redis;
 
 import lombok.RequiredArgsConstructor;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -52,12 +49,5 @@ public class RedisRepositoryConfig extends CachingConfigurerSupport {
 
         builder.cacheDefaults(configuration);
         return builder.build();
-    }
-
-    @Bean
-    public RedissonClient redissonClient() {
-        Config config = new Config();
-        config.useSingleServer().setAddress("redis://" + redisProperties.getHost() + ":" + redisProperties.getPort());
-        return Redisson.create(config);
     }
 }
