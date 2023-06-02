@@ -4,7 +4,5 @@
     <content url="file://$MODULE_DIR$/../../surveyanswer/build/generated/querydsl">
       <sourceFolder url="file://$MODULE_DIR$/../../surveyanswer/build/generated/querydsl" isTestSource="false" generated="true" />
     </content>
-    <orderEntry type="jdk" jdkName="corretto-17 (2)" jdkType="JavaSDK" />
-    <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

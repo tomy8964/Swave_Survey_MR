@@ -6,7 +6,6 @@
     <file type="web" url="file://$PROJECT_DIR$/surveyanalyze" />
     <file type="web" url="file://$PROJECT_DIR$/surveyanswer" />
     <file type="web" url="file://$PROJECT_DIR$/surveydocument" />
-    <file type="web" url="file://$PROJECT_DIR$/user" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="corretto-17 (2)" project-jdk-type="JavaSDK" />
   <component name="ProjectType">

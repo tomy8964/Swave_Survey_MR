@@ -38,6 +38,7 @@ public class SurveyDocument {
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionDocument> questionDocumentList;
 
+
     @Builder
     public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, String title, int type, String description, List<QuestionDocument> questionDocumentList) {
         this.title = title;

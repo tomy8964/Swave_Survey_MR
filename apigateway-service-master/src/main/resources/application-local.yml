@@ -2,19 +2,6 @@
 server:
   port: 8080
 
-#eureka:
-#  client:
-#    register-with-eureka: true
-#    fetch-registry: true
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka
-
-#spring:
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://mysql:3306/surveydb?serverTimezone=Asia/Seoul
-#    username: root
-#    password: admin
 spring:
   jpa:
     hibernate:
@@ -26,13 +13,6 @@ spring:
     name: apigateway-service
   cloud:
     gateway:
-
-#      default-filters:
-#        - name: GlobalFilter
-#          args:
-#            baseMessage: Spring Cloud Gateway Global Filter
-#            preLogger: true
-#            postLogger: true
       routes:
         - id: survey-analyze
           uri: http://localhost:8084/
@@ -48,13 +28,11 @@ spring:
           filters:
             - AuthorizationHeaderFilter
 
-        - id: survey-answer
         - id: surveyanswer
           uri: http://localhost:8083/
           predicates:
             - Path=/survey/external/**
             - Method=GET,POST
-        - id: survey-answer
         - id: surveyanswer
           uri: http://localhost:8083/
           predicates:
@@ -72,22 +50,13 @@ spring:
           predicates:
             - Path=/api/internal/**
             - Method=GET,POST
+
         - id: surveydocument
           uri: http://localhost:8082/
           predicates:
             - Path=/api/oauth/**
             - Method=GET,POST
 
-        - id: user
-          uri: http://localhost:8081/
-          predicates:
-            - Path=/user/external/** # 프론트에서 요청
-            - Method=GET,POST
-        - id: user
-          uri: http://localhost:8081/
-          predicates:
-            - Path=/user/internal/** # 모듈간 통신
-            - Method=GET,POST
 
 management:
   endpoints:
@@ -97,7 +66,5 @@ management:
 
 token:
   expiration-time: 86400000 # 하루짜리 토큰 생성
-
-  secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan
   secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan
 ---

@@ -1,7 +1,3 @@
-
-spring:
-  profiles:
-    active: local
 ## Current Server Profile Setting
 server:
   port: 8080
