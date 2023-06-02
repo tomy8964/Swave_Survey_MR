@@ -49,4 +49,24 @@ public class SurveyDocumentExternalController {
         return surveyService.readSurveyDetail(request, id);
     }
 
+    // 설문 수정
+    @PutMapping("/update/{id}")
+    public void updateSurvey(@RequestBody SurveyRequestDto requestDto, @PathVariable Long id) {
+        surveyService.updateSurvey(requestDto, id);
+    }
+
+    // 설문 삭제
+    @PostMapping("/delete/{id}")
+    public void deleteSurvey(@PathVariable Long id) {
+        surveyService.deleteSurvey(id);
+    }
+
+    // 설문 관리
+    @PostMapping("/management/{id}")
+    public void managementSurvey(@PathVariable Long id) {
+
+    }
+
+
+
 }
