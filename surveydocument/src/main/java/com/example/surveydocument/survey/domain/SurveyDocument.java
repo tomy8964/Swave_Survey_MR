@@ -27,6 +27,10 @@ public class SurveyDocument {
     private String description;
     @Column(name = "accept_response")
     private boolean acceptResponse;
+    @Column(name = "start_date")
+    private Date startDate;
+    @Column(name = "dead_line")
+    private Date deadline;
 
     @Column(name = "url")
     private String url;
