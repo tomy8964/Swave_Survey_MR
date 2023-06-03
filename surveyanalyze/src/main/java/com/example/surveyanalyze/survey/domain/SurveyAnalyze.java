@@ -22,9 +22,15 @@ public class SurveyAnalyze {
     private List<QuestionAnalyze> questionAnalyzeList;
 
 
+    @OneToMany(mappedBy = "surveyAnalyzeId", fetch = FetchType.LAZY, orphanRemoval = true)
+    @Column(name = "apriori_list")
+    private List<AprioriAnalyze> aprioriAnalyzeList;
+
+
     @Builder
-    public SurveyAnalyze(List<QuestionAnalyze> questionAnalyzeList, Long surveyDocumentId) {
+    public SurveyAnalyze(List<AprioriAnalyze> aprioriAnalyzeList, List<QuestionAnalyze> questionAnalyzeList, Long surveyDocumentId) {
         this.questionAnalyzeList = questionAnalyzeList;
         this.surveyDocumentId = surveyDocumentId;
+        this.aprioriAnalyzeList = aprioriAnalyzeList;
     }
 }

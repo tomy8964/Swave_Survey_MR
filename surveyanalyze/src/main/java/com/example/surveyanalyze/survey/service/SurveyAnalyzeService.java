@@ -210,7 +210,7 @@ public class SurveyAnalyzeService {
                             .choiceTitle(choice.getTitle())
                             .questionTitle(questionDocument1.getTitle())
                             .choiceAnalyzeList(new ArrayList<>())
-                            .questionAnalyzeId(questionAnalyze)
+                            .surveyAnalyzeId(surveyAnalyze)
                             .build();
 
                     aprioriAnalyzeRepository.save(aprioriAnalyze);
@@ -526,30 +526,28 @@ public class SurveyAnalyzeService {
             }
             questionDto.setChiAnalyzeList(chiAnalyzeDtos);
 
-
-            List<AprioriAnalyzeDto> aprioriAnalyzeDtos = new ArrayList<>();
-            for (AprioriAnalyze aprioriAnalyze : questionAnalyze.getAprioriAnalyzeList()) {
-                AprioriAnalyzeDto aprioriAnalyzeDto = new AprioriAnalyzeDto();
-                aprioriAnalyzeDto.setId(aprioriAnalyze.getId());
-                aprioriAnalyzeDto.setChoiceTitle(aprioriAnalyze.getChoiceTitle());
-                aprioriAnalyzeDto.setQuestionTitle(aprioriAnalyze.getQuestionTitle());
-
-                List<ChoiceAnalyzeDto> choiceDtos = new ArrayList<>();
-                    for (ChoiceAnalyze choice : aprioriAnalyze.getChoiceAnalyzeList()) {
-                        ChoiceAnalyzeDto choiceDto = new ChoiceAnalyzeDto();
-                        choiceDto.setId(choice.getId());
-                        choiceDto.setChoiceTitle(choice.getChoiceTitle());
-                        choiceDto.setSupport(choice.getSupport());
-                        choiceDto.setQuestionTitle(choice.getQuestionTitle());
-                        choiceDtos.add(choiceDto);
-                    }
-                aprioriAnalyzeDto.setChoiceAnalyzeList(choiceDtos);
-                aprioriAnalyzeDtos.add(aprioriAnalyzeDto);
-            }
-            questionDto.setAprioriAnalyzeList(aprioriAnalyzeDtos);
-
             questionDtos.add(questionDto);
         }
+        List<AprioriAnalyzeDto> aprioriAnalyzeDtos = new ArrayList<>();
+        for (AprioriAnalyze aprioriAnalyze : surveyAnalyze.getAprioriAnalyzeList()) {
+            AprioriAnalyzeDto aprioriAnalyzeDto = new AprioriAnalyzeDto();
+            aprioriAnalyzeDto.setId(aprioriAnalyze.getId());
+            aprioriAnalyzeDto.setChoiceTitle(aprioriAnalyze.getChoiceTitle());
+            aprioriAnalyzeDto.setQuestionTitle(aprioriAnalyze.getQuestionTitle());
+
+            List<ChoiceAnalyzeDto> choiceDtos = new ArrayList<>();
+            for (ChoiceAnalyze choice : aprioriAnalyze.getChoiceAnalyzeList()) {
+                ChoiceAnalyzeDto choiceDto = new ChoiceAnalyzeDto();
+                choiceDto.setId(choice.getId());
+                choiceDto.setChoiceTitle(choice.getChoiceTitle());
+                choiceDto.setSupport(choice.getSupport());
+                choiceDto.setQuestionTitle(choice.getQuestionTitle());
+                choiceDtos.add(choiceDto);
+            }
+            aprioriAnalyzeDto.setChoiceAnalyzeList(choiceDtos);
+            aprioriAnalyzeDtos.add(aprioriAnalyzeDto);
+        }
+        surveyAnalyzeDto.setAprioriAnalyzeList(aprioriAnalyzeDtos);
         surveyAnalyzeDto.setQuestionAnalyzeList(questionDtos);
 
         return surveyAnalyzeDto;
