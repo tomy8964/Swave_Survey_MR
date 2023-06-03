@@ -18,7 +18,6 @@ import com.example.surveydocument.survey.response.QuestionDetailDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.user.domain.User;
-import com.example.surveydocument.user.service.UserService2;
 import com.example.surveydocument.util.OAuth.JwtProperties;
 import com.example.surveydocument.util.page.PageRequest;
 import com.example.surveydocument.survey.domain.*;

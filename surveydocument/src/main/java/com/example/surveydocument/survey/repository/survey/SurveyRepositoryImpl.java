@@ -1,8 +1,6 @@
 package com.example.surveydocument.survey.repository.survey;
 
-import com.example.surveydocument.survey.domain.QSurvey;
-import com.example.surveydocument.survey.domain.QSurveyDocument;
-import com.example.surveydocument.survey.domain.SurveyDocument;
+import com.example.surveydocument.survey.domain.*;
 import com.example.surveydocument.survey.request.PageRequestDto;
 import com.example.surveydocument.user.domain.QUser;
 import com.example.surveydocument.user.domain.User;
@@ -121,10 +119,12 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
     }
 
     private static OrderSpecifier getOrderSpecifier(QSurveyDocument surveyDocument, String property, Order direction) {
+        QDateManagement date = QDateManagement.dateManagement;
+
         switch (property){
             case "date" :
-                log.info("날짜 순으로 정렬");
-                return new OrderSpecifier(direction, surveyDocument.startDate);
+                log.info("시작 날짜 순으로 정렬");
+                return new OrderSpecifier(direction, date.startDate);
             case "title":
                 log.info("제목 순으로 정렬");
                 return new OrderSpecifier(direction, surveyDocument.title);
