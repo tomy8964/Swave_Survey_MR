@@ -6,6 +6,8 @@ COPY ./build/libs/surveydocument-0.0.1-SNAPSHOT.jar ./build/libs/surveydocument-
 
 EXPOSE 8080
 
+EXPOSE 8082
+
 #server
 CMD ["java","-jar","-Dspring.profiles.active=server","./build/libs/surveydocument-0.0.1-SNAPSHOT.jar"]
 #local
