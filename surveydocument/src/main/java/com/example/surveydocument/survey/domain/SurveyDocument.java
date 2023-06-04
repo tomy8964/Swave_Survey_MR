@@ -31,7 +31,7 @@ public class SurveyDocument {
     @Column(name = "url")
     private String url;
     @Column(name = "answer_count")
-    private int countAnswer;
+    private int countAnswer = 0;
 
     private boolean isDeleted = false;
 

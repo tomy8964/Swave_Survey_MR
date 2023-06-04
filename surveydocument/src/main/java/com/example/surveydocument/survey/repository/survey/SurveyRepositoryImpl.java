@@ -7,6 +7,10 @@ import com.example.surveydocument.user.domain.User;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.jpa.impl.JPAUpdateClause;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +24,9 @@ import java.util.List;
 @Slf4j
 public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     // survey document 의 list 를 페이징 처리하여 조회
     @Override
@@ -82,6 +89,19 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
                         .and(survey.surveyDocumentList.contains(surveyDocumentRequest)))
                 .fetch();
         return null;
+    }
+
+    @Override
+    public void surveyDocumentCount(SurveyDocument surveyDocument) {
+        QSurveyDocument qSurveyDocument = QSurveyDocument.surveyDocument;
+
+        jpaQueryFactory
+                .update(qSurveyDocument)
+                .set(qSurveyDocument.countAnswer, qSurveyDocument.countAnswer.add(1))
+                .where(qSurveyDocument.id.eq(surveyDocument.getId()))
+                .execute();
+
+        entityManager.clear();
     }
 
     // 특정 기준(날짜 or 오름차순)에 따라 정렬
