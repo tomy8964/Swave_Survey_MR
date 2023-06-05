@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,7 @@ public class SurveyAnswerService {
 //        }
     }
     // 설문 응답 저장
+    @Transactional
     public void createSurveyAnswer(SurveyResponseDto surveyResponse){
         if(surveyResponse.getReliability()) {
             for (QuestionResponseDto questionResponseDto : surveyResponse.getQuestionResponse()) {

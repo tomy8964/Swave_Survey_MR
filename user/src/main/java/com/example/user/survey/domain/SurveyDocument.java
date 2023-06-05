@@ -47,19 +47,15 @@ public class SurveyDocument {
     private Survey survey;
 
     @Builder
-    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, Survey survey, String title, int type, String description, List<QuestionDocument> questionDocumentList) {
+    public SurveyDocument(int countAnswer, Survey survey, String title, int type, String description, List<QuestionDocument> questionDocumentList) {
         this.survey = survey;
         this.title = title;
         this.type = type;
         this.description = description;
         this.questionDocumentList = questionDocumentList;
-//        this.surveyAnswerList = surveyAnswerList;
         this.countAnswer = countAnswer;
     }
 
-//    public void setAnswer(SurveyAnswer surveyAnswer) {
-//        this.surveyAnswerList.add(surveyAnswer);
-//    }
     // 문항 list 에 넣어주기
     public void setQuestion(QuestionDocument questionDocument) {
         this.questionDocumentList.add(questionDocument);

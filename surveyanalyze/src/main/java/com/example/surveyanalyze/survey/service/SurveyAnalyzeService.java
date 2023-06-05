@@ -19,6 +19,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -45,6 +46,7 @@ public class SurveyAnalyzeService {
 
 
     // 파이썬에 DocumentId 보내주고 분석결과 Entity에 매핑해서 저장
+    @Transactional
     public void analyze(String stringId) throws InvalidPythonException {
         long surveyDocumentId = Long.parseLong(stringId);
 
@@ -263,6 +265,7 @@ public class SurveyAnalyzeService {
         }
     }
 
+    @Transactional
     public void wordCloud(String stringId) {
         long surveyDocumentId = Long.parseLong(stringId);
         // 값 분리해서 Analyze DB에 저장

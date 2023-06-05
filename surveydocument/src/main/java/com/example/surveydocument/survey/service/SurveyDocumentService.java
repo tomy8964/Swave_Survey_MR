@@ -18,23 +18,17 @@ import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.user.domain.User;
 import com.example.surveydocument.util.page.PageRequest;
-import com.example.surveydocument.survey.domain.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.xml.messaging.saaj.packaging.mime.MessagingException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.SystemException;
-import jakarta.transaction.Transaction;
-import jakarta.transaction.TransactionManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +37,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -229,7 +222,7 @@ public class SurveyDocumentService {
     }
 
     //count +1
-    //응답자 수 +1
+    @Transactional
     public void countChoice(Long choiceId) {
         Optional<Choice> findChoice = choiceRepository.findById(choiceId);
 
@@ -394,6 +387,7 @@ public class SurveyDocumentService {
         return choiceRepository.findById(id).get().getQuestion_id();
     }
 
+    @Transactional
     public void setWordCloud(Long id, List<WordCloudDto> wordCloudDtos) {
         List<WordCloud> wordCloudList = new ArrayList<>();
         for (WordCloudDto wordCloudDto : wordCloudDtos) {
@@ -409,6 +403,7 @@ public class SurveyDocumentService {
         questionDocumentRepository.flush();
     }
 
+    @Transactional
     public void countAnswer(Long id) {
         Optional<SurveyDocument> byId = surveyDocumentRepository.findById(id);
         byId.get().setCountAnswer(byId.get().getCountAnswer() + 1);
