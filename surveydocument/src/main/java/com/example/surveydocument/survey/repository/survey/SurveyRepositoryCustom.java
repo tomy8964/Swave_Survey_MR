@@ -11,7 +11,7 @@ import java.util.List;
 public interface SurveyRepositoryCustom {
     Page<SurveyDocument> surveyDocumentPaging(User user, Pageable pageable);
     SurveyDocument surveyDocumentDetail(User userRequest, SurveyDocument surveyDocumentRequest);
-
+    void surveyDocumentCount(SurveyDocument surveyDocument);
     List<SurveyDocument> getSurveyDocumentListGrid(User user, PageRequestDto pageRequest);
 
 }

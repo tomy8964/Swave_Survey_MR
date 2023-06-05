@@ -1,3 +1,4 @@
+
 FROM openjdk:17
 
 WORKDIR /usr/src/app
@@ -12,3 +13,4 @@ EXPOSE 8082
 CMD ["java","-jar","-Dspring.profiles.active=server","./build/libs/user-0.0.1-SNAPSHOT.jar"]
 #local
 #CMD ["java","-jar","./build/libs/user-0.0.1-SNAPSHOT.jar"]
+

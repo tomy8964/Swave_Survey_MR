@@ -24,8 +24,8 @@ hs_err_pid*
 replay_pid*
 
 
-## yml ignore
-#*.yml
-#*.properties
-#*.yml
+# yml ignore
+# *.yml
+# *.properties
+# *.yml
 

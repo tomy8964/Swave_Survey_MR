@@ -51,8 +51,8 @@ public class SurveyDocumentExternalController {
 
     // 설문 수정
     @PutMapping("/update/{id}")
-    public void updateSurvey(@RequestBody SurveyRequestDto requestDto, @PathVariable Long id) {
-        surveyService.updateSurvey(requestDto, id);
+    public void updateSurvey(HttpServletRequest request,@RequestBody SurveyRequestDto requestDto, @PathVariable Long id) {
+        surveyService.updateSurvey(request,requestDto, id);
     }
 
     // 설문 삭제
@@ -67,6 +67,10 @@ public class SurveyDocumentExternalController {
 
     }
 
-
+    // 설문 응답수 추가
+    @GetMapping("/survey/count/{id}")
+    public void countSurveyDocument(@PathVariable Long id) throws Exception {
+        surveyService.countSurveyDocument(id);
+    }
 
 }

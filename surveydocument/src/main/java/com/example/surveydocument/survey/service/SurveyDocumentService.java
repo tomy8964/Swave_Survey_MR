@@ -11,35 +11,52 @@ import com.example.surveydocument.survey.repository.questionDocument.QuestionDoc
 import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
 import com.example.surveydocument.survey.repository.wordCloud.WordCloudRepository;
-import com.example.surveydocument.survey.request.ChoiceRequestDto;
-import com.example.surveydocument.survey.request.PageRequestDto;
-import com.example.surveydocument.survey.request.QuestionRequestDto;
-import com.example.surveydocument.survey.request.SurveyRequestDto;
+import com.example.surveydocument.survey.request.*;
 import com.example.surveydocument.survey.response.ChoiceDetailDto;
 import com.example.surveydocument.survey.response.QuestionDetailDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.user.domain.User;
 import com.example.surveydocument.util.page.PageRequest;
+import com.example.surveydocument.survey.domain.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.xml.messaging.saaj.packaging.mime.MessagingException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@EnableTransactionManagement
 public class SurveyDocumentService {
     private final SurveyRepository surveyRepository;
     private final SurveyDocumentRepository surveyDocumentRepository;
@@ -49,15 +66,60 @@ public class SurveyDocumentService {
 
     private final RestApiSurveyDocumentService apiService;
 
+    private static String gateway="localhost:8080";
+    Random random = new Random();
+    private List<ReliabilityQuestion> questions;
+    private int reliabilityquestionNumber;
+    @PersistenceContext
+    private final EntityManager em;
+    // redis 분산 락 사용
+    // 분산 락은 Transactional 과 같이 진행되지 않아서 따로 관리로직을 만들어야한다
+    private final RedissonClient redissonClient;
+    private final PlatformTransactionManager transactionManager;
+    public ReliabilityQuestion reliabilityQuestion() throws JsonProcessingException {
+        String jsonString = "{\"questionRequest\":[" +
+                "{\"title\":\"이 문항에는 어느것도 아니다를 선택해주세요.\",\"type\":2,\"correct_answer\":\"어느것도 아니다.\",\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 문항에는 매우 부정적이다를 선택해주세요.\",\"correct_answer\":\"매우 부정적이다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 문항에는 약간 부정적이다를 선택해주세요.\",\"correct_answer\":\"약간 부정적이다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 문항에는 약간 긍정적이다를 선택해주세요.\",\"correct_answer\":\"약간 긍정적이다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 문항에는 매우 긍정적이다를 선택해주세요.\",\"correct_answer\":\"매우 긍정적이다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 질문에 대한 답변을 생각해보지 않고 무작위로 선택했습니다.\",\"correct_answer\":\"그렇다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"그렇다.\"},{\"id\":2,\"choiceName\":\"그렇지 않다.\"},{\"id\":3,\"choiceName\":\"잘 모르겠다.\"},{\"id\":4,\"choiceName\":\"그렇다고 말할 수 있다.\"}]}," +
+                "{\"title\":\"이 설문에 진심으로 참여하고 있나요?\",\"correct_answer\":\"매우 그렇다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"전혀 아니다.\"},{\"id\":2,\"choiceName\":\"아니다.\"},{\"id\":3,\"choiceName\":\"잘 모르겠다.\"},{\"id\":4,\"choiceName\":\"어느 정도 아니다.\"},{\"id\":5,\"choiceName\":\"매우 그렇다.\"}]}," +
+                "{\"title\":\"메뚜기의 종류를 3000개이상 알고 있다\",\"correct_answer\":\"아니다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"아니다.\"},{\"id\":2,\"choiceName\":\"그렇다.\"}]}," +
+                "{\"title\":\"설문조사의 목적과 내용을 이해하고 진정성을 유지하며 응답하고 있습니까?\",\"correct_answer\":\"매우 그렇다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"전혀 아니다.\"},{\"id\":2,\"choiceName\":\"아니다.\"},{\"id\":3,\"choiceName\":\"잘 모르겠다.\"},{\"id\":4,\"choiceName\":\"어느 정도 아니다.\"},{\"id\":5,\"choiceName\":\"매우 그렇다.\"}]}," +
+                "{\"title\":\"이 설문조사에 참여하는 데 얼마나 진지하게 접근하고 있나요?\",\"correct_answer\":\"매우 진지하게 접근하고 있다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 진지하게 접근하고 있다.\"},{\"id\":2,\"choiceName\":\"부주의하게 접근하고 있다.\"},{\"id\":3,\"choiceName\":\"아주 부주의하게 접근하고 있다..\"}]}" +
+                "]}";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ReliabilityQuestionRequest questionRequest = objectMapper.readValue(jsonString, ReliabilityQuestionRequest.class);
+
+        reliabilityquestionNumber=random.nextInt(10);
+
+        // Access the converted Java object
+        questions = questionRequest.getQuestionRequest();
+        ReliabilityQuestion question1=questions.get(reliabilityquestionNumber);
+        List<ReliabilityChoice> Rchoices = question1.getChoiceList();
+        return question1;
     @Value("${gateway.host}")
     private String gateway;
 
+//        for (ReliabilityQuestion question : questions) {
+//            System.out.println("Title: " + question.getTitle());
+//            System.out.println("Type: " + question.getType());
+//            System.out.println("Correct Answer: " + question.getCorrect_answer());
+//            List<ReliabilityChoice> Rchoices = question.getChoiceList();
+//            for (ReliabilityChoice choice : Rchoices) {
+//                System.out.println("Choice ID: " + choice.getId());
+//                System.out.println("Choice Name: " + choice.getChoiceName());
+//            }
+//        }
+    }
     @Transactional
     public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
 
         // 유저 정보 받아오기
         // User Module 에서 현재 유저 가져오기
-        User getUser = apiService.getCurrentUserFromUser();
+        User getUser = apiService.getCurrentUserFromUser(request);
         Survey userSurvey = getUser.getSurvey();
 
         if(userSurvey == null) {
@@ -76,6 +138,10 @@ public class SurveyDocumentService {
                 .type(surveyRequest.getType())
                 .questionDocumentList(new ArrayList<>())
                 .surveyAnswerList(new ArrayList<>())
+                .reliability(surveyRequest.getReliability())
+                .font(surveyRequest.getFont())
+                .fontSize(surveyRequest.getFontSize())
+                .backColor(surveyRequest.getBackColor())
                 .countAnswer(0)
                 .build();
         surveyDocumentRepository.save(surveyDocument);
@@ -116,14 +182,14 @@ public class SurveyDocumentService {
         surveyRepository.flush();
 
         // User Module 에 저장된 Survey 보내기
-        apiService.sendSurveyToUser(userSurvey);
+        apiService.sendSurveyToUser(request,userSurvey);
     }
 
     // gird method 로 SurveyDocument 조회
     public List<SurveyDocument> readSurveyListByGrid(HttpServletRequest request, PageRequestDto pageRequest) {
 
         // User Module 에서 현재 유저 가져오기
-        User getUser = apiService.getCurrentUserFromUser();
+        User getUser = apiService.getCurrentUserFromUser(request);
 
         return surveyRepository.getSurveyDocumentListGrid(getUser, pageRequest);
     }
@@ -133,7 +199,7 @@ public class SurveyDocumentService {
 
 
         // User Module 에서 현재 유저 가져오기
-        User getUser = apiService.getCurrentUserFromUser();
+        User getUser = apiService.getCurrentUserFromUser(request);
 
         PageRequest page = PageRequest.builder()
                 .page(pageRequest.getPage())
@@ -173,11 +239,80 @@ public class SurveyDocumentService {
         }
     }
 
+    // 설문 응답자 수 + 1
+    // 분산락 실행
+    public void countSurveyDocument(Long surveyDocumentId) throws Exception {
+        // survey document id 값을 키로 하는 lock 을 조회합니다.
+        RLock rLock = redissonClient.getLock("$surveyDocumentId");
+        // Lock 획득 시도
+        boolean isLocked = rLock.tryLock(1, 3, TimeUnit.SECONDS);
+
+        TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        // @Transactional 대신 코드로 트랜잭션을 관리한다
+        try {
+            if(!isLocked) {
+                throw new MessagingException("failed to get RLock");
+            }
+
+            // 조회수 증가 로직 실행
+            try {
+                SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).orElse(null);
+                surveyRepository.surveyDocumentCount(surveyDocument);
+
+                // 영속성 컨텍스트 clear
+                em.flush();
+                em.clear();
+
+                // 더티 체크
+//                SurveyDocument nowSurveyDocument = surveyDocumentRepository.findById(surveyDocumentId).orElse(null);
+//                nowSurveyDocument.updateAnswerCount(nowSurveyDocument.getCountAnswer());
+
+                // 실행하면 커밋
+                transactionManager.commit(status);
+
+            } catch (RuntimeException e) {
+                // 로직 실행 중 예외가 발생하면 롤백
+                transactionManager.rollback(status);
+                throw new Exception(e.getMessage());
+            }
+
+        } catch (Exception e) {
+            throw new Exception("Thread Interrupted");
+        } finally {
+            // 로직 수행이 끝나면 Lock 반환
+            if (rLock.isLocked() && rLock.isHeldByCurrentThread()) {
+                rLock.unlock();
+            }
+        }
+    }
+
     // SurveyDocument Response 보낼 SurveyDetailDto로 변환하는 메서드
     private SurveyDetailDto getSurveyDetailDto(Long surveyDocumentId) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).get();
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
-
+        ReliabilityQuestion reliabilityQuestion = null;
+        QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
+        List<ChoiceDetailDto> reliabiltyChoiceDtos = new ArrayList<>();
+        if(surveyDocument.getReliability()){
+            try {
+                Long l = Long.valueOf(-1);
+                reliabilityQuestion = reliabilityQuestion();
+                reliabilityQuestionDto.setId(l);
+                reliabilityQuestionDto.setTitle(reliabilityQuestion.getTitle());
+                reliabilityQuestionDto.setQuestionType(reliabilityQuestion.getType());
+                List<ReliabilityChoice> Rchoices = reliabilityQuestion.getChoiceList();
+                for (ReliabilityChoice choice : Rchoices) {
+                    ChoiceDetailDto choiceDto = new ChoiceDetailDto();
+                    choiceDto.setId(l);
+                    choiceDto.setTitle(choice.getChoiceName());
+                    choiceDto.setCount(0);
+                    reliabiltyChoiceDtos.add(choiceDto);
+                }
+                reliabilityQuestionDto.setChoiceList(reliabiltyChoiceDtos);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());
@@ -234,6 +369,10 @@ public class SurveyDocumentService {
 
             questionDtos.add(questionDto);
         }
+        if(surveyDocument.getReliability()) {
+            reliabilityquestionNumber = random.nextInt(questionDtos.size());
+            questionDtos.add(reliabilityquestionNumber, reliabilityQuestionDto);
+        }
         surveyDetailDto.setQuestionList(questionDtos);
 
         log.info(String.valueOf(surveyDetailDto));
@@ -275,11 +414,11 @@ public class SurveyDocumentService {
         surveyDocumentRepository.flush();
     }
 
-    public void updateSurvey(SurveyRequestDto requestDto, Long surveyId) {
+    public void updateSurvey(HttpServletRequest request,SurveyRequestDto requestDto, Long surveyId) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyId).orElseGet(null);
 
         // User Module 로 부터 현재 유저 정보 가져오기
-        User currentUser = apiService.getCurrentUserFromUser();
+        User currentUser = apiService.getCurrentUserFromUser(request);
 
         // 유저 확인 검사
         if(!surveyDocument.getSurvey().getUser().equals(currentUser)) {
