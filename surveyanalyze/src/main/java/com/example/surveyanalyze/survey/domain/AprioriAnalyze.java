@@ -31,7 +31,7 @@ public class AprioriAnalyze {
 
     @ManyToOne
     @JsonIgnore // 순환참조 방지
-    @JoinColumn(name = "question_analyze_id")
-    private QuestionAnalyze questionAnalyzeId;
+    @JoinColumn(name = "survey_analyze_id")
+    private SurveyAnalyze surveyAnalyzeId;
 
 }

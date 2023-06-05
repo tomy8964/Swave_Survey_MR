@@ -14,5 +14,4 @@ public class QuestionAnalyzeDto {
     private String questionTitle;
     private List<ChiAnalyzeDto> chiAnalyzeList;
     private List<CompareAnalyzeDto> compareAnalyzeList;
-    private List<AprioriAnalyzeDto> aprioriAnalyzeList;
 }

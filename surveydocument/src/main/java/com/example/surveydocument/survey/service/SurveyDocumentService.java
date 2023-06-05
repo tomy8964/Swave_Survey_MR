@@ -1,8 +1,10 @@
 package com.example.surveydocument.survey.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+//import com.auth0.jwt.JWT;
+//import com.auth0.jwt.algorithms.Algorithm;
+
 import com.example.surveydocument.restAPI.service.RestApiSurveyDocumentService;
+import com.example.surveydocument.survey.domain.*;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
@@ -18,7 +20,6 @@ import com.example.surveydocument.survey.response.QuestionDetailDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.user.domain.User;
-import com.example.surveydocument.util.OAuth.JwtProperties;
 import com.example.surveydocument.util.page.PageRequest;
 import com.example.surveydocument.survey.domain.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,11 +34,11 @@ import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -70,10 +71,12 @@ public class SurveyDocumentService {
 
     private final RestApiSurveyDocumentService apiService;
 
+
     private final SurveyTemplateRepository surveyTemplateRepository;
     private final QuestionTemplateRepository questionTemplateRepository;
     private final ChoiceTemplateRepository choiceTemplateRepository;
-    private static String gateway="localhost:8080";
+    @Value("${gateway.host}")
+    private String gateway;
     Random random = new Random();
     private List<ReliabilityQuestion> questions;
     private int reliabilityquestionNumber;
