@@ -49,8 +49,8 @@ out/
 
 npm-debug.log*
 
-#### properties ###
-#*.properties
-#
-#### yml ###
-#*.yml
+### properties ###
+*.properties
+
+### yml ###
+*.yml
