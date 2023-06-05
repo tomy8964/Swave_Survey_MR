@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -15,11 +17,13 @@ public class DateManagement {
     @Column(name = "Date_id")
     private long id;
 
-    @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_start_date")
-    private Date startDate;
-    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_deadline")
-    private Date deadline;
+    @Column(name = "survey_start_date")
+    @DateTimeFormat(pattern = "yy-mm-dd")
+    private LocalDate startDate;
+
+    @Column(name = "survey_deadline")
+    @DateTimeFormat(pattern = "yy-mm-dd")
+    private LocalDate deadline;
 
     @OneToOne(mappedBy = "date")
     private SurveyDocument surveyDocument;

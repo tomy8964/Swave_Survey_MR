@@ -113,6 +113,7 @@ public class SurveyDocumentService {
 //        }
     }
     @Transactional
+    // todo : 날짜 생성
     public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
 
         // 유저 정보 받아오기
