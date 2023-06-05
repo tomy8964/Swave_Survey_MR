@@ -67,6 +67,10 @@ public class SurveyDocumentExternalController {
 
     }
 
-
+    // 설문 응답수 추가
+    @GetMapping("/survey/count/{id}")
+    public void countSurveyDocument(@PathVariable Long id) throws Exception {
+        surveyService.countSurveyDocument(id);
+    }
 
 }
