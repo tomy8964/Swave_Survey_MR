@@ -1,9 +1,11 @@
 package com.example.surveydocument.survey.domain;
 
+import com.example.surveydocument.survey.request.DateDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
@@ -46,11 +48,6 @@ public class SurveyDocument {
     @Column(name = "Desing_id")
     private Design design;
 
-//    @Column(name="survey_design")
-//    @OneToOne(mappedBy = "design_id",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private SurveyDesign surveyDesign;
-
-
     @Column(name = "content")
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionDocument> questionDocumentList;
@@ -60,26 +57,19 @@ public class SurveyDocument {
     private Survey survey;
 
     @Builder
-    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, Survey survey, String title, int type,Boolean reliability, String description, List<QuestionDocument> questionDocumentList) {
+    public SurveyDocument(int countAnswer, Survey survey, String title, int type,Boolean reliability, String description, List<QuestionDocument> questionDocumentList) {
         this.survey = survey;
         this.title = title;
         this.type = type;
         this.description = description;
         this.questionDocumentList = questionDocumentList;
         this.reliability=reliability;
-//        this.surveyAnswerList = surveyAnswerList;
         this.countAnswer = countAnswer;
     }
 
-    //    public void setAnswer(SurveyAnswer surveyAnswer) {
-//        this.surveyAnswerList.add(surveyAnswer);
-//    }
     // 문항 list 에 넣어주기
     public void setQuestion(QuestionDocument questionDocument) {
         this.questionDocumentList.add(questionDocument);
     }
-    // 문항 analyze 에 넣어주기
-//    public void setAnalyze(surveyAnswer surveyAnswer) {
-//        this.surveyAnswer=surveyAnswer;
-//    }
+
 }

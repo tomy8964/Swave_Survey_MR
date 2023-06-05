@@ -10,11 +10,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Design {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Design_id")
     private Long id;
+    @Column(name = "font")
     private String font;
+    @Column(name = "font_size")
     private int fontSize;
+    @Column(name = "back_color")
     private String backColor;
 
+    @Column(name = "SurveyDocument_id")
     @OneToOne(mappedBy = "design")
     private SurveyDocument surveyDocument;
 
@@ -26,8 +31,8 @@ public class Design {
     }
 
     // Request -> Entity
-    public static void designRequestToEntity(String font, int fontSize, String backColor) {
-        Design design = Design.builder()
+    public static Design designRequestToEntity(String font, int fontSize, String backColor) {
+        return Design.builder()
                 .font(font)
                 .fontSize(fontSize)
                 .backColor(backColor)

@@ -84,11 +84,10 @@ public class RedisTest {
                 .build();
         documentRepository.save(surveyDocument);
 
-        entityManager.flush();
-        entityManager.clear();
         // when
         int countAnswer = documentRepository.findById(surveyDocument.getId()).orElse(null)
                 .getCountAnswer();
+
         // then
         assertThat(countAnswer).isEqualTo(2);
     }

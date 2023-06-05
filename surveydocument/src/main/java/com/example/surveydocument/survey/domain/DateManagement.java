@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
-@NoArgsConstructor
 @Data
 public class DateManagement {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,8 +40,8 @@ public class DateManagement {
     }
 
     // RequestDto -> Entity
-    public static void dateRequestToEntity(String start, String end, SurveyDocument surveyDocument) {
-        DateManagement dateManagement = DateManagement.builder()
+    public static DateManagement dateRequestToEntity(String start, String end, SurveyDocument surveyDocument) {
+        return DateManagement.builder()
                 .startDate(LocalDate.parse(start))
                 .deadline(LocalDate.parse(end))
                 .surveyDocument(surveyDocument).build();

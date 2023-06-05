@@ -1,7 +1,5 @@
 package com.example.surveydocument.survey.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.example.surveydocument.restAPI.service.RestApiSurveyDocumentService;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
@@ -15,26 +13,19 @@ import com.example.surveydocument.survey.response.QuestionDetailDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.user.domain.User;
-import com.example.surveydocument.util.OAuth.JwtProperties;
 import com.example.surveydocument.util.page.PageRequest;
 import com.example.surveydocument.survey.domain.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.xml.messaging.saaj.packaging.mime.MessagingException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.SystemException;
-import jakarta.transaction.Transaction;
-import jakarta.transaction.TransactionManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,7 +33,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -139,7 +129,6 @@ public class SurveyDocumentService {
                 .description(surveyRequest.getDescription())
                 .type(surveyRequest.getType())
                 .questionDocumentList(new ArrayList<>())
-                .surveyAnswerList(new ArrayList<>())
                 .reliability(surveyRequest.getReliability()) // 진정성 검사
                 .countAnswer(0)
                 .build();
@@ -147,7 +136,7 @@ public class SurveyDocumentService {
 
         // 디자인 저장
         // Design Request To Entity
-        designRequestToEntity(
+        Design design = designRequestToEntity(
                 surveyRequest.getFont(),
                 surveyRequest.getFontSize(),
                 surveyRequest.getBackColor()
@@ -155,11 +144,14 @@ public class SurveyDocumentService {
 
         // 날짜 저장
         // Date Request To Entity
-        dateRequestToEntity(
+        DateManagement dateManagement = dateRequestToEntity(
                 surveyRequest.getStartDate(),
                 surveyRequest.getEndDate(),
                 surveyDocumentRepository.findById(surveyDocument.getId()).get()
         );
+
+        surveyDocument.setDesign(design);
+        surveyDocument.setDate(dateManagement);
 
         // 설문 문항
         surveyDocumentRepository.findById(surveyDocument.getId());
@@ -275,12 +267,7 @@ public class SurveyDocumentService {
                 surveyRepository.surveyDocumentCount(surveyDocument);
 
                 // 영속성 컨텍스트 clear
-                em.flush();
-                em.clear();
-
-                // 더티 체크
-//                SurveyDocument nowSurveyDocument = surveyDocumentRepository.findById(surveyDocumentId).orElse(null);
-//                nowSurveyDocument.updateAnswerCount(nowSurveyDocument.getCountAnswer());
+                surveyRepository.flush();
 
                 // 실행하면 커밋
                 transactionManager.commit(status);
@@ -481,7 +468,10 @@ public class SurveyDocumentService {
         surveyDocument.setDeleted(true);
     }
 
-    public void managementSurvey(Long id) {
-
+    public void managementSurvey(Long id, DateDto dateRequest) {
+        SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).get();
+        surveyDocument.setDate(
+                dateRequestToEntity(dateRequest.getStartDate(), dateRequest.getEndDate(), surveyDocument)
+        );
     }
 }
