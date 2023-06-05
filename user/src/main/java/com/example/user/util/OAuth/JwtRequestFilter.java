@@ -30,11 +30,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     UserRepository userRepository;
 
     // 인증에서 제외할 url
-    private static final String Exclude_url = "/**";
+    private static final String Exclude_url = "/user/internal/**";
     private static final List<String> EXCLUDE_URL =
             Collections.unmodifiableList(
                     Arrays.asList(
-                            "/api/oauth/token"
+                            "/user/external/oauth/token"
                     ));
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
