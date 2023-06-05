@@ -35,7 +35,7 @@ public class User {
 
     private String Description;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     private Survey survey;
 

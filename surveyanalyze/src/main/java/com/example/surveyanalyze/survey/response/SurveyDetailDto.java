@@ -17,5 +17,8 @@ public class SurveyDetailDto {
     private String description;
     private int countAnswer;
     private List<QuestionDetailDto> questionList;
+    String font;
+    int fontSize;
+    String backColor;
     // getter, setter 생략
 }

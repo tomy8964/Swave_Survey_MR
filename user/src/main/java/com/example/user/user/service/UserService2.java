@@ -1,5 +1,7 @@
 package com.example.user.user.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.example.user.survey.domain.Survey;
 import com.example.user.survey.domain.SurveyDocument;
 import com.example.user.survey.response.SurveyMyPageDto;
@@ -49,6 +51,9 @@ public class UserService2 {
 
     public User getUser(HttpServletRequest request) { //(1)
         Long userCode = (Long) request.getAttribute("userCode");
+        String jwtHeader = ((HttpServletRequest)request).getHeader(JwtProperties.HEADER_STRING);
+        String token = jwtHeader.replace(JwtProperties.TOKEN_PREFIX, "");
+        userCode = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token).getClaim("id").asLong();
         User user = userRepository.findByUserCode(userCode).orElseThrow(UserNotFoundException::new);
         return user;
     }

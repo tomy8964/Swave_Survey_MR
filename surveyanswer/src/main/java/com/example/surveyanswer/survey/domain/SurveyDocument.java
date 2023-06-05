@@ -34,21 +34,37 @@ public class SurveyDocument {
     @Column(name = "answer_count")
     private int countAnswer;
 
+    @Column(name = "reliability")
+    private Boolean reliability;
+
+    @Column(name = "font")
+    private String font;
+
+    @Column(name = "size")
+    private int fontSize;
+
+    @Column(name = "backcolor")
+    private String backColor;
+
     @Column(name = "content")
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionDocument> questionDocumentList;
 
+
     @Builder
-    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, String title, int type, String description, List<QuestionDocument> questionDocumentList) {
-        this.title = title;
+    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, String title, int type,Boolean reliability,String backColor, String font,int fontSize, String description, List<QuestionDocument> questionDocumentList) {        this.title = title;
         this.type = type;
         this.description = description;
+        this.reliability=reliability;
+        this.font=font;
+        this.fontSize=fontSize;
+        this.backColor=backColor;
         this.questionDocumentList = questionDocumentList;
 //        this.surveyAnswerList = surveyAnswerList;
         this.countAnswer = countAnswer;
     }
 
-//    public void setAnswer(SurveyAnswer surveyAnswer) {
+    //    public void setAnswer(SurveyAnswer surveyAnswer) {
 //        this.surveyAnswerList.add(surveyAnswer);
 //    }
     // 문항 list 에 넣어주기

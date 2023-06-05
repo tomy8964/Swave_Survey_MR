@@ -6,6 +6,7 @@ import com.example.surveydocument.user.domain.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,12 @@ import java.util.List;
 @Slf4j
 public class RestApiSurveyDocumentService {
 
-    private static String gateway="gateway-service:8080";
+//    private static String gateway="gateway-service:8080";
     private static String userInternalUrl = "/user/internal";
-
+    private static String gateway="localhost:8080";
     // Current User 정보 가져오기
-    public User getCurrentUserFromUser() {
-
+    public User getCurrentUserFromUser(HttpServletRequest request) {
+        String jwtHeader = ((HttpServletRequest)request).getHeader("Authorization");
         // WebClient 가져오기
         log.info("현재 유저정보를 가져옵니다");
         WebClient webClient = WebClient.create();
@@ -34,7 +35,7 @@ public class RestApiSurveyDocumentService {
 
         User getUser = webClient.get()
                 .uri(getCurrentUserUrl)
-                .header("Authorization", "NotNull")
+                .header("Authorization", jwtHeader)
                 .retrieve()
                 .bodyToMono(User.class)
                 .blockOptional()
@@ -47,7 +48,8 @@ public class RestApiSurveyDocumentService {
     }
 
     // User 에 Survey 정보 보내기
-    public void sendSurveyToUser(Survey survey) {
+    public void sendSurveyToUser(HttpServletRequest request,Survey survey) {
+        String jwtHeader = ((HttpServletRequest)request).getHeader("Authorization");
         // WebClient 가져오기
         log.info("Survey 정보를 보냅니다");
         WebClient webClient = WebClient.create();
@@ -57,12 +59,12 @@ public class RestApiSurveyDocumentService {
 
         webClient.post()
                 .uri(saveSurveyUrl)
-                .header("Authorization", "NotNull")
+                .header("Authorization", jwtHeader)
                 .bodyValue(survey)
                 .retrieve()
                 .bodyToMono(Survey.class)
-                .blockOptional()
-                .orElseGet(null);
+                .blockOptional();
+//                .orElseGet(null);
 
         log.info(survey.getUser().getNickname() +"에게 정보 보냅니다");
     }

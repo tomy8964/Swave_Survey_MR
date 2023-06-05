@@ -51,8 +51,8 @@ public class SurveyDocumentExternalController {
 
     // 설문 수정
     @PutMapping("/update/{id}")
-    public void updateSurvey(@RequestBody SurveyRequestDto requestDto, @PathVariable Long id) {
-        surveyService.updateSurvey(requestDto, id);
+    public void updateSurvey(HttpServletRequest request,@RequestBody SurveyRequestDto requestDto, @PathVariable Long id) {
+        surveyService.updateSurvey(request,requestDto, id);
     }
 
     // 설문 삭제

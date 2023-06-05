@@ -25,7 +25,7 @@ public class Survey {
     @Column(name = "survey_id")
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @JoinColumn(name = "user_Id")
     private User user;
