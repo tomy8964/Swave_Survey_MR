@@ -4,7 +4,12 @@ import com.example.surveyanswer.survey.domain.*;
 import com.example.surveyanswer.survey.exception.InvalidTokenException;
 import com.example.surveyanswer.survey.repository.questionAnswer.QuestionAnswerRepository;
 import com.example.surveyanswer.survey.repository.surveyAnswer.SurveyAnswerRepository;
+import com.example.surveyanswer.survey.request.ReliabilityChoice;
+import com.example.surveyanswer.survey.request.ReliabilityQuestion;
+import com.example.surveyanswer.survey.request.ReliabilityQuestionRequest;
 import com.example.surveyanswer.survey.response.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -20,14 +26,72 @@ public class SurveyAnswerService {
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final QuestionAnswerRepository questionAnswerRepository;
     private final RestAPIService restAPIService;
-
+    Random random = new Random();
+    private List<ReliabilityQuestion> questions;
+    private int reliabilityquestionNumber;
     // 설문 응답 참여
     public SurveyDetailDto getParticipantSurvey(Long id){
         return getSurveyDetailDto(id);
     }
 
+    public ReliabilityQuestion reliabilityQuestion() throws JsonProcessingException {
+        String jsonString = "{\"questionRequest\":[" +
+                "{\"title\":\"이 문항에는 어느것도 아니다를 선택해주세요.\",\"type\":2,\"correct_answer\":\"어느것도 아니다.\",\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 문항에는 매우 부정적이다를 선택해주세요.\",\"correct_answer\":\"매우 부정적이다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 문항에는 약간 부정적이다를 선택해주세요.\",\"correct_answer\":\"약간 부정적이다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 문항에는 약간 긍정적이다를 선택해주세요.\",\"correct_answer\":\"약간 긍정적이다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 문항에는 매우 긍정적이다를 선택해주세요.\",\"correct_answer\":\"매우 긍정적이다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 부정적이다.\"},{\"id\":2,\"choiceName\":\"약간 부정적이다.\"},{\"id\":3,\"choiceName\":\"어느것도 아니다.\"},{\"id\":4,\"choiceName\":\"약간 긍정적이다..\"},{\"id\":5,\"choiceName\":\"매우 긍정적이다.\"}]}," +
+                "{\"title\":\"이 질문에 대한 답변을 생각해보지 않고 무작위로 선택했습니다.\",\"correct_answer\":\"그렇다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"그렇다.\"},{\"id\":2,\"choiceName\":\"그렇지 않다.\"},{\"id\":3,\"choiceName\":\"잘 모르겠다.\"},{\"id\":4,\"choiceName\":\"그렇다고 말할 수 있다.\"}]}," +
+                "{\"title\":\"이 설문에 진심으로 참여하고 있나요?\",\"correct_answer\":\"매우 그렇다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"전혀 아니다.\"},{\"id\":2,\"choiceName\":\"아니다.\"},{\"id\":3,\"choiceName\":\"잘 모르겠다.\"},{\"id\":4,\"choiceName\":\"어느 정도 아니다.\"},{\"id\":5,\"choiceName\":\"매우 그렇다.\"}]}," +
+                "{\"title\":\"메뚜기의 종류를 3000개이상 알고 있다\",\"correct_answer\":\"아니다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"아니다.\"},{\"id\":2,\"choiceName\":\"그렇다.\"}]}," +
+                "{\"title\":\"설문조사의 목적과 내용을 이해하고 진정성을 유지하며 응답하고 있습니까?\",\"correct_answer\":\"매우 그렇다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"전혀 아니다.\"},{\"id\":2,\"choiceName\":\"아니다.\"},{\"id\":3,\"choiceName\":\"잘 모르겠다.\"},{\"id\":4,\"choiceName\":\"어느 정도 아니다.\"},{\"id\":5,\"choiceName\":\"매우 그렇다.\"}]}," +
+                "{\"title\":\"이 설문조사에 참여하는 데 얼마나 진지하게 접근하고 있나요?\",\"correct_answer\":\"매우 진지하게 접근하고 있다.\",\"type\":2,\"choiceList\":[{\"id\":1,\"choiceName\":\"매우 진지하게 접근하고 있다.\"},{\"id\":2,\"choiceName\":\"부주의하게 접근하고 있다.\"},{\"id\":3,\"choiceName\":\"아주 부주의하게 접근하고 있다..\"}]}" +
+                "]}";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ReliabilityQuestionRequest questionRequest = objectMapper.readValue(jsonString, ReliabilityQuestionRequest.class);
+
+        reliabilityquestionNumber=random.nextInt(10);
+
+        // Access the converted Java object
+        questions = questionRequest.getQuestionRequest();
+        ReliabilityQuestion question1=questions.get(reliabilityquestionNumber);
+        List<ReliabilityChoice> Rchoices = question1.getChoiceList();
+        return question1;
+
+//        for (ReliabilityQuestion question : questions) {
+//            System.out.println("Title: " + question.getTitle());
+//            System.out.println("Type: " + question.getType());
+//            System.out.println("Correct Answer: " + question.getCorrect_answer());
+//            List<ReliabilityChoice> Rchoices = question.getChoiceList();
+//            for (ReliabilityChoice choice : Rchoices) {
+//                System.out.println("Choice ID: " + choice.getId());
+//                System.out.println("Choice Name: " + choice.getChoiceName());
+//            }
+//        }
+    }
     // 설문 응답 저장
     public void createSurveyAnswer(SurveyResponseDto surveyResponse){
+        if(surveyResponse.getReliability()) {
+            for (QuestionResponseDto questionResponseDto : surveyResponse.getQuestionResponse()) {
+                for (ReliabilityQuestion question : questions) {
+                    if (questionResponseDto.getTitle().equals(question.getTitle())) {
+                        System.out.println(question.getCorrect_answer());
+                        System.out.println(question.getTitle());
+                        if (questionResponseDto.getAnswer().equals(question.getCorrect_answer())) {
+                            System.out.println(question.getCorrect_answer());
+                            surveyResponse.getQuestionResponse().remove(questionResponseDto);
+                            break;
+                        } else {
+                            return;
+                        }
+                    }
+                    else{
+                        return;
+                    }
+                }
+            }
+        }
         Long surveyDocumentId = surveyResponse.getId();
         // SurveyDocumentId를 통해 어떤 설문인지 가져옴
 //        SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).get();
@@ -120,12 +184,37 @@ public class SurveyAnswerService {
         SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
 
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
-
+        ReliabilityQuestion reliabilityQuestion = null;
+        QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
+        List<ChoiceDetailDto> reliabiltyChoiceDtos = new ArrayList<>();
+        if(surveyDocument.getReliability()){
+            try {
+                Long l = Long.valueOf(-1);
+                reliabilityQuestion = reliabilityQuestion();
+                reliabilityQuestionDto.setId(l);
+                reliabilityQuestionDto.setTitle(reliabilityQuestion.getTitle());
+                reliabilityQuestionDto.setQuestionType(reliabilityQuestion.getType());
+                List<ReliabilityChoice> Rchoices = reliabilityQuestion.getChoiceList();
+                for (ReliabilityChoice choice : Rchoices) {
+                    ChoiceDetailDto choiceDto = new ChoiceDetailDto();
+                    choiceDto.setId(l);
+                    choiceDto.setTitle(choice.getChoiceName());
+                    choiceDto.setCount(0);
+                    reliabiltyChoiceDtos.add(choiceDto);
+                }
+                reliabilityQuestionDto.setChoiceList(reliabiltyChoiceDtos);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
-
+        surveyDetailDto.setFont(surveyDocument.getFont());
+        surveyDetailDto.setFontSize(surveyDocument.getFontSize());
+        surveyDetailDto.setBackColor(surveyDocument.getBackColor());
+        surveyDetailDto.setReliability(surveyDocument.getReliability());
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
             QuestionDetailDto questionDto = new QuestionDetailDto();
@@ -175,6 +264,10 @@ public class SurveyAnswerService {
             questionDto.setWordCloudDtos(wordCloudDtos);
 
             questionDtos.add(questionDto);
+        }
+        if(surveyDocument.getReliability()) {
+            reliabilityquestionNumber=random.nextInt(questionDtos.size());
+            questionDtos.add(reliabilityquestionNumber, reliabilityQuestionDto);
         }
         surveyDetailDto.setQuestionList(questionDtos);
 
