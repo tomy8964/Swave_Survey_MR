@@ -2,7 +2,9 @@ package com.example.surveydocument.survey.service;
 
 //import com.auth0.jwt.JWT;
 //import com.auth0.jwt.algorithms.Algorithm;
+
 import com.example.surveydocument.restAPI.service.RestApiSurveyDocumentService;
+import com.example.surveydocument.survey.domain.*;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
@@ -18,21 +20,15 @@ import com.example.surveydocument.survey.response.QuestionDetailDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.user.domain.User;
-import com.example.surveydocument.util.OAuth.JwtProperties;
 import com.example.surveydocument.util.page.PageRequest;
-import com.example.surveydocument.survey.domain.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -52,9 +48,9 @@ public class SurveyDocumentService {
     private final WordCloudRepository wordCloudRepository;
 
     private final RestApiSurveyDocumentService apiService;
-//    private static String gateway="gateway-service:8080";
 
-    private static String gateway="localhost:8080";
+    @Value("${gateway.host}")
+    private String gateway;
 
     @Transactional
     public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {

@@ -185,4 +185,8 @@ public class SurveyAnswerService {
     public List<QuestionAnswer> getQuestionAnswerByCheckAnswerId(Long id) {
         return questionAnswerRepository.findQuestionAnswersByCheckAnswerId(id);
     }
+
+    public List<SurveyAnswer> getSurveyAnswersBySurveyDocumentId(Long id) {
+        return surveyAnswerRepository.findSurveyAnswersBySurveyDocumentId(id);
+    }
 }

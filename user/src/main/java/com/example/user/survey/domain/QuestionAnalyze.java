@@ -23,10 +23,6 @@ public class QuestionAnalyze {
     private String wordCloud;
 
     @OneToMany(mappedBy = "questionAnalyzeId", fetch = FetchType.LAZY, orphanRemoval = true)
-    @Column(name = "apriori_list")
-    private List<AprioriAnalyze> aprioriAnalyzeList;
-
-    @OneToMany(mappedBy = "questionAnalyzeId", fetch = FetchType.LAZY, orphanRemoval = true)
     @Column(name = "chi_list")
     private List<ChiAnalyze> chiAnalyzeList;
 
@@ -37,6 +33,6 @@ public class QuestionAnalyze {
     @ManyToOne
     @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "survey_analyze_id")
-    private SurveyAnalyze surveyAnswerId;
+    private SurveyAnalyze surveyAnalyzeId;
 
 }
