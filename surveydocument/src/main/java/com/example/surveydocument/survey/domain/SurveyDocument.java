@@ -42,15 +42,9 @@ public class SurveyDocument {
     @Column(name = "reliability")
     private Boolean reliability;
 
-    @Column(name = "font")
-    private String font;
-
-    @Column(name = "size")
-    private int fontSize;
-
-    @Column(name = "backcolor")
-    private String backColor;
-
+    @OneToOne
+    @Column(name = "Desing_id")
+    private Design design;
 
 //    @Column(name="survey_design")
 //    @OneToOne(mappedBy = "design_id",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -66,16 +60,13 @@ public class SurveyDocument {
     private Survey survey;
 
     @Builder
-    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, Survey survey, String title, int type,Boolean reliability, String description, String font,int fontSize,String backColor,List<QuestionDocument> questionDocumentList) {
+    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, Survey survey, String title, int type,Boolean reliability, String description, List<QuestionDocument> questionDocumentList) {
         this.survey = survey;
         this.title = title;
         this.type = type;
         this.description = description;
         this.questionDocumentList = questionDocumentList;
         this.reliability=reliability;
-        this.font=font;
-        this.fontSize=fontSize;
-        this.backColor=backColor;
 //        this.surveyAnswerList = surveyAnswerList;
         this.countAnswer = countAnswer;
     }

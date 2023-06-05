@@ -51,6 +51,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.surveydocument.survey.domain.DateManagement.*;
+import static com.example.surveydocument.survey.domain.Design.*;
+
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
 
 @Service
@@ -137,13 +140,26 @@ public class SurveyDocumentService {
                 .type(surveyRequest.getType())
                 .questionDocumentList(new ArrayList<>())
                 .surveyAnswerList(new ArrayList<>())
-                .reliability(surveyRequest.getReliability())
-                .font(surveyRequest.getFont())
-                .fontSize(surveyRequest.getFontSize())
-                .backColor(surveyRequest.getBackColor())
+                .reliability(surveyRequest.getReliability()) // 진정성 검사
                 .countAnswer(0)
                 .build();
         surveyDocumentRepository.save(surveyDocument);
+
+        // 디자인 저장
+        // Design Request To Entity
+        designRequestToEntity(
+                surveyRequest.getFont(),
+                surveyRequest.getFontSize(),
+                surveyRequest.getBackColor()
+        );
+
+        // 날짜 저장
+        // Date Request To Entity
+        dateRequestToEntity(
+                surveyRequest.getStartDate(),
+                surveyRequest.getEndDate(),
+                surveyDocumentRepository.findById(surveyDocument.getId()).get()
+        );
 
         // 설문 문항
         surveyDocumentRepository.findById(surveyDocument.getId());
