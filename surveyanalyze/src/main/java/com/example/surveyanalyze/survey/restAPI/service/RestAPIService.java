@@ -1,4 +1,4 @@
-package com.example.surveyanalyze.survey.service;
+package com.example.surveyanalyze.survey.restAPI.service;
 
 import com.example.surveyanalyze.survey.domain.Choice;
 import com.example.surveyanalyze.survey.domain.QuestionAnswer;
