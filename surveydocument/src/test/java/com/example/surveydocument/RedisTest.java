@@ -73,6 +73,7 @@ public class RedisTest {
     }
 
     @Test @DisplayName("설문 응답자 수 1 추가할 때")
+    @Transactional
     void Redis_test2() throws Exception {
         // given
         // 설문 생성
@@ -83,9 +84,13 @@ public class RedisTest {
                 .build();
         documentRepository.save(surveyDocument);
 
+        entityManager.flush();
+        entityManager.clear();
         // when
+        int countAnswer = documentRepository.findById(surveyDocument.getId()).orElse(null)
+                .getCountAnswer();
         // then
-        assertThat(surveyDocument.getCountAnswer()).isEqualTo(2);
+        assertThat(countAnswer).isEqualTo(2);
     }
 
     @Test @DisplayName("Redis 조회수 증가 테스트")

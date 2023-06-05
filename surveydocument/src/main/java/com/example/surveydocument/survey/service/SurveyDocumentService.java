@@ -25,6 +25,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.xml.messaging.saaj.packaging.mime.MessagingException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
@@ -35,9 +37,13 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -52,6 +58,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@EnableTransactionManagement
 public class SurveyDocumentService {
     private final SurveyRepository surveyRepository;
     private final SurveyDocumentRepository surveyDocumentRepository;
@@ -63,10 +70,12 @@ public class SurveyDocumentService {
 
     private static String gateway="localhost:8080";
 
+    @PersistenceContext
+    private final EntityManager em;
     // redis 분산 락 사용
     // 분산 락은 Transactional 과 같이 진행되지 않아서 따로 관리로직을 만들어야한다
     private final RedissonClient redissonClient;
-    private final TransactionManager transactionManager;
+    private final PlatformTransactionManager transactionManager;
 
     @Transactional
     public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
@@ -197,6 +206,7 @@ public class SurveyDocumentService {
         // Lock 획득 시도
         boolean isLocked = rLock.tryLock(1, 3, TimeUnit.SECONDS);
 
+        TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
         // @Transactional 대신 코드로 트랜잭션을 관리한다
         try {
             if(!isLocked) {
@@ -208,16 +218,24 @@ public class SurveyDocumentService {
                 SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).orElse(null);
                 surveyRepository.surveyDocumentCount(surveyDocument);
 
+                // 영속성 컨텍스트 clear
+                em.flush();
+                em.clear();
+
+                // 더티 체크
+//                SurveyDocument nowSurveyDocument = surveyDocumentRepository.findById(surveyDocumentId).orElse(null);
+//                nowSurveyDocument.updateAnswerCount(nowSurveyDocument.getCountAnswer());
+
                 // 실행하면 커밋
-                transactionManager.commit();
+                transactionManager.commit(status);
 
             } catch (RuntimeException e) {
                 // 로직 실행 중 예외가 발생하면 롤백
-                transactionManager.rollback();
+                transactionManager.rollback(status);
                 throw new Exception(e.getMessage());
             }
 
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             throw new Exception("Thread Interrupted");
         } finally {
             // 로직 수행이 끝나면 Lock 반환

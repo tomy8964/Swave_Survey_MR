@@ -69,4 +69,10 @@ public class SurveyDocument {
 //    public void setAnalyze(surveyAnswer surveyAnswer) {
 //        this.surveyAnswer=surveyAnswer;
 //    }
+
+    // todo : QueryDSL 문제 해결하기
+    // 조회수 추가 dirty 방식
+    public void updateAnswerCount(int countAnswer) {
+        this.countAnswer = countAnswer + 1;
+    }
 }
