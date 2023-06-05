@@ -35,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,9 @@ public class SurveyDocumentService {
 
     private final RestApiSurveyDocumentService apiService;
 
-    private static String gateway="localhost:8080";
+    @Value("${gateway.host}")
+    private String gateway;
+
     Random random = new Random();
     private List<ReliabilityQuestion> questions;
     private int reliabilityquestionNumber;
@@ -100,8 +103,6 @@ public class SurveyDocumentService {
         ReliabilityQuestion question1=questions.get(reliabilityquestionNumber);
         List<ReliabilityChoice> Rchoices = question1.getChoiceList();
         return question1;
-    @Value("${gateway.host}")
-    private String gateway;
 
 //        for (ReliabilityQuestion question : questions) {
 //            System.out.println("Title: " + question.getTitle());
