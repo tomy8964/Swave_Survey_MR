@@ -29,12 +29,14 @@ public class SurveyAnalyzeInternalController {
     }
 
     // 설문 분석 시작
+    // 분산락 적용
     @PostMapping(value = "/research/analyze/create")
     public String saveAnalyze(@RequestBody String surveyId) {
         RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("/research/analyze/create"));
 
         try {
             if (lock.tryLock()) {
+                // transaction
                 surveyService.analyze(surveyId);
                 surveyService.wordCloud(surveyId);
                 return "Success";

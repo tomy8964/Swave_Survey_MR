@@ -12,4 +12,6 @@ import java.util.List;
 public class SurveyAnalyzeDto {
     private Long id;
     private List<QuestionAnalyzeDto> questionAnalyzeList;
+    private List<AprioriAnalyzeDto> aprioriAnalyzeList;
+
 }

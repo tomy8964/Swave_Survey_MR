@@ -1,4 +1,4 @@
-package com.example.surveyanswer.survey.service;
+package com.example.surveyanswer.survey.restAPI.service;
 
 import com.example.surveyanswer.survey.domain.SurveyDocument;
 import lombok.RequiredArgsConstructor;
