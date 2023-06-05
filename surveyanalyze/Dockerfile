@@ -6,4 +6,9 @@ COPY ./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar ./build/libs/surveyanalyze-0.
 
 EXPOSE 8080
 
-CMD ["java","-jar","./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar"]
+EXPOSE 8082
+
+#server
+CMD ["java","-jar","-Dspring.profiles.active=server","./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar"]
+#local
+#CMD ["java","-jar","./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar"]
