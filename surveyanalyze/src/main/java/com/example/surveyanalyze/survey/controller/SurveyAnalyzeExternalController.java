@@ -17,19 +17,19 @@ public class SurveyAnalyzeExternalController {
 
     private final SurveyAnalyzeService surveyService;
 
-    // 분석 문항
+    // 분석 문항 & 응답
     @Cacheable(value = "/research/survey/load/{id}", key = "#id")
     @GetMapping(value = "/research/survey/load/{id}")
     public SurveyDetailDto readSurvey(@PathVariable Long id) {
         return surveyService.getSurveyDetailDto(id);
     }
 
-    // 분석 응답 조회
-    @Cacheable(value = "response/id", key = "#id")
-    @GetMapping(value = "/response/{id}")
-    public SurveyDetailDto readResponse(@PathVariable Long id) {
-        return surveyService.getSurveyDetailDto(id);
-    }
+//    // 분석 응답 조회
+//    @Cacheable(value = "response/id", key = "#id")
+//    @GetMapping(value = "/response/{id}")
+//    public SurveyDetailDto readResponse(@PathVariable Long id) {
+//        return surveyService.getSurveyDetailDto(id);
+//    }
 
 //    // todo:설문 관리 수정
 //    @GetMapping(value = "/api/survey/management/{surveyId}")

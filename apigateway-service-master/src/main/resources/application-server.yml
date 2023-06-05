@@ -15,13 +15,13 @@ spring:
     gateway:
       routes:
         - id: survey-analyze
-          uri: http://surveyanalyze-service:8080/
+          uri: http://analysis-back-service:8080/
           predicates:
             - Path=/analyze/internal/**
             - Method=GET,POST
 
         - id: survey-analyze
-          uri: http://surveyanalyze-service:8080/
+          uri: http://analysis-back-service:8080/
           predicates:
             - Path=/analyze/external/**
             - Method=GET,POST
@@ -29,32 +29,43 @@ spring:
             - AuthorizationHeaderFilter
 
         - id: survey-answer
-          uri: http://surveyanswer-service:8080/
+          uri: http://response-back-service:8080/
           predicates:
             - Path=/survey/external/**
             - Method=GET,POST
         - id: survey-answer
-          uri: http://surveyanswer-service:8080/
+          uri: http://response-back-service:8080/
           predicates:
             - Path=/survey/internal/**
             - Method=GET,POST
         - id: surveydocument
-          uri: http://surveydocument-service:8080/
+          uri: http://survey-back-service:8080/
           predicates:
             - Path=/api/external/**
             - Method=GET,POST
           filters:
             - AuthorizationHeaderFilter
         - id: surveydocument
-          uri: http://surveydocument-service:8080/
+          uri: http://survey-back-service:8080/
           predicates:
             - Path=/api/internal/**
             - Method=GET,POST
 
         - id: surveydocument
-          uri: http://surveydocument-service:8080/
+          uri: http://survey-back-service:8080/
           predicates:
             - Path=/api/oauth/**
+            - Method=GET,POST
+
+        - id: user
+          uri: http://user-back-service:8080/
+          predicates:
+            - Path=/user/external/** # 프론트에서 요청
+            - Method=GET,POST
+        - id: user
+          uri: http://user-back-service:8080/
+          predicates:
+            - Path=/user/internal/** # 모듈간 통신
             - Method=GET,POST
 
 management:
