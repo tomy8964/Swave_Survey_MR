@@ -19,7 +19,6 @@ public class Design {
     @Column(name = "back_color")
     private String backColor;
 
-    @Column(name = "SurveyDocument_id")
     @OneToOne(mappedBy = "design")
     private SurveyDocument surveyDocument;
 

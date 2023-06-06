@@ -1,7 +1,6 @@
 package com.example.user.user.controller;
 
-import com.example.user.restAPI.service.RestApiUserService;
-import com.example.user.survey.domain.Survey;
+import com.example.user.restAPI.service.InterRestApiUserService;
 import com.example.user.survey.response.SurveyMyPageDto;
 import com.example.user.user.domain.User;
 import com.example.user.user.repository.UserRepository;
@@ -26,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserExternalController {
     private final UserService2 userService;
-    private final RestApiUserService restApiService;
+    private final InterRestApiUserService restApiService;
     private final UserRepository userRepository;
 
     @PostMapping("/oauth/token")

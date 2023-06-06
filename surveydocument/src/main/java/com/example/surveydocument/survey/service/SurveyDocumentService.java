@@ -1,6 +1,6 @@
 package com.example.surveydocument.survey.service;
 
-import com.example.surveydocument.restAPI.service.RestApiSurveyDocumentService;
+import com.example.surveydocument.restAPI.service.OuterRestApiSurveyDocumentService;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
@@ -57,7 +57,7 @@ public class SurveyDocumentService {
     private final ChoiceRepository choiceRepository;
     private final WordCloudRepository wordCloudRepository;
 
-    private final RestApiSurveyDocumentService apiService;
+    private final OuterRestApiSurveyDocumentService apiService;
 
     private static String gateway="localhost:8080";
     Random random = new Random();
@@ -250,11 +250,13 @@ public class SurveyDocumentService {
     // 분산락 실행
     public void countSurveyDocument(Long surveyDocumentId) throws Exception {
         // survey document id 값을 키로 하는 lock 을 조회합니다.
-        RLock rLock = redissonClient.getLock("$surveyDocumentId");
+        RLock rLock = redissonClient.getLock("survey : lock");
         // Lock 획득 시도
-        boolean isLocked = rLock.tryLock(1, 3, TimeUnit.SECONDS);
-
+        boolean isLocked = rLock.tryLock(5, 10, TimeUnit.SECONDS);
+        log.info(Thread.currentThread().getName() + " lock 획득 시도!");
         TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        log.info(Thread.currentThread().getName() + " Transaction 시작");
+
         // @Transactional 대신 코드로 트랜잭션을 관리한다
         try {
             if(!isLocked) {
@@ -266,24 +268,23 @@ public class SurveyDocumentService {
                 SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).orElse(null);
                 surveyRepository.surveyDocumentCount(surveyDocument);
 
-                // 영속성 컨텍스트 clear
-                surveyRepository.flush();
-
-                // 실행하면 커밋
+                // 실행하면 커밋후 트랜잭션 종료
                 transactionManager.commit(status);
-
+                log.info(Thread.currentThread().getName() + " 커밋 후 트랜잭션 종료");
             } catch (RuntimeException e) {
                 // 로직 실행 중 예외가 발생하면 롤백
                 transactionManager.rollback(status);
+                log.info(Thread.currentThread().getName() + " 로직 실행 실패");
                 throw new Exception(e.getMessage());
             }
 
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             throw new Exception("Thread Interrupted");
         } finally {
             // 로직 수행이 끝나면 Lock 반환
             if (rLock.isLocked() && rLock.isHeldByCurrentThread()) {
                 rLock.unlock();
+                log.info(Thread.currentThread().getName() + " Lock 해제");
             }
         }
     }

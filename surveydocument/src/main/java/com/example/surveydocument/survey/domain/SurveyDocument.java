@@ -45,7 +45,7 @@ public class SurveyDocument {
     private Boolean reliability;
 
     @OneToOne
-    @Column(name = "Desing_id")
+    @JoinColumn(name = "Design_id")
     private Design design;
 
     @Column(name = "content")

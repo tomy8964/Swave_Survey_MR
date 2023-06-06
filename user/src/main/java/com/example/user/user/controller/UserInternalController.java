@@ -1,6 +1,6 @@
 package com.example.user.user.controller;
 
-import com.example.user.restAPI.service.RestApiUserService;
+import com.example.user.restAPI.service.InterRestApiUserService;
 import com.example.user.survey.domain.Survey;
 import com.example.user.user.domain.User;
 import com.example.user.user.repository.UserRepository;
@@ -24,15 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserInternalController {
     private final UserService2 userService;
     private final UserRepository userRepository;
-    private final RestApiUserService restApiUserService;
+    private final InterRestApiUserService interRestApiUserService;
 
     @GetMapping("/me")
     public User getCurrentUser(HttpServletRequest request) {
-        return restApiUserService.getCurrentUser(request);
+        return interRestApiUserService.getCurrentUser(request);
     }
 
     @PostMapping("/survey/save")
     public void saveSurveyInUser(HttpServletRequest request, Survey survey) {
-        restApiUserService.saveSurveyInUser(request, survey);
+        interRestApiUserService.saveSurveyInUser(request, survey);
     }
 }

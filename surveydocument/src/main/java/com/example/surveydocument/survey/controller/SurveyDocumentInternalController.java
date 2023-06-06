@@ -68,4 +68,10 @@ public class SurveyDocumentInternalController {
         surveyService.setWordCloud(id, wordCloudList);
     }
 
+    // 유저 정보 저장하기
+    @PostMapping(value = "/saveUser")
+    public void saveUser() {
+
+    }
+
 }

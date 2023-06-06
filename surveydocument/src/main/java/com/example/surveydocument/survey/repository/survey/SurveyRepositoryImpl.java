@@ -100,7 +100,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
                 .set(qSurveyDocument.countAnswer, qSurveyDocument.countAnswer.add(1))
                 .where(qSurveyDocument.id.eq(surveyDocument.getId()))
                 .execute();
-
+        entityManager.flush();
         entityManager.clear();
     }
 

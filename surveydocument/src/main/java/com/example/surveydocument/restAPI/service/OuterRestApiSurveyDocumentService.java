@@ -12,13 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.Serial;
 import java.util.List;
 
+/**
+ * Reference
+ * https://findmypiece.tistory.com/276
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RestApiSurveyDocumentService {
+public class OuterRestApiSurveyDocumentService {
 
 //    private static String gateway="gateway-service:8080";
     private static String userInternalUrl = "/user/internal";
@@ -33,18 +36,29 @@ public class RestApiSurveyDocumentService {
         // Current User URL
         String getCurrentUserUrl = "http://" + gateway + userInternalUrl + "/me";
 
-        User getUser = webClient.get()
+        final User[] getUser = new User[1];
+
+        webClient.get()
                 .uri(getCurrentUserUrl)
                 .header("Authorization", jwtHeader)
                 .retrieve()
                 .bodyToMono(User.class)
-                .blockOptional()
-                .orElseGet(null);
+                .subscribe(response -> {
+                    getUser[0] = User.builder()
+                            .id(response.getId())
+                            .email(response.getEmail())
+                            .nickname(response.getNickname())
+                            .userRole(response.getUserRole())
+                            .provider(response.getProvider())
+                            .survey(response.getSurvey())
+                            .build();
+                });
+
 
         // check log
-        log.info("현재 유저의 설문 정보: " + getUser.getNickname());
+        log.info("현재 유저의 설문 정보: " + getUser[0].getNickname());
 
-        return getUser;
+        return getUser[0];
     }
 
     // User 에 Survey 정보 보내기
@@ -60,11 +74,7 @@ public class RestApiSurveyDocumentService {
         webClient.post()
                 .uri(saveSurveyUrl)
                 .header("Authorization", jwtHeader)
-                .bodyValue(survey)
-                .retrieve()
-                .bodyToMono(Survey.class)
-                .blockOptional();
-//                .orElseGet(null);
+                .bodyValue(survey);
 
         log.info(survey.getUser().getNickname() +"에게 정보 보냅니다");
     }

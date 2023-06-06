@@ -257,6 +257,9 @@ public class OAuthService {
                         .userRole("ROLE_USER").build();
 
                 userRepository.save(user);
+
+                // Document 에 알리기
+
             } else {
                 log.info("기존 회원 -> 회원 가입 건너 뜀");
             }

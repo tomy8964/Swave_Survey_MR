@@ -41,8 +41,8 @@ public class User {
 
     @Builder
     public User(Long id, String profileImg, String nickname,
-                String email,String provider, String userRole) {
-
+                String email,String provider, String userRole, Survey survey) {
+        this.survey = survey;
         this.id = id;
         this.profileImg = profileImg;
         this.nickname = nickname;
