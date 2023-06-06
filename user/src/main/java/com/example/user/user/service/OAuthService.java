@@ -2,6 +2,8 @@ package com.example.user.user.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.user.restAPI.service.OuterRestApiUserService;
+import com.example.user.survey.domain.Survey;
 import com.example.user.user.domain.User;
 import com.example.user.user.repository.UserRepository;
 import com.example.user.util.OAuth.Git.GItProfile;
@@ -11,6 +13,7 @@ import com.example.user.util.OAuth.OauthToken;
 import com.example.user.util.OAuth.kakao.KakaoProfile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -30,10 +33,13 @@ import java.util.HashMap;
 import java.util.Map;
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OAuthService {
 
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final UserService2 userService;
+    private final OuterRestApiUserService apiUserService;
+
     public OauthToken getAccessToken(String code, String provider) {
         RestTemplate rt = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -244,8 +250,6 @@ public class OAuthService {
         if (provider.equals("kakao")) {
             KakaoProfile profile = findKakaoProfile(token);
 
-            //회원 정보 조회 by Email
-//            User user = userRepository.findByEmail(profile.getKakao_account().getEmail());
             User user = userRepository.findByEmailAndProvider(profile.getKakao_account().getEmail(),provider);
             if (user == null) {
                 user = User.builder()
@@ -254,21 +258,22 @@ public class OAuthService {
                         .nickname(profile.getKakao_account().getProfile().getNickname())
                         .email(profile.getKakao_account().getEmail())
                         .provider(provider)
+                        .survey(new Survey())
                         .userRole("ROLE_USER").build();
 
                 userRepository.save(user);
 
                 // Document 에 알리기
+                apiUserService.sendUserToSurveyDocument(user);
 
             } else {
                 log.info("기존 회원 -> 회원 가입 건너 뜀");
             }
             return createToken(user);
+
         } else if (provider.equals("google")) {
             GoogleProfile profile = findGoogleProfile(token);
 
-            //회원 정보 조회 by Email
-//            User user = userRepository.findByEmail(profile.getEmail());
             User user = userRepository.findByEmailAndProvider(profile.getEmail(),provider);
             //새로운 회원이면 등록
             if(user == null) {
@@ -281,6 +286,10 @@ public class OAuthService {
                         .userRole("ROLE_USER").build();
 
                 userRepository.save(user);
+
+                // Document 에 알리기
+                apiUserService.sendUserToSurveyDocument(user);
+
             } else {
                 log.info("기존 회원 -> 회원 가입 건너 뜀");
             }
@@ -299,8 +308,6 @@ public class OAuthService {
                 e.printStackTrace();
             }
 
-            //회원 정보 조회 by Email
-//            User user = userRepository.findByEmail((String)value.get("email"));
             User user = userRepository.findByEmailAndProvider((String)value.get("email"),provider);
             if(user == null) {
                 user = User.builder()
@@ -312,6 +319,10 @@ public class OAuthService {
                         .userRole("ROLE_USER").build();
 
                 userRepository.save(user);
+
+                // Document 에 알리기
+                apiUserService.sendUserToSurveyDocument(user);
+
             } else {
                 log.info(String.valueOf(user));
                 log.info("기존 회원 -> 회원 가입 건너 뜀");

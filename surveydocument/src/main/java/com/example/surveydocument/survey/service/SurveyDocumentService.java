@@ -114,6 +114,7 @@ public class SurveyDocumentService {
         User getUser = apiService.getCurrentUserFromUser(request);
         Survey userSurvey = getUser.getSurvey();
 
+        // 유저에 Survey 가 없다면 넣어주기
         if(userSurvey == null) {
             userSurvey = Survey.builder()
                     .user(getUser)
@@ -428,6 +429,10 @@ public class SurveyDocumentService {
             // todo: User 확인 Exception 처리
         }
 
+        updateTest(surveyDocument, requestDto);
+    }
+
+    public void updateTest(SurveyDocument surveyDocument, SurveyRequestDto requestDto) {
         // 초기 값 수정
         surveyDocument.setTitle(requestDto.getTitle());
         surveyDocument.setDescription(requestDto.getDescription());
@@ -461,7 +466,6 @@ public class SurveyDocumentService {
             surveyDocument.setQuestion(question);
         }
         surveyDocumentRepository.save(surveyDocument);
-
     }
 
     public void deleteSurvey(Long id) {

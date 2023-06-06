@@ -1,5 +1,6 @@
 package com.example.surveydocument.survey.controller;
 
+import com.example.surveydocument.restAPI.service.InterRestApiSurveyDocumentService;
 import com.example.surveydocument.survey.domain.Choice;
 import com.example.surveydocument.survey.domain.QuestionDocument;
 import com.example.surveydocument.survey.domain.SurveyDocument;
@@ -9,6 +10,7 @@ import com.example.surveydocument.survey.request.SurveyRequestDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
+import com.example.surveydocument.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,7 @@ import java.util.List;
 public class SurveyDocumentInternalController {
 
     private final SurveyDocumentService surveyService;
+    private final InterRestApiSurveyDocumentService apiService;
 
     @GetMapping(value = "/survey-list/{id}")
     public SurveyDetailDto readDetail(HttpServletRequest request, @PathVariable Long id) throws InvalidTokenException {
@@ -70,8 +73,8 @@ public class SurveyDocumentInternalController {
 
     // 유저 정보 저장하기
     @PostMapping(value = "/saveUser")
-    public void saveUser() {
-
+    public void saveUser(@RequestBody User user) {
+        apiService.saveUserInSurvey(user);
     }
 
 }
