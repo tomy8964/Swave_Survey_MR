@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/chat-gpt")
+@RequestMapping("/api/external")
 public class ChatGptController {
 
     private final ChatGptService chatGptService;
@@ -19,7 +19,7 @@ public class ChatGptController {
         this.chatGptService = chatGptService;
     }
 
-    @PostMapping("/question")
+    @PostMapping("/chat-gpt/question")
     public ChatResultDto sendQuestion(@RequestBody ChatGptQuestionRequestDto requestDto) {
         return chatGptService.chatGptResult(requestDto);
     }

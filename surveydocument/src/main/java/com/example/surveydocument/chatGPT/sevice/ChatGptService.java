@@ -3,6 +3,7 @@ package com.example.surveydocument.chatGPT.sevice;
 
 import com.example.surveydocument.chatGPT.config.ChatGptConfig;
 import com.example.surveydocument.chatGPT.request.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
@@ -14,6 +15,8 @@ public class ChatGptService {
 
     private static RestTemplate restTemplate = new RestTemplate();
 
+//    @Value("${secret.key}")
+//    private String API_KEY;
     public HttpEntity<ChatGptRequestDto> buildHttpEntity(ChatGptRequestDto requestDto) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(ChatGptConfig.MEDIA_TYPE));
