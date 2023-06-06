@@ -227,9 +227,7 @@ public class SurveyDocumentService {
         Optional<Choice> findChoice = choiceRepository.findById(choiceId);
 
         if (findChoice.isPresent()) {
-            //todo: querydsl로 변경
-            findChoice.get().setCount(findChoice.get().getCount() + 1);
-            choiceRepository.flush();
+            choiceRepository.incrementCount(choiceId);
         }
     }
 
@@ -406,8 +404,9 @@ public class SurveyDocumentService {
     @Transactional
     public void countAnswer(Long id) {
         Optional<SurveyDocument> byId = surveyDocumentRepository.findById(id);
-        byId.get().setCountAnswer(byId.get().getCountAnswer() + 1);
-        surveyDocumentRepository.flush();
+        if (byId.isPresent()) {
+            surveyDocumentRepository.incrementCountAnswer(id);
+        }
     }
 
     public void updateSurvey(HttpServletRequest request,SurveyRequestDto requestDto, Long surveyId) {
