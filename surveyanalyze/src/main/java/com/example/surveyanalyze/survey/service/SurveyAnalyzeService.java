@@ -81,6 +81,7 @@ public class SurveyAnalyzeService {
 
     private void saveQuestionAnalyze(ArrayList<Object> apriori, ArrayList<Object> compare, ArrayList<Object> chi, SurveyAnalyze surveyAnalyze, SurveyDocument surveyDocument) {
         int p = 0;
+        List<QuestionAnalyze> questionAnalyzeList = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
             if (questionDocument.getQuestionType() == 0) {
                 continue;
@@ -107,11 +108,15 @@ public class SurveyAnalyzeService {
 
             questionAnalyzeRepository.flush();
             p++;
+            questionAnalyzeList.add(questionAnalyze);
         }
+        surveyAnalyze.setQuestionAnalyzeList(questionAnalyzeList);
+        surveyAnalyzeRepository.flush();
     }
 
     private void saveApriori(ArrayList<Object> apriori, SurveyAnalyze surveyAnalyze) {
         //apriori
+        List<AprioriAnalyze> aprioriAnalyzeList = new ArrayList<>();
         for (int j = 0; j < apriori.size(); j++) {
             // [['1', [0.66, '3'], [0.33, '4']]
             List<Object> dataList = (List<Object>) apriori.get(j);
@@ -133,8 +138,11 @@ public class SurveyAnalyzeService {
             // for문 [0.88,2] 같은 배열의 갯수 만큼
             // [[0.88,3],[0.8,5]]
             saveAprioriSecond(dataList, aprioriAnalyze, questionDocument1);
+            aprioriAnalyzeList.add(aprioriAnalyze);
             aprioriAnalyzeRepository.flush();
         }
+        surveyAnalyze.setAprioriAnalyzeList(aprioriAnalyzeList);
+        surveyAnalyzeRepository.flush();
     }
 
     private void saveAprioriSecond(List<Object> dataList, AprioriAnalyze aprioriAnalyze, QuestionDocument questionDocument1) {
@@ -156,6 +164,7 @@ public class SurveyAnalyzeService {
     }
 
     private void saveChi(QuestionAnalyze questionAnalyze, List<QuestionDocument> questionDocumentList, int size, int o, List<Object> chiList) {
+        List<ChiAnalyze> chiAnalyzeList = new ArrayList<>();
         for (int k = 0; k < size; k++) {
             if (questionDocumentList.get(k).getQuestionType() == 0) {
                 continue;
@@ -172,11 +181,15 @@ public class SurveyAnalyzeService {
                     .build();
             o++;
             chiAnalyzeRepository.save(chiAnalyze);
+            chiAnalyzeList.add(chiAnalyze);
         }
+        questionAnalyze.setChiAnalyzeList(chiAnalyzeList);
+        questionAnalyzeRepository.flush();
     }
 
     private void saveCompare(QuestionAnalyze questionAnalyze, List<Object> compareList, List<QuestionDocument> questionDocumentList, int size) {
         int o=0;
+        List<CompareAnalyze> compareAnalyzeList = new ArrayList<>();
         for (int k = 0; k < size; k++) {
             if (questionDocumentList.get(k).getQuestionType() == 0) {
                 continue;
@@ -187,15 +200,17 @@ public class SurveyAnalyzeService {
             ArrayList<Double> temp = (ArrayList<Double>) compareList.get(o);
             Double pValue = temp.get(0); // Assuming you want to retrieve the first Double value from the ArrayList
 
-            CompareAnalyze compareAnalyze = new CompareAnalyze();
-            compareAnalyze = CompareAnalyze.builder()
+            CompareAnalyze compareAnalyze = CompareAnalyze.builder()
                     .questionAnalyzeId(questionAnalyze)
                     .pValue(pValue)
                     .questionTitle(questionDocumentList.get(k).getTitle())
                     .build();
             o++;
             compareAnalyzeRepository.save(compareAnalyze);
+            compareAnalyzeList.add(compareAnalyze);
         }
+        questionAnalyze.setCompareAnalyzeList(compareAnalyzeList);
+        questionAnalyzeRepository.flush();
     }
 
     private SurveyAnalyze getSurveyAnalyze(long surveyDocumentId) {
