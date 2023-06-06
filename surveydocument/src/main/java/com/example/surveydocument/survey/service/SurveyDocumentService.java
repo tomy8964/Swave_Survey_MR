@@ -55,6 +55,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.surveydocument.survey.domain.DesignTemplate.designRequestToEntity;
+
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
 
 @Service
@@ -216,13 +218,16 @@ public class SurveyDocumentService {
                 .questionTemplateList(new ArrayList<>())
                 .surveyAnswerList(new ArrayList<>())
                 .reliability(surveyRequest.getReliability())
-                .font(surveyRequest.getFont())
-                .fontSize(surveyRequest.getFontSize())
-                .backColor(surveyRequest.getBackColor())
                 .countAnswer(0)
                 .build();
         surveyTemplateRepository.save(surveyTemplate);
 
+        DesignTemplate design = designRequestToEntity(
+                surveyRequest.getFont(),
+                surveyRequest.getFontSize(),
+                surveyRequest.getBackColor()
+        );
+        surveyTemplate.setDesignTemplate(design);
         // 설문 문항
         surveyTemplateRepository.findById(surveyTemplate.getId());
         for (QuestionRequestDto questionRequestDto : surveyRequest.getQuestionRequest()) {
@@ -398,10 +403,13 @@ public class SurveyDocumentService {
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
+        surveyDetailDto.setReliability(surveyDocument.getReliability());
+
+
         surveyDetailDto.setFont(surveyDocument.getFont());
         surveyDetailDto.setFontSize(surveyDocument.getFontSize());
         surveyDetailDto.setBackColor(surveyDocument.getBackColor());
-        surveyDetailDto.setReliability(surveyDocument.getReliability());
+
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
@@ -562,10 +570,12 @@ public class SurveyDocumentService {
         // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
         surveyDetailDto.setTitle(surveyTemplate.getTitle());
         surveyDetailDto.setDescription(surveyTemplate.getDescription());
-        surveyDetailDto.setFont(surveyTemplate.getFont());
-        surveyDetailDto.setFontSize(surveyTemplate.getFontSize());
-        surveyDetailDto.setBackColor(surveyTemplate.getBackColor());
         surveyDetailDto.setReliability(surveyTemplate.getReliability());
+
+        DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
+        surveyDetailDto.setFont(designTemplate.getFont());
+        surveyDetailDto.setFontSize(designTemplate.getFontSize());
+        surveyDetailDto.setBackColor(designTemplate.getBackColor());
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionTemplate questionTemplate : surveyTemplate.getQuestionTemplateList()) {

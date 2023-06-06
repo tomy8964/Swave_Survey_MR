@@ -49,4 +49,10 @@ public class UserExternalController {
         return userService.updateMyPage(request,user);
     }
 
+    @PostMapping("/deleteuser")
+    public String deleteUs(HttpServletRequest request) {
+        userService.deleteUser(request);
+        return "success";
+    }
+
 }
