@@ -62,35 +62,6 @@ public class RestTest {
     }
 
     @Test
-    void test1() {
-
-    }
-
-    public static MockWebServer mockWebServer;
-    @Autowired
-    public ObjectMapper objectMapper;
-
-    String host;
-
-//    @BeforeAll
-//    static void setUp() throws IOException {
-//        mockWebServer = new MockWebServer();
-//        mockWebServer.start();
-//    }
-//
-//    @AfterAll
-//    static void tearDown() throws IOException {
-//        mockWebServer.shutdown();
-//    }
-//
-//    @BeforeEach
-//    void initialize() {
-//        String baseUrl = String.format("http://localhost:%s",
-//                mockWebServer.getPort());
-//        surveyAnswerService.setWebClient(baseUrl);
-//    }
-
-    @Test
     void restTest() throws JsonProcessingException {
 //        //given
 //        SurveyDocument response = SurveyDocument.builder()

@@ -28,9 +28,11 @@ public class SurveyAnswerService {
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final QuestionAnswerRepository questionAnswerRepository;
     private final RestAPIService restAPIService;
-    Random random = new Random();
     private List<ReliabilityQuestion> questions;
     private int reliabilityquestionNumber;
+
+    Random random = new Random();
+
     // 설문 응답 참여
     public SurveyDetailDto getParticipantSurvey(Long id){
         return getSurveyDetailDto(id);
