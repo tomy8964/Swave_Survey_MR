@@ -17,10 +17,7 @@ import com.example.surveydocument.survey.repository.template.questionTemplate.Qu
 import com.example.surveydocument.survey.repository.template.surveyTemplate.SurveyTemplateRepository;
 import com.example.surveydocument.survey.repository.wordCloud.WordCloudRepository;
 import com.example.surveydocument.survey.request.*;
-import com.example.surveydocument.survey.response.ChoiceDetailDto;
-import com.example.surveydocument.survey.response.QuestionDetailDto;
-import com.example.surveydocument.survey.response.SurveyDetailDto;
-import com.example.surveydocument.survey.response.WordCloudDto;
+import com.example.surveydocument.survey.response.*;
 import com.example.surveydocument.util.page.PageRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +44,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.surveydocument.survey.domain.DateManagement.dateRequestToEntity;
-import static com.example.surveydocument.survey.domain.Design.designRequestToEntity;
 import static com.example.surveydocument.survey.domain.DesignTemplate.designTemplateRequestToEntity;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
@@ -116,7 +112,7 @@ public class SurveyDocumentService {
 //        }
     }
     @Transactional
-    public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
+    public Long createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
 
         // 유저 정보 받아오기
         // User Module 에서 현재 유저 가져오기
@@ -124,45 +120,46 @@ public class SurveyDocumentService {
 
         // 유저 코드에 해당하는 survey 찾기
         Survey survey = surveyRepository.findByUserCode(userCode);
-        createTest(survey, surveyRequest);
+        Long documentId = createTest(survey, surveyRequest);
 
         // User Module 에 저장된 Survey 보내기
         apiService.sendSurveyToUser(request, survey);
+
+        return documentId;
     }
 
-    public void createTest(Survey userSurvey, SurveyRequestDto surveyRequest) {
+    @Transactional
+    public Long createTest(Survey userSurvey, SurveyRequestDto surveyRequest) {
         // Survey Request 를 Survey Document 에 저장하기
         SurveyDocument surveyDocument = SurveyDocument.builder()
                 .survey(userSurvey)
                 .title(surveyRequest.getTitle())
                 .description(surveyRequest.getDescription())
                 .type(surveyRequest.getType())
-                .questionDocumentList(new ArrayList<>())
                 .reliability(surveyRequest.getReliability()) // 진정성 검사
                 .countAnswer(0)
+                .questionDocumentList(new ArrayList<>())
                 .build();
         surveyDocumentRepository.save(surveyDocument);
 
-        // 디자인 저장
-        // Design Request To Entity
         Design design = Design.builder()
                 .font(surveyRequest.getDesign().getFont())
                 .fontSize(surveyRequest.getDesign().getFontSize())
                 .backColor(surveyRequest.getDesign().getBackColor())
                 .build();
+        surveyDocument.setDesign(design);
+        surveyDocumentRepository.flush();
         designRepository.save(design);
 
-        // 날짜 저장
-        // Date Request To Entity
         DateManagement dateManagement = DateManagement.builder()
                 .startDate(surveyRequest.getStartDate())
                 .deadline(surveyRequest.getEndDate())
+                .isEnabled(surveyRequest.getEnable())
                 .build();
-        dateRepository.save(dateManagement);
 
-        surveyDocument.setDesign(design);
         surveyDocument.setDate(dateManagement);
         surveyDocumentRepository.flush();
+        dateRepository.save(dateManagement);
 
         // 설문 문항
         for (QuestionRequestDto questionRequestDto : surveyRequest.getQuestionRequest()) {
@@ -197,6 +194,8 @@ public class SurveyDocumentService {
         // Survey 에 SurveyDocument 저장
         userSurvey.setDocument(surveyDocument);
         surveyRepository.flush();
+
+        return surveyDocument.getId();
     }
 
     public void createTemplateSurvey(HttpServletRequest request, SurveyTemplateRequestDTO surveyRequest) throws InvalidTokenException, UnknownHostException {
@@ -545,7 +544,7 @@ public class SurveyDocumentService {
         surveyDocumentRepository.save(surveyDocument);
     }
 
-    public void managementSurvey(Long id, DateDto dateRequest) {
+    public void managementDate(Long id, DateDto dateRequest) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).get();
         surveyDocument.setDate(
                 dateRequestToEntity(dateRequest.getStartDate(), dateRequest.getEndDate())
@@ -609,5 +608,19 @@ public class SurveyDocumentService {
 
         log.info(String.valueOf(surveyDetailDto));
         return surveyDetailDto;
+    }
+
+    public void managementEnable(Long id, Boolean enable) {
+        SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElse(null);
+        surveyDocument.getDate().setEnabled(enable);
+    }
+
+    public ManagementResponseDto managementSurvey(Long id) {
+        SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElse(null);
+        return ManagementResponseDto.builder()
+                .startDate(surveyDocument.getDate().getStartDate())
+                .endDate(surveyDocument.getDate().getDeadline())
+                .enable(surveyDocument.getDate().isEnabled())
+                .build();
     }
 }

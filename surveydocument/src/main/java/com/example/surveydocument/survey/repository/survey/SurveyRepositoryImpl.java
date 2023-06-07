@@ -2,7 +2,6 @@ package com.example.surveydocument.survey.repository.survey;
 
 import com.example.surveydocument.survey.domain.*;
 import com.example.surveydocument.survey.request.PageRequestDto;
-//import com.example.surveydocument.user.domain.User;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -148,7 +147,4 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
         }
         return null;
     }
-
-
-
 }

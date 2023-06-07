@@ -15,8 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 public class SurveyDocument {
 
-    //todo : soft delete 쿼리 조회 되게 만들어주기
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_document_id")
     private Long id;
@@ -29,21 +27,17 @@ public class SurveyDocument {
     @Column(name = "accept_response")
     private boolean acceptResponse;
 
-    // todo : Url 필요 없음
-    @Column(name = "url")
-    private String url;
-
     @Column(name = "answer_count")
     private int countAnswer;
 
     @Column(name = "isDeleted")
     private boolean isDeleted = false;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "Design_id")
     private Design design;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "Date_id")
     private DateManagement date;
@@ -51,9 +45,8 @@ public class SurveyDocument {
     @Column(name = "reliability")
     private Boolean reliability;
 
-
     @Column(name = "content")
-    @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<QuestionDocument> questionDocumentList;
 
     @ManyToOne

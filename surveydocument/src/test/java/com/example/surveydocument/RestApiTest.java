@@ -4,7 +4,6 @@ import com.example.surveydocument.restAPI.service.OuterRestApiSurveyDocumentServ
 import com.example.surveydocument.survey.domain.Survey;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
-import com.example.surveydocument.user.domain.User;
 import com.example.surveydocument.util.OAuth.JwtProperties;
 import okhttp3.mockwebserver.MockWebServer;
 import org.aspectj.bridge.Message;

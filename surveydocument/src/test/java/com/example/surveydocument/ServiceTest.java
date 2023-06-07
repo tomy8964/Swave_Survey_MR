@@ -14,6 +14,7 @@ import com.example.surveydocument.survey.request.SurveyRequestDto;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
 import jakarta.transaction.Transactional;
 import okhttp3.mockwebserver.MockWebServer;
+import org.hibernate.annotations.CreationTimestamp;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.TestInstance.*;
@@ -62,8 +64,8 @@ public class ServiceTest {
         SurveyRequestDto surveyRequest = SurveyRequestDto.builder()
                 .title("설문 제목")
                 .description("설문 내용")
-                .startDate("2022-06-01")
-                .endDate("2022-06-02")
+                .startDate(new Date())
+                .endDate(new Date())
                 .questionRequest(questionRequestList)
                 .design(design)
                 .build();
@@ -81,9 +83,9 @@ public class ServiceTest {
         SurveyDocument surveyDocument = documentRepository.findAll().get(0);
 
         assertThat(surveyRequest.getTitle()).isEqualTo(surveyDocument.getTitle());
-//        assertThat(questionRequest.getTitle()).isEqualTo(surveyDocument.getQuestionDocumentList().get(0).getTitle());
         assertThat(surveyRequest.getDesign().getFont()).isEqualTo(surveyDocument.getDesign().getFont());
-        assertThat(LocalDate.parse(surveyRequest.getStartDate())).isEqualTo(surveyDocument.getDate().getStartDate());
+        assertThat(surveyRequest.getStartDate()).isEqualTo(surveyDocument.getDate().getStartDate());
+        assertThat(questionRequest.getTitle()).isEqualTo(surveyDocument.getQuestionDocumentList().get(0).getTitle());
 
     }
     @Test @DisplayName("설문 수정") @Transactional
@@ -106,8 +108,8 @@ public class ServiceTest {
         SurveyRequestDto surveyRequest = SurveyRequestDto.builder()
                 .title("설문 제목 수정")
                 .description("설문 내용 수정")
-                .startDate("2022-06-01")
-                .endDate("2022-06-02")
+                .startDate(new Date())
+                .endDate(new Date())
                 .questionRequest(questionRequestList)
                 .build();
 
@@ -122,7 +124,6 @@ public class ServiceTest {
 
     @Test @DisplayName("설문 삭제")
 //    @Order(2)
-    // todo : 삭제는 되는데 Select 쿼리가 왜이렇게 많을까
     void service_test3() {
         // given
         SurveyDocument surveyDocument = documentRepository.findAll().get(0);
@@ -141,11 +142,11 @@ public class ServiceTest {
         SurveyDocument surveyDocument = documentRepository.findAll().get(0);
 
         DateDto dateRequest = DateDto.builder()
-                .startDate("2023-07-09")
-                .endDate("2023-09-10")
+                .startDate(new Date())
+                .endDate(new Date())
                 .build();
         // when
-        documentService.managementSurvey(surveyDocument.getId(), dateRequest);
+        documentService.managementDate(surveyDocument.getId(), dateRequest);
 
         // then
         assertThat(surveyDocument.getDate().getStartDate()).isEqualTo(dateRequest.getStartDate());

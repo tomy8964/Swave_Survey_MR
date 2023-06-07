@@ -114,7 +114,6 @@ public class SurveyAnswerService {
         // Survey Response 를 Question Answer 에 저장하기
         for (QuestionResponseDto questionResponseDto : surveyResponse.getQuestionResponse()) {
             // Question Answer 에 저장
-            // todo: 주관식0 / 찬부식1, 객관식2 구분 저장
             QuestionAnswer questionAnswer = QuestionAnswer.builder()
                     .surveyAnswerId(surveyAnswer)
                     .title(questionResponseDto.getTitle())
@@ -129,15 +128,7 @@ public class SurveyAnswerService {
             if(questionResponseDto.getType()!=0){
                 //check 한 answer 의 id 값으로 survey document 의 choice 를 찾아서 count ++
                 if (questionAnswer.getCheckAnswerId() != null) {
-//                    Optional<Choice> findChoice = choiceRepository.findById(questionAnswer.getCheckAnswerId());
-    //                Optional<Choice> findChoice = choiceRepository.findByTitle(questionAnswer.getCheckAnswer());
                     restAPIService.giveChoiceIdToCount(questionAnswer.getCheckAnswerId());
-
-//                    if (findChoice.isPresent()) {
-//                        //todo: querydsl로 변경
-//                        findChoice.get().setCount(findChoice.get().getCount() + 1);
-//                        choiceRepository.save(findChoice.get());
-//                    }
                 }
             }
             surveyAnswer.setQuestion(questionAnswer);
@@ -186,10 +177,9 @@ public class SurveyAnswerService {
     private SurveyDetailDto getSurveyDetailDto(Long surveyDocumentId) {
         SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
 
-        surveyDocument.getDesign();
-
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
         QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
+        DesignResponseDto designResponseDto = new DesignResponseDto();
 
         ReliabilityQuestion reliabilityQuestion = null;
         List<ChoiceDetailDto> reliabiltyChoiceDtos = new ArrayList<>();
@@ -220,10 +210,18 @@ public class SurveyAnswerService {
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
 
-        surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
-        surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
-        surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
+        // 디자인
+        designResponseDto.setFont(surveyDocument.getDesign().getFont());
+        designResponseDto.setFontSize(surveyDocument.getDesign().getFontSize());
+        designResponseDto.setBackColor(surveyDocument.getDesign().getBackColor());
+        surveyDetailDto.setDesign(designResponseDto);
 
+        // 날짜
+        surveyDetailDto.setStartDate(surveyDocument.getDate().getStartDate());
+        surveyDetailDto.setEndDate(surveyDocument.getDate().getDeadline());
+        surveyDetailDto.setEnable(surveyDocument.getDate().isEnabled());
+
+        // 진정성
         surveyDetailDto.setReliability(surveyDocument.getReliability());
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();

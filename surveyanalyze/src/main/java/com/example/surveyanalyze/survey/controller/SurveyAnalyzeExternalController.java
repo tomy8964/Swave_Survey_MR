@@ -24,26 +24,6 @@ public class SurveyAnalyzeExternalController {
         return surveyService.getSurveyDetailDto(id);
     }
 
-//    // 분석 응답 조회
-//    @Cacheable(value = "response/id", key = "#id")
-//    @GetMapping(value = "/response/{id}")
-//    public SurveyDetailDto readResponse(@PathVariable Long id) {
-//        return surveyService.getSurveyDetailDto(id);
-//    }
-
-//    // todo:설문 관리 수정
-//    @GetMapping(value = "/api/survey/management/{surveyId}")
-//    public SurveyManageDto getManageSurvey(HttpServletRequest request, @PathVariable Long surveyId) throws InvalidTokenException {
-//        return surveyService.readSurveyMange(request, surveyId);
-//    }
-//
-//    // todo:설문 관리 조회
-//    @PostMapping(value = "/api/survey/management/update/{surveyId}")
-//    public String setManageSurvey(HttpServletRequest request,@RequestBody SurveyManageDto surveyForm, @PathVariable Long surveyId) throws InvalidTokenException {
-//        surveyService.setSurveyMange(request, surveyId, surveyForm);
-//        return "success";
-//    }
-
     // 설문 상세 분석 조회
     @Cacheable(value = "/research/analyze/{id}", key = "#id")
     @GetMapping(value = "/research/analyze/{id}")

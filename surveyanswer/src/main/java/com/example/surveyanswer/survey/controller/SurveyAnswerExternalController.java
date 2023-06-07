@@ -56,7 +56,6 @@ public class SurveyAnswerExternalController {
     }
 
     // 설문 응답들 조회
-    // todo : 없어도 됨
     @Cacheable(value = "get-csv", key = "#id")
     @GetMapping(value = "/response/{id}")
     public List<SurveyAnswer> readResponse(@PathVariable Long id){

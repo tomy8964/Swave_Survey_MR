@@ -3,13 +3,15 @@ package com.example.surveydocument.survey.request;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class DateDto {
-    String startDate;
-    String endDate;
+    Date startDate;
+    Date endDate;
 
     @Builder
-    public DateDto(String startDate, String endDate) {
+    public DateDto(Date startDate, Date endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
     }

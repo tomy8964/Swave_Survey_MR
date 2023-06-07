@@ -29,7 +29,6 @@ public class QuestionAnswer {
     @JoinColumn(name = "survey_answer_id")
     private SurveyAnswer surveyAnswerId;
 
-    // 생성자 오버로딩
     @Builder
     public QuestionAnswer(Long surveyDocumentId, String title, SurveyAnswer surveyAnswerId, int questionType, String checkAnswer, Long checkAnswerId) {
         this.title = title;
