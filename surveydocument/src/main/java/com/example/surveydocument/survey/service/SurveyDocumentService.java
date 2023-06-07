@@ -47,7 +47,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.surveydocument.survey.domain.DateManagement.*;
-import static com.example.surveydocument.survey.domain.DesignTemplate.designRequestToEntity;
+import static com.example.surveydocument.survey.domain.Design.designRequestToEntity;
+import static com.example.surveydocument.survey.domain.DesignTemplate.designTemplateRequestToEntity;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
 
@@ -156,10 +157,10 @@ public class SurveyDocumentService {
 
         // 디자인 저장
         // Design Request To Entity
-        DesignTemplate design = designRequestToEntity(
-                surveyRequest.getFont(),
-                surveyRequest.getFontSize(),
-                surveyRequest.getBackColor()
+        Design design = designRequestToEntity(
+                surveyRequest.getDesign().getFont(),
+                surveyRequest.getDesign().getFontSize(),
+                surveyRequest.getDesign().getBackColor()
         );
 
         // 날짜 저장
@@ -211,20 +212,7 @@ public class SurveyDocumentService {
         surveyRepository.flush();
     }
 
-    public void createTemplateSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
-
-//        // 유저 정보 받아오기
-//        // User Module 에서 현재 유저 가져오기
-//        User getUser = apiService.getCurrentUserFromUser(request);
-//        Survey userSurvey = getUser.getSurvey();
-//
-//        if(userSurvey == null) {
-//            userSurvey = Survey.builder()
-//                    .user(getUser)
-//                    .surveyDocumentList(new ArrayList<>())
-//                    .build();
-//            surveyRepository.save(userSurvey);
-//        }
+    public void createTemplateSurvey(HttpServletRequest request, SurveyTemplateRequestDTO surveyRequest) throws InvalidTokenException, UnknownHostException {
 
         // Survey Request 를 Survey Document 에 저장하기
         SurveyTemplate surveyTemplate = SurveyTemplate.builder()
@@ -238,10 +226,10 @@ public class SurveyDocumentService {
                 .build();
         surveyTemplateRepository.save(surveyTemplate);
 
-        DesignTemplate design = designRequestToEntity(
-                surveyRequest.getFont(),
-                surveyRequest.getFontSize(),
-                surveyRequest.getBackColor()
+        DesignTemplate design = designTemplateRequestToEntity(
+                surveyRequest.getDesign().getFont(),
+                surveyRequest.getDesign().getFontSize(),
+                surveyRequest.getDesign().getBackColor()
         );
         surveyTemplate.setDesignTemplate(design);
         // 설문 문항

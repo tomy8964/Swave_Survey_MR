@@ -1,5 +1,5 @@
-package com.example.surveydocument.survey.domain;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+package com.example.surveyanswer.survey.domain;
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-public class DesignTemplate {
+public class Design {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Design_id")
@@ -23,19 +23,19 @@ public class DesignTemplate {
     @Column(name = "back_color")
     private String backColor;
 
-    @OneToOne(mappedBy = "designTemplate",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private SurveyTemplate surveyTemplate;
+    @OneToOne(mappedBy = "design", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private SurveyDocument surveyDocument;
 
     @Builder
-    public DesignTemplate(String font, int fontSize, String backColor) {
+    public Design(String font, int fontSize, String backColor) {
         this.font = font;
         this.fontSize = fontSize;
         this.backColor = backColor;
     }
 
     // Request -> Entity
-    public static DesignTemplate designTemplateRequestToEntity(String font, int fontSize, String backColor) {
-        return DesignTemplate.builder()
+    public static Design designRequestToEntity(String font, int fontSize, String backColor) {
+        return Design.builder()
                 .font(font)
                 .fontSize(fontSize)
                 .backColor(backColor)

@@ -7,6 +7,7 @@ import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.request.DateDto;
 import com.example.surveydocument.survey.request.PageRequestDto;
 import com.example.surveydocument.survey.request.SurveyRequestDto;
+import com.example.surveydocument.survey.request.SurveyTemplateRequestDTO;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
@@ -88,12 +89,12 @@ public class SurveyDocumentExternalController {
     //SurveyTemplate 조회
     // todo : Template
     @GetMapping(value = "/template-load/{id}")
-    public SurveyDetailDto participateSurvey(@PathVariable Long id) {
+    public SurveyDetailDto loadTemplateSurvey(@PathVariable Long id) {
         return surveyService.getSurveyTemplateDetailDto(id);
     }
 
     @PostMapping(value = "/template-create")
-    public String createTemlpate(HttpServletRequest request, @RequestBody SurveyRequestDto surveyForm) throws InvalidTokenException, UnknownHostException {
+    public String createTemlpate(HttpServletRequest request, @RequestBody SurveyTemplateRequestDTO surveyForm) throws InvalidTokenException, UnknownHostException {
         surveyService.createTemplateSurvey(request, surveyForm);
 
         return "Success";

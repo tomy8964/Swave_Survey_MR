@@ -20,6 +20,8 @@ public class SurveyDetailDto implements Serializable {
     private List<QuestionDetailDto> questionList;
     Boolean reliability;
 
+
+
     // 설문 참여 부분이기 때문에 디자인 필요
     String font;
     int fontSize;

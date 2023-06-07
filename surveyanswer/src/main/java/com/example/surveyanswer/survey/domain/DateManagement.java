@@ -1,17 +1,13 @@
-package com.example.surveydocument.survey.domain;
+package com.example.surveyanswer.survey.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Data
@@ -31,8 +27,7 @@ public class DateManagement {
     @NotNull
     private LocalDate deadline;
 
-    @OneToOne(mappedBy = "date",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnore // 순환참조 방지
+    @OneToOne(mappedBy = "date")
     private SurveyDocument surveyDocument;
 
     // todo : enable boolean 추가

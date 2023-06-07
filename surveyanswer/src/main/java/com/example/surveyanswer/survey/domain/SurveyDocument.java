@@ -25,10 +25,14 @@ public class SurveyDocument {
     private String description;
     @Column(name = "accept_response")
     private boolean acceptResponse;
-    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_start_date")
-    private Date startDate;
-    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_deadline")
-    private Date deadline;
+//    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_start_date")
+//    private Date startDate;
+//    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_deadline")
+//    private Date deadline;
+
+    @OneToOne
+    @JoinColumn(name = "Date_id")
+    private DateManagement date;
 
     @Column(name = "answer_count")
     private int countAnswer;
@@ -36,14 +40,18 @@ public class SurveyDocument {
     @Column(name = "reliability")
     private Boolean reliability;
 
-    @Column(name = "font")
-    private String font;
+//    @Column(name = "font")
+//    private String font;
+//
+//    @Column(name = "size")
+//    private int fontSize;
+//
+//    @Column(name = "backcolor")
+//    private String backColor;
 
-    @Column(name = "size")
-    private int fontSize;
-
-    @Column(name = "backcolor")
-    private String backColor;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "Design_id")
+    private Design design;
 
     @Column(name = "content")
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -55,9 +63,9 @@ public class SurveyDocument {
         this.type = type;
         this.description = description;
         this.reliability=reliability;
-        this.font=font;
-        this.fontSize=fontSize;
-        this.backColor=backColor;
+//        this.font=font;
+//        this.fontSize=fontSize;
+//        this.backColor=backColor;
         this.questionDocumentList = questionDocumentList;
 //        this.surveyAnswerList = surveyAnswerList;
         this.countAnswer = countAnswer;
