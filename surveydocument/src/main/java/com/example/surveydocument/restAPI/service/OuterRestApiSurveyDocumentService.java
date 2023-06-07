@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -23,10 +24,9 @@ import java.util.List;
 @Slf4j
 public class OuterRestApiSurveyDocumentService {
 
-//    private static String gateway="gateway-service:8080";
+    @Value("${gateway.host}")
+    private String gateway;
     private static String userInternalUrl = "/user/internal";
-    private static String gateway="localhost:8080";
-
     // Current User 정보 가져오기
     public User getCurrentUserFromUser(HttpServletRequest request) {
         String jwtHeader = ((HttpServletRequest)request).getHeader("Authorization");

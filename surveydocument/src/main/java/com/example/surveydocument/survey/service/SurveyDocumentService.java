@@ -1,12 +1,20 @@
 package com.example.surveydocument.survey.service;
 
 import com.example.surveydocument.restAPI.service.OuterRestApiSurveyDocumentService;
+//import com.auth0.jwt.JWT;
+//import com.auth0.jwt.algorithms.Algorithm;
+
+import com.example.surveydocument.restAPI.service.RestApiSurveyDocumentService;
+import com.example.surveydocument.survey.domain.*;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
 import com.example.surveydocument.survey.repository.date.DateRepository;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
 import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
+import com.example.surveydocument.survey.repository.template.choiceTemplate.ChoiceTemplateRepository;
+import com.example.surveydocument.survey.repository.template.questionTemplate.QuestionTemplateRepository;
+import com.example.surveydocument.survey.repository.template.surveyTemplate.SurveyTemplateRepository;
 import com.example.surveydocument.survey.repository.wordCloud.WordCloudRepository;
 import com.example.surveydocument.survey.request.*;
 import com.example.surveydocument.survey.response.ChoiceDetailDto;
@@ -27,6 +35,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.example.surveydocument.survey.domain.DateManagement.*;
 import static com.example.surveydocument.survey.domain.Design.*;
+import static com.example.surveydocument.survey.domain.DesignTemplate.designRequestToEntity;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
 
@@ -51,13 +62,19 @@ import static com.example.surveydocument.survey.domain.Design.*;
 public class SurveyDocumentService {
     private final SurveyRepository surveyRepository;
     private final SurveyDocumentRepository surveyDocumentRepository;
+
     private final QuestionDocumentRepository questionDocumentRepository;
     private final ChoiceRepository choiceRepository;
     private final WordCloudRepository wordCloudRepository;
     private final DateRepository dateRepository;
     private final OuterRestApiSurveyDocumentService apiService;
 
-    private static String gateway="localhost:8080";
+
+    private final SurveyTemplateRepository surveyTemplateRepository;
+    private final QuestionTemplateRepository questionTemplateRepository;
+    private final ChoiceTemplateRepository choiceTemplateRepository;
+    @Value("${gateway.host}")
+    private String gateway;
     Random random = new Random();
     private List<ReliabilityQuestion> questions;
     private int reliabilityquestionNumber;
@@ -198,6 +215,78 @@ public class SurveyDocumentService {
         surveyRepository.flush();
     }
 
+    public void createTemplateSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
+
+//        // 유저 정보 받아오기
+//        // User Module 에서 현재 유저 가져오기
+//        User getUser = apiService.getCurrentUserFromUser(request);
+//        Survey userSurvey = getUser.getSurvey();
+//
+//        if(userSurvey == null) {
+//            userSurvey = Survey.builder()
+//                    .user(getUser)
+//                    .surveyDocumentList(new ArrayList<>())
+//                    .build();
+//            surveyRepository.save(userSurvey);
+//        }
+
+        // Survey Request 를 Survey Document 에 저장하기
+        SurveyTemplate surveyTemplate = SurveyTemplate.builder()
+                .title(surveyRequest.getTitle())
+                .description(surveyRequest.getDescription())
+                .type(surveyRequest.getType())
+                .questionTemplateList(new ArrayList<>())
+                .surveyAnswerList(new ArrayList<>())
+                .reliability(surveyRequest.getReliability())
+                .countAnswer(0)
+                .build();
+        surveyTemplateRepository.save(surveyTemplate);
+
+        DesignTemplate design = designRequestToEntity(
+                surveyRequest.getFont(),
+                surveyRequest.getFontSize(),
+                surveyRequest.getBackColor()
+        );
+        surveyTemplate.setDesignTemplate(design);
+        // 설문 문항
+        surveyTemplateRepository.findById(surveyTemplate.getId());
+        for (QuestionRequestDto questionRequestDto : surveyRequest.getQuestionRequest()) {
+            // 설문 문항 저장
+            QuestionTemplate questionTemplate = QuestionTemplate.builder()
+                    .surveyTemplate(surveyTemplateRepository.findById(surveyTemplate.getId()).get())
+                    .title(questionRequestDto.getTitle())
+                    .questionType(questionRequestDto.getType())
+                    .build();
+            questionTemplateRepository.save(questionTemplate);
+
+            if(questionRequestDto.getType() == 0) continue; // 주관식
+
+            // 객관식, 찬부식일 경우 선지 저장
+            questionTemplate.setChoiceTemplateList(new ArrayList<>());
+            for(ChoiceRequestDto choiceRequestDto : questionRequestDto.getChoiceList()) {
+                ChoiceTemplate choiceTemplate = ChoiceTemplate.builder()
+                        .question_template_id(questionTemplateRepository.findById(questionTemplate.getId()).get())
+                        .title(choiceRequestDto.getChoiceName())
+                        .count(0)
+                        .build();
+                choiceTemplateRepository.save(choiceTemplate);
+                questionTemplate.setChoice(choiceTemplate);
+            }
+            surveyTemplate.setQuestion(questionTemplate);
+            // choice 가 추가될 때마다 변경되는 Question Document 정보 저장
+            questionTemplateRepository.flush();
+        }
+        // question 이 추가될 때마다 변경되는 Survey Document 정보 저장
+        surveyTemplateRepository.flush();
+
+//        // Survey 에 SurveyDocument 저장
+//        userSurvey.setDocument(surveyDocument);
+//        surveyRepository.flush();
+//
+//        // User Module 에 저장된 Survey 보내기
+//        apiService.sendSurveyToUser(request,userSurvey);
+    }
+
     // gird method 로 SurveyDocument 조회
     public List<SurveyDocument> readSurveyListByGrid(HttpServletRequest request, PageRequestDto pageRequest) {
 
@@ -234,6 +323,10 @@ public class SurveyDocumentService {
     public SurveyDetailDto readSurveyDetail(HttpServletRequest request, Long id) throws InvalidTokenException {
 
         return getSurveyDetailDto(id);
+    }
+
+    public SurveyDetailDto readSurveyTemplate(Long id){
+        return getSurveyTemplateDetailDto(id);
     }
 
     public SurveyDocument getSurveyDocument(Long surveyDocumentId) {
@@ -326,6 +419,13 @@ public class SurveyDocumentService {
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
+        surveyDetailDto.setReliability(surveyDocument.getReliability());
+
+
+        surveyDetailDto.setFont(surveyDocument.getFont());
+        surveyDetailDto.setFontSize(surveyDocument.getFontSize());
+        surveyDetailDto.setBackColor(surveyDocument.getBackColor());
+
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
@@ -486,5 +586,63 @@ public class SurveyDocumentService {
         surveyDocument.setDate(
                 dateRequestToEntity(dateRequest.getStartDate(), dateRequest.getEndDate(), surveyDocument)
         );
+    }
+
+    public SurveyDetailDto getSurveyTemplateDetailDto(Long surveyDocumentId) {
+        SurveyTemplate surveyTemplate = surveyTemplateRepository.findById(surveyDocumentId).get();
+        SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
+
+        // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
+        surveyDetailDto.setTitle(surveyTemplate.getTitle());
+        surveyDetailDto.setDescription(surveyTemplate.getDescription());
+        surveyDetailDto.setReliability(surveyTemplate.getReliability());
+
+        DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
+        surveyDetailDto.setFont(designTemplate.getFont());
+        surveyDetailDto.setFontSize(designTemplate.getFontSize());
+        surveyDetailDto.setBackColor(designTemplate.getBackColor());
+
+        List<QuestionDetailDto> questionDtos = new ArrayList<>();
+        for (QuestionTemplate questionTemplate : surveyTemplate.getQuestionTemplateList()) {
+            QuestionDetailDto questionDto = new QuestionDetailDto();
+            questionDto.setTitle(questionTemplate.getTitle());
+            questionDto.setQuestionType(questionTemplate.getQuestionType());
+
+
+            List<ChoiceDetailDto> choiceDtos = new ArrayList<>();
+            if (questionTemplate.getQuestionType() == 0) {
+                ChoiceDetailDto choiceDto = new ChoiceDetailDto();
+                choiceDto.setTitle(questionTemplate.getTitle());
+                choiceDto.setCount(0);
+
+            } else {
+                for (ChoiceTemplate choiceTemplate : questionTemplate.getChoiceTemplateList()) {
+                    ChoiceDetailDto choiceDto = new ChoiceDetailDto();
+                    choiceDto.setTitle(choiceTemplate.getTitle());
+                    choiceDto.setCount(choiceTemplate.getCount());
+
+                    choiceDtos.add(choiceDto);
+                }
+            }
+            questionDto.setChoiceList(choiceDtos);
+
+//            List<WordCloudDto> wordCloudDtos = new ArrayList<>();
+//            for (WordCloud wordCloud : questionDocument.getWordCloudList()) {
+//                WordCloudDto wordCloudDto = new WordCloudDto();
+//                wordCloudDto.setId(wordCloud.getId());
+//                wordCloudDto.setTitle(wordCloud.getTitle());
+//                wordCloudDto.setCount(wordCloud.getCount());
+//
+//                wordCloudDtos.add(wordCloudDto);
+//            }
+//            questionDto.setWordCloudDtos(wordCloudDtos);
+
+            questionDtos.add(questionDto);
+        }
+
+        surveyDetailDto.setQuestionList(questionDtos);
+
+        log.info(String.valueOf(surveyDetailDto));
+        return surveyDetailDto;
     }
 }

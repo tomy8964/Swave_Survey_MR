@@ -12,6 +12,7 @@ import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,6 +73,19 @@ public class SurveyDocumentExternalController {
     @GetMapping("/survey/count/{id}")
     public void countSurveyDocument(@PathVariable Long id) throws Exception {
         surveyService.countSurveyDocument(id);
+    }
+
+    //SurveyTemplate 조회
+    @GetMapping(value = "/template-load/{id}")
+    public SurveyDetailDto participateSurvey(@PathVariable Long id) {
+        return surveyService.getSurveyTemplateDetailDto(id);
+    }
+
+    @PostMapping(value = "/template-create")
+    public String createTemlpate(HttpServletRequest request, @RequestBody SurveyRequestDto surveyForm) throws InvalidTokenException, UnknownHostException {
+        surveyService.createTemplateSurvey(request, surveyForm);
+
+        return "Success";
     }
 
 }

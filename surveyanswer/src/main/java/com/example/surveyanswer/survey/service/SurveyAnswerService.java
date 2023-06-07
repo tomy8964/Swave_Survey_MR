@@ -8,6 +8,7 @@ import com.example.surveyanswer.survey.request.ReliabilityChoice;
 import com.example.surveyanswer.survey.request.ReliabilityQuestion;
 import com.example.surveyanswer.survey.request.ReliabilityQuestionRequest;
 import com.example.surveyanswer.survey.response.*;
+import com.example.surveyanswer.survey.restAPI.service.RestAPIService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -277,5 +278,9 @@ public class SurveyAnswerService {
 
     public List<QuestionAnswer> getQuestionAnswerByCheckAnswerId(Long id) {
         return questionAnswerRepository.findQuestionAnswersByCheckAnswerId(id);
+    }
+
+    public List<SurveyAnswer> getSurveyAnswersBySurveyDocumentId(Long id) {
+        return surveyAnswerRepository.findSurveyAnswersBySurveyDocumentId(id);
     }
 }

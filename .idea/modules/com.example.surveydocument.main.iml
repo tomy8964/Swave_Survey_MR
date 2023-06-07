@@ -4,9 +4,5 @@
     <content url="file://$MODULE_DIR$/../../surveydocument/build/generated/querydsl">
       <sourceFolder url="file://$MODULE_DIR$/../../surveydocument/build/generated/querydsl" isTestSource="false" generated="true" />
     </content>
-    <orderEntry type="jdk" jdkName="17" jdkType="JavaSDK" />
-    <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Gradle: com.querydsl:querydsl-core:5.0.0" level="project" />
-    <orderEntry type="module" module-name="spring-gateway.surveydocument.main" />
   </component>
 </module>

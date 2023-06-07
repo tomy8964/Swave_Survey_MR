@@ -259,6 +259,7 @@ public class OAuthService {
                         .email(profile.getKakao_account().getEmail())
                         .provider(provider)
                         .survey(new Survey())
+                        .isDeleted(Boolean.FALSE)
                         .userRole("ROLE_USER").build();
 
                 userRepository.save(user);

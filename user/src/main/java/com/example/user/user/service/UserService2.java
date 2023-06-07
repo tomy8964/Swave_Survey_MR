@@ -85,4 +85,11 @@ public class UserService2 {
         return "success";
     }
 
+    public void deleteUser(HttpServletRequest request) {
+        User user= getUser(request);
+        user.setIsDeleted(Boolean.TRUE);
+        user.setProvider("deleted");
+        user.setUserCode((long) -1);
+        userRepository.flush();
+    }
 }
