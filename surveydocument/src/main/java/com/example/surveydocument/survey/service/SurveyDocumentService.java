@@ -47,7 +47,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.surveydocument.survey.domain.DateManagement.*;
-import static com.example.surveydocument.survey.domain.DesignTemplate.designRequestToEntity;
+import static com.example.surveydocument.survey.domain.Design.designRequestToEntity;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
 
@@ -156,10 +156,10 @@ public class SurveyDocumentService {
 
         // 디자인 저장
         // Design Request To Entity
-        DesignTemplate design = designRequestToEntity(
-                surveyRequest.getFont(),
-                surveyRequest.getFontSize(),
-                surveyRequest.getBackColor()
+        Design design = designRequestToEntity(
+                surveyRequest.getDesign().getFont(),
+                surveyRequest.getDesign().getFontSize(),
+                surveyRequest.getDesign().getBackColor()
         );
 
         // 날짜 저장
