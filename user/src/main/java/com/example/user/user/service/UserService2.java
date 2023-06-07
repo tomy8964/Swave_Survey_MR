@@ -15,10 +15,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +71,7 @@ public class UserService2 {
         return ResponseEntity.ok().headers(headers).body("\"success\"");
     }
 
+    @Transactional
     public String updateMyPage(HttpServletRequest request, UserUpdateRequest userUpdateRequest) throws ServletException {
         Long userId =getUser(request).getUserCode();
         Optional<User> optionalUser = userRepository.findByUserCode(userId);

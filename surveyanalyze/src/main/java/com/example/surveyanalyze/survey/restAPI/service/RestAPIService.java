@@ -29,6 +29,13 @@ public class RestAPIService {
     @Value("${gateway.host}")
     private String gateway;
 
+    public WebClient webClient = WebClient.create();
+
+    public void setGateway(String baseUrl) {
+        this.gateway = baseUrl;
+        this.webClient = WebClient.create(gateway);
+    }
+
     public SurveyDocument getSurveyDocument(Long surveyDocumentId) {
         //REST API로 분석 시작 컨트롤러로 전달
         // Create a WebClient instance
@@ -38,7 +45,7 @@ public class RestAPIService {
                 .build();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/"+surveyDocumentId;
+        String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/" + surveyDocumentId;
 
         // Make a GET request to the API and retrieve the response
         SurveyDocument get = webClient.get()
