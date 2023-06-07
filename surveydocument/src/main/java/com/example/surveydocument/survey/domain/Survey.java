@@ -21,6 +21,7 @@ public class Survey {
     @Column(name = "survey_id")
     private Long id;
 
+    @Column(name = "user_Id")
     private Long userCode;
 
     @OneToMany(mappedBy = "survey", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

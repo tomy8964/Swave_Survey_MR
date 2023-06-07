@@ -63,7 +63,24 @@ public class SurveyAnalyzeService {
 //                line = testString;
             }
             List<Object> testList = getListResult(line);
-
+/*
+[testList
+    [
+        [
+            'ex)1'[[1.0, '0_1']], [[1.0, '0_2']]
+        ],
+        [
+            'ex)2'[[1.0, '1_3']], [[1.0, '1_4']]
+        ]
+    ],
+    [
+        [[0.8075499102701248], [0.42264973081037427]], [[0.42264973081037427], [0.8075499102701248]]
+    ],
+    [
+        [0.1921064408679386, 1.0], [1.0, 0.1921064408679386]
+    ]
+]
+*/
             ArrayList<Object> apriori = (ArrayList<Object>) testList.get(0);
             ArrayList<Object> compare = (ArrayList<Object>) testList.get(1);
             ArrayList<Object> chi = (ArrayList<Object>) testList.get(2);
@@ -110,13 +127,15 @@ public class SurveyAnalyzeService {
             List<Object> chiList = (List<Object>) chi.get(p);
             saveChi(questionAnalyze, questionDocumentList, questionDocumentList.size(), 0, chiList);
 
-            // apriori
-            saveApriori(apriori, surveyAnalyze);
 
             questionAnalyzeRepository.flush();
             p++;
             questionAnalyzeList.add(questionAnalyze);
         }
+        // apriori
+        // Define a custom Comparator
+        log.info(String.valueOf(apriori));
+        saveApriori(apriori, surveyAnalyze);
         surveyAnalyze.setQuestionAnalyzeList(questionAnalyzeList);
         surveyAnalyzeRepository.flush();
     }
@@ -148,6 +167,11 @@ public class SurveyAnalyzeService {
             aprioriAnalyzeList.add(aprioriAnalyze);
             aprioriAnalyzeRepository.flush();
         }
+        // Define a custom Comparator
+        Comparator<AprioriAnalyze> choiceIdComparator = Comparator.comparing(AprioriAnalyze::getChoiceId);
+
+        // Sort the list using the custom Comparator
+        Collections.sort(aprioriAnalyzeList, choiceIdComparator);
         surveyAnalyze.setAprioriAnalyzeList(aprioriAnalyzeList);
         surveyAnalyzeRepository.flush();
     }
@@ -267,7 +291,7 @@ public class SurveyAnalyzeService {
 
         Resource[] resources = ResourcePatternUtils
                 .getResourcePatternResolver(new DefaultResourceLoader())
-                .getResources("classpath*:python/python2.py");
+                .getResources("classpath*:python/python4.py");
 
         log.info(String.valueOf(resources[0]));
         String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);

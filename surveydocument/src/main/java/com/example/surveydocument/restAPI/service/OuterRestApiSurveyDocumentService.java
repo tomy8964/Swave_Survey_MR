@@ -40,14 +40,15 @@ public class OuterRestApiSurveyDocumentService {
 
         final Long[] userCode = new Long[1];
 
-        webClient.get()
+        userCode[0]=webClient.get()
                 .uri(getCurrentUserUrl)
                 .header("Authorization", jwtHeader)
                 .retrieve()
                 .bodyToMono(Long.class)
-                .subscribe(response -> {
-                    userCode[0] = response;
-                });
+                .block();
+//                .subscribe(response -> {
+//                    userCode[0] = response;
+//                });
 
 
 //        final User[] getUser = new User[1];

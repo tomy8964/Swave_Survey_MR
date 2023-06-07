@@ -1,14 +1,15 @@
 package com.example.surveydocument.survey.repository.survey;
 
-import com.example.surveydocument.survey.domain.*;
+import com.example.surveydocument.survey.domain.QDateManagement;
+import com.example.surveydocument.survey.domain.QSurvey;
+import com.example.surveydocument.survey.domain.QSurveyDocument;
+import com.example.surveydocument.survey.domain.SurveyDocument;
 import com.example.surveydocument.survey.request.PageRequestDto;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
