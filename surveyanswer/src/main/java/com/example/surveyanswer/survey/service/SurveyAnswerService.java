@@ -185,13 +185,14 @@ public class SurveyAnswerService {
 
     // SurveyDocument Response 보낼 SurveyDetailDto로 변환하는 메서드
     private SurveyDetailDto getSurveyDetailDto(Long surveyDocumentId) {
-//        SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).get();
         SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
 
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
-        ReliabilityQuestion reliabilityQuestion = null;
         QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
+
+        ReliabilityQuestion reliabilityQuestion = null;
         List<ChoiceDetailDto> reliabiltyChoiceDtos = new ArrayList<>();
+
         if(surveyDocument.getReliability()){
             try {
                 Long l = Long.valueOf(-1);
@@ -212,6 +213,7 @@ public class SurveyAnswerService {
                 throw new RuntimeException(e);
             }
         }
+
         // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());

@@ -583,6 +583,7 @@ public class SurveyDocumentService {
         surveyDocument.setDate(
                 dateRequestToEntity(dateRequest.getStartDate(), dateRequest.getEndDate(), surveyDocument)
         );
+        surveyDocumentRepository.save(surveyDocument);
     }
 
     public SurveyDetailDto getSurveyTemplateDetailDto(Long surveyDocumentId) {

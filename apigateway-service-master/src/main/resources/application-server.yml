@@ -68,13 +68,6 @@ spring:
             - Path=/user/internal/** # 모듈간 통신
             - Method=GET,POST
 
-management:
-  server:
-    port: 8082
-  endpoints:
-    web:
-      exposure:
-        include: *
 token:
   expiration-time: 86400000 # 하루짜리 토큰 생성
   secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan

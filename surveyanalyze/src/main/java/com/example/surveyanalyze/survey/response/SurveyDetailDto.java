@@ -15,8 +15,11 @@ public class SurveyDetailDto {
     private Long id;
     private String title;
     private String description;
+    //
     private int countAnswer;
     private List<QuestionDetailDto> questionList;
+
+    // design 필요 없음
     String font;
     int fontSize;
     String backColor;

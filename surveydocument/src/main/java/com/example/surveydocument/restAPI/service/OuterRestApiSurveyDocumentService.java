@@ -26,7 +26,7 @@ public class OuterRestApiSurveyDocumentService {
 
     @Value("${gateway.host}")
     private String gateway;
-    private static String userInternalUrl = "/user/internal";
+    private static String userInternalUrl = "api/user/internal";
     // Current User 정보 가져오기
     public User getCurrentUserFromUser(HttpServletRequest request) {
         String jwtHeader = ((HttpServletRequest)request).getHeader("Authorization");

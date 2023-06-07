@@ -27,6 +27,7 @@ public class SurveyDocumentExternalController {
 
     private final SurveyDocumentService surveyService;
 
+    // todo : Response (id 값을 보내주기)
     @PostMapping(value = "/create")
     public String create(HttpServletRequest request, @RequestBody SurveyRequestDto surveyForm) throws InvalidTokenException, UnknownHostException {
         surveyService.createSurvey(request, surveyForm);
@@ -64,11 +65,19 @@ public class SurveyDocumentExternalController {
         surveyService.deleteSurvey(id);
     }
 
-    // 설문 관리
-    @PostMapping("/management/{id}")
+    // 설문 관리 날짜
+    @PatchMapping("/management/date/{id}")
     public void managementSurvey(@PathVariable Long id, @RequestBody DateDto dateRequest) {
         surveyService.managementSurvey(id, dateRequest);
     }
+
+    // todo : 응답 여부 API
+    // 설문 관리 응답 여부
+    // /management/enable/{}
+
+    // todo : management get
+    // 설문 관리 Get
+    // /management/{}
 
     // 설문 응답수 추가
     @GetMapping("/survey/count/{id}")
@@ -77,6 +86,7 @@ public class SurveyDocumentExternalController {
     }
 
     //SurveyTemplate 조회
+    // todo : Template
     @GetMapping(value = "/template-load/{id}")
     public SurveyDetailDto participateSurvey(@PathVariable Long id) {
         return surveyService.getSurveyTemplateDetailDto(id);
