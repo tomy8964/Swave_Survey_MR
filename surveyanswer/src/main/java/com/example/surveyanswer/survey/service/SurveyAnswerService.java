@@ -114,7 +114,6 @@ public class SurveyAnswerService {
         // Survey Response 를 Question Answer 에 저장하기
         for (QuestionResponseDto questionResponseDto : surveyResponse.getQuestionResponse()) {
             // Question Answer 에 저장
-            // todo: 주관식0 / 찬부식1, 객관식2 구분 저장
             QuestionAnswer questionAnswer = QuestionAnswer.builder()
                     .surveyAnswerId(surveyAnswer)
                     .title(questionResponseDto.getTitle())
@@ -129,15 +128,7 @@ public class SurveyAnswerService {
             if(questionResponseDto.getType()!=0){
                 //check 한 answer 의 id 값으로 survey document 의 choice 를 찾아서 count ++
                 if (questionAnswer.getCheckAnswerId() != null) {
-//                    Optional<Choice> findChoice = choiceRepository.findById(questionAnswer.getCheckAnswerId());
-    //                Optional<Choice> findChoice = choiceRepository.findByTitle(questionAnswer.getCheckAnswer());
                     restAPIService.giveChoiceIdToCount(questionAnswer.getCheckAnswerId());
-
-//                    if (findChoice.isPresent()) {
-//                        //todo: querydsl로 변경
-//                        findChoice.get().setCount(findChoice.get().getCount() + 1);
-//                        choiceRepository.save(findChoice.get());
-//                    }
                 }
             }
             surveyAnswer.setQuestion(questionAnswer);

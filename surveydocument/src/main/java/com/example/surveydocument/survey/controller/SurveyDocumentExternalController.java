@@ -8,6 +8,7 @@ import com.example.surveydocument.survey.request.DateDto;
 import com.example.surveydocument.survey.request.PageRequestDto;
 import com.example.surveydocument.survey.request.SurveyRequestDto;
 import com.example.surveydocument.survey.request.SurveyTemplateRequestDTO;
+import com.example.surveydocument.survey.response.ManagementResponseDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
@@ -28,15 +29,12 @@ public class SurveyDocumentExternalController {
 
     private final SurveyDocumentService surveyService;
 
-    // todo : Response (id 값을 보내주기)
+    //Response (id 값을 보내주기)
     @PostMapping(value = "/create")
-    public String create(HttpServletRequest request, @RequestBody SurveyRequestDto surveyForm) throws InvalidTokenException, UnknownHostException {
-        surveyService.createSurvey(request, surveyForm);
-
-        return "Success";
+    public Long create(HttpServletRequest request, @RequestBody SurveyRequestDto surveyForm) throws InvalidTokenException, UnknownHostException {
+        return surveyService.createSurvey(request, surveyForm);
     }
 
-    // todo : QueryDsl 에서 date 수정
     // grid 로 조회
     @PostMapping(value = "/survey-list-grid")
     public List<SurveyDocument> readListGrid(HttpServletRequest request, @RequestBody PageRequestDto pageRequest) {
@@ -68,17 +66,21 @@ public class SurveyDocumentExternalController {
 
     // 설문 관리 날짜
     @PatchMapping("/management/date/{id}")
-    public void managementSurvey(@PathVariable Long id, @RequestBody DateDto dateRequest) {
-        surveyService.managementSurvey(id, dateRequest);
+    public void managementDate(@PathVariable Long id, @RequestBody DateDto dateRequest) {
+        surveyService.managementDate(id, dateRequest);
     }
 
-    // todo : 응답 여부 API
     // 설문 관리 응답 여부
-    // /management/enable/{}
+    @PatchMapping("/management/enable/{id}")
+    public void managementEnable(@PathVariable Long id, @RequestBody Boolean enable) {
+        surveyService.managementEnable(id, enable);
+    }
 
-    // todo : management get
     // 설문 관리 Get
-    // /management/{}
+    @GetMapping("/management/{id}")
+    public ManagementResponseDto managementSurvey(@PathVariable Long id) {
+        return surveyService.managementSurvey(id);
+    }
 
     // 설문 응답수 추가
     @GetMapping("/survey/count/{id}")
@@ -87,7 +89,6 @@ public class SurveyDocumentExternalController {
     }
 
     //SurveyTemplate 조회
-    // todo : Template
     @GetMapping(value = "/template-load/{id}")
     public SurveyDetailDto loadTemplateSurvey(@PathVariable Long id) {
         return surveyService.getSurveyTemplateDetailDto(id);

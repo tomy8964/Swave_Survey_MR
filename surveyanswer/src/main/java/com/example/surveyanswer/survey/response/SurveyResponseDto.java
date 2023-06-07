@@ -19,7 +19,6 @@ public class SurveyResponseDto {
     String backColor;
     Boolean reliability;
 
-    //    @ConstructorProperties({"title", "description", "type", "questionResponse"})
     @Builder
     public SurveyResponseDto(Long id, String title, String description, int type,String font,int fontSize,String backColor,Boolean reliability, List<QuestionResponseDto> questionResponse) {        this.title = title;
         this.id = id;

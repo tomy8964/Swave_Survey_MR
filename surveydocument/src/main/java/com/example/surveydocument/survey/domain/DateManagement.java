@@ -22,25 +22,24 @@ public class DateManagement {
     private long id;
 
     @Column(name = "survey_start_date")
-    @DateTimeFormat(pattern = "yy-mm-dd")
     @NotNull
-    private LocalDate startDate;
+    private Date startDate;
 
     @Column(name = "survey_deadline")
     @DateTimeFormat(pattern = "yy-mm-dd")
     @NotNull
-    private LocalDate deadline;
-
-    // todo : enable boolean 추가
-
+    private Date deadline;
+    @Column(name = "survey_enable")
+    private boolean isEnabled;
     @Builder
-    public DateManagement(String startDate, String deadline) {
-        this.startDate = LocalDate.parse(startDate);
-        this.deadline = LocalDate.parse(deadline);
+    public DateManagement(Boolean isEnabled, @NotNull Date startDate, @NotNull Date deadline) {
+        this.startDate = startDate;
+        this.deadline = deadline;
+        this.isEnabled = isEnabled;
     }
 
     // RequestDto -> Entity
-    public static DateManagement dateRequestToEntity(String start, String end) {
+    public static DateManagement dateRequestToEntity(Date start, Date end) {
         return DateManagement.builder()
                 .startDate(start)
                 .deadline(end)

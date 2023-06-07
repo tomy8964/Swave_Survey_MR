@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -16,14 +17,15 @@ public class SurveyRequestDto {
     List<QuestionRequestDto> questionRequest;
     Boolean reliability;
     DesignRequestDto design;
-    String startDate;
-    String endDate;
+    Date startDate;
+    Date endDate;
 
-    // todo : enable
+    // 설문 공개 여부
+    Boolean enable;
 
     @Builder
     public SurveyRequestDto(
-            String startDate, String endDate, String title, String description, int type, List<QuestionRequestDto> questionRequest, DesignRequestDto design, Boolean reliability) {
+            Date startDate, Date endDate, String title, String description, int type, List<QuestionRequestDto> questionRequest, DesignRequestDto design, Boolean reliability) {
         this.title = title;
         this.description = description;
         this.startDate = startDate;

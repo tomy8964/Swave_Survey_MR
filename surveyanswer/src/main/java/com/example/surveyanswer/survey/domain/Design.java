@@ -23,9 +23,6 @@ public class Design {
     @Column(name = "back_color")
     private String backColor;
 
-    @OneToOne(mappedBy = "design", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private SurveyDocument surveyDocument;
-
     @Builder
     public Design(String font, int fontSize, String backColor) {
         this.font = font;

@@ -305,7 +305,6 @@ public class SurveyAnalyzeService {
         return line;
     }
 
-//    todo: Python으로 변경
 //    @Transactional
     public void wordCloud(String stringId) {
         long surveyDocumentId = Long.parseLong(stringId);

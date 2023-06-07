@@ -81,9 +81,9 @@ public class ServiceTest {
         SurveyDocument surveyDocument = documentRepository.findAll().get(0);
 
         assertThat(surveyRequest.getTitle()).isEqualTo(surveyDocument.getTitle());
-//        assertThat(questionRequest.getTitle()).isEqualTo(surveyDocument.getQuestionDocumentList().get(0).getTitle());
         assertThat(surveyRequest.getDesign().getFont()).isEqualTo(surveyDocument.getDesign().getFont());
         assertThat(LocalDate.parse(surveyRequest.getStartDate())).isEqualTo(surveyDocument.getDate().getStartDate());
+        assertThat(questionRequest.getTitle()).isEqualTo(surveyDocument.getQuestionDocumentList().get(0).getTitle());
 
     }
     @Test @DisplayName("설문 수정") @Transactional
@@ -122,7 +122,6 @@ public class ServiceTest {
 
     @Test @DisplayName("설문 삭제")
 //    @Order(2)
-    // todo : 삭제는 되는데 Select 쿼리가 왜이렇게 많을까
     void service_test3() {
         // given
         SurveyDocument surveyDocument = documentRepository.findAll().get(0);
@@ -145,7 +144,7 @@ public class ServiceTest {
                 .endDate("2023-09-10")
                 .build();
         // when
-        documentService.managementSurvey(surveyDocument.getId(), dateRequest);
+        documentService.managementDate(surveyDocument.getId(), dateRequest);
 
         // then
         assertThat(surveyDocument.getDate().getStartDate()).isEqualTo(dateRequest.getStartDate());

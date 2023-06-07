@@ -27,23 +27,21 @@ public class DateManagement {
     @NotNull
     private LocalDate deadline;
 
-    @OneToOne(mappedBy = "date")
-    private SurveyDocument surveyDocument;
-
-    // todo : enable boolean 추가
+    @Column(name = "survey_enable")
+    private boolean isEnabled;
 
     @Builder
-    public DateManagement(LocalDate startDate, LocalDate deadline, SurveyDocument surveyDocument) {
+    public DateManagement(LocalDate startDate, LocalDate deadline, Boolean isEnabled) {
         this.startDate = startDate;
         this.deadline = deadline;
-        this.surveyDocument = surveyDocument;
+        this.isEnabled = isEnabled;
     }
 
     // RequestDto -> Entity
-    public static DateManagement dateRequestToEntity(String start, String end, SurveyDocument surveyDocument) {
+    public static DateManagement dateRequestToEntity(String start, String end) {
         return DateManagement.builder()
                 .startDate(LocalDate.parse(start))
                 .deadline(LocalDate.parse(end))
-                .surveyDocument(surveyDocument).build();
+                .build();
     }
 }
