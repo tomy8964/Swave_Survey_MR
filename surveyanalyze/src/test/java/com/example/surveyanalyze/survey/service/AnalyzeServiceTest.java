@@ -100,25 +100,25 @@ public class AnalyzeServiceTest {
                 MockResponse response = new MockResponse();
 
                 // Customize the response based on the request URL
-                if (path.startsWith("/api/internal/getChoice/")) {
-                    String id = path.substring("/api/internal/getChoice/".length()); // Extract the value of {id}
+                if (path.startsWith("/api/document/internal/getChoice/")) {
+                    String id = path.substring("/api/document/internal/getChoice/".length()); // Extract the value of {id}
                     String choice = choiceStringList.get(Integer.parseInt(id) - 1);
                     // Rest of your logic using the extracted id
                     response.setResponseCode(200)
                             .setBody(choice)
                             .addHeader("Content-Type", "application/json");
-                } else if (path.startsWith("/api/internal/getSurveyDocument/")) {
+                } else if (path.startsWith("/api/document/internal/getSurveyDocument/")) {
                     response.setResponseCode(200)
                             .setBody(survey)
                             .addHeader("Content-Type", "application/json");
-                } else if (path.startsWith("/survey/internal/getQuestionAnswerByCheckAnswerId/")) {
-                    String id = path.substring("/survey/internal/getQuestionAnswerByCheckAnswerId/".length()); // Extract the value of {id}
+                } else if (path.startsWith("/api/answer/internal/getQuestionAnswerByCheckAnswerId/")) {
+                    String id = path.substring("/api/answer/internal/getQuestionAnswerByCheckAnswerId/".length()); // Extract the value of {id}
                     // Rest of your logic using the extracted id
                     response.setResponseCode(200)
                             .setBody("word Cloud")
                             .addHeader("Content-Type", "application/json");
-                } else if (path.startsWith("/api/internal/getQuestionByChoiceId/")) {
-                    String id = path.substring("/api/internal/getQuestionByChoiceId/".length()); // Extract the value of {id}
+                } else if (path.startsWith("/api/document/internal/getQuestionByChoiceId/")) {
+                    String id = path.substring("/api/document/internal/getQuestionByChoiceId/".length()); // Extract the value of {id}
                     Choice choice = choiceList.get(Integer.parseInt(id) - 1);
                     QuestionDocument questionId = choice.getQuestion_id();
                     // Rest of your logic using the extracted id

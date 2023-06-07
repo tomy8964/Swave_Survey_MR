@@ -304,7 +304,8 @@ public class SurveyAnalyzeService {
         return line;
     }
 
-    @Transactional
+//    todo: Python으로 변경
+//    @Transactional
     public void wordCloud(String stringId) {
         long surveyDocumentId = Long.parseLong(stringId);
         // 값 분리해서 Analyze DB에 저장
@@ -633,5 +634,58 @@ public class SurveyAnalyzeService {
             }
         }
         return wordCount;
+    }
+
+    public static void wordCloudPython(String surveyDocumentId) {
+        System.out.println("wordcloud pythonbuilder 시작");
+        ProcessBuilder builder;
+
+        Resource[] resources;
+        try {
+            resources = ResourcePatternUtils
+                    .getResourcePatternResolver(new DefaultResourceLoader())
+                    .getResources("classpath*:python/python3.py");
+        } catch (IOException e) {
+            throw new InvalidPythonException(e);
+        }
+
+        log.info(String.valueOf(resources[0]));
+        String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
+        log.info(substring);
+
+        builder = new ProcessBuilder("python", substring, surveyDocumentId);
+
+        builder.redirectErrorStream(true);
+        Process process;
+        try {
+            process = builder.start();
+        } catch (IOException e) {
+            throw new InvalidPythonException(e);
+        }
+
+        // 자식 프로세스가 종료될 때까지 기다림
+        int exitCode;
+        try {
+            exitCode = process.waitFor();
+        } catch (InterruptedException e) {
+            // Handle interrupted exception
+            exitCode = -1;
+        }
+
+        if (exitCode != 0) {
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String errorLine;
+            System.out.println("Error output:");
+            while (true) {
+                try {
+                    if (!((errorLine = errorReader.readLine()) != null)) break;
+                } catch (IOException e) {
+                    throw new InvalidPythonException(e);
+                }
+                System.out.println(errorLine);
+            }
+        }
+
+        System.out.println("Process exited with code " + exitCode);
     }
 }

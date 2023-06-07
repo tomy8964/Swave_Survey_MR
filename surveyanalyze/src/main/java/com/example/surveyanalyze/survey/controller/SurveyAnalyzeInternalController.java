@@ -38,7 +38,7 @@ public class SurveyAnalyzeInternalController {
             if (lock.tryLock()) {
                 // transaction
                 surveyService.analyze(surveyId);
-                surveyService.wordCloud(surveyId);
+                surveyService.wordCloudPython(surveyId);
                 return "Success";
             } else {
                 throw new RuntimeException("Failed to acquire lock.");
