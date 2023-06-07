@@ -17,13 +17,13 @@ spring:
         - id: survey-analyze
           uri: http://analysis-back-service:8080/
           predicates:
-            - Path=/analyze/internal/**
+            - Path=/api/analyze/internal/**
             - Method=GET,POST
 
         - id: survey-analyze
           uri: http://analysis-back-service:8080/
           predicates:
-            - Path=/analyze/external/**
+            - Path=/api/analyze/external/**
             - Method=GET,POST
           filters:
             - AuthorizationHeaderFilter
@@ -31,43 +31,50 @@ spring:
         - id: survey-answer
           uri: http://response-back-service:8080/
           predicates:
-            - Path=/survey/external/**
+            - Path=/api/answer/external/**
             - Method=GET,POST
         - id: survey-answer
           uri: http://response-back-service:8080/
           predicates:
-            - Path=/survey/internal/**
+            - Path=/api/answer/internal/**
             - Method=GET,POST
         - id: surveydocument
           uri: http://survey-back-service:8080/
           predicates:
-            - Path=/api/external/**
+            - Path=/api/document/external/**
             - Method=GET,POST
           filters:
             - AuthorizationHeaderFilter
         - id: surveydocument
           uri: http://survey-back-service:8080/
           predicates:
-            - Path=/api/internal/**
+            - Path=/api/document/internal/**
             - Method=GET,POST
 
         - id: surveydocument
           uri: http://survey-back-service:8080/
           predicates:
-            - Path=/api/oauth/**
+            - Path=/api/document/oauth/**
             - Method=GET,POST
 
         - id: user
           uri: http://user-back-service:8080/
           predicates:
-            - Path=/user/external/** # 프론트에서 요청
+            - Path=/api/user/external/** # 프론트에서 요청
             - Method=GET,POST
         - id: user
           uri: http://user-back-service:8080/
           predicates:
-            - Path=/user/internal/** # 모듈간 통신
+            - Path=/api/user/internal/** # 모듈간 통신
             - Method=GET,POST
-
+#
+#management:
+#  server:
+#    port: 8082
+#  endpoints:
+#    web:
+#      exposure:
+#        include: *
 token:
   expiration-time: 86400000 # 하루짜리 토큰 생성
   secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan

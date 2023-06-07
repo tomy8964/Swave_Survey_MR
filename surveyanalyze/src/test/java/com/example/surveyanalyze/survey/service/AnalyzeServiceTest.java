@@ -8,6 +8,7 @@ import com.example.surveyanalyze.survey.repository.choiceAnalyze.ChoiceAnalyzeRe
 import com.example.surveyanalyze.survey.repository.compareAnlayze.CompareAnalyzeRepository;
 import com.example.surveyanalyze.survey.repository.questionAnlayze.QuestionAnalyzeRepository;
 import com.example.surveyanalyze.survey.repository.surveyAnalyze.SurveyAnalyzeRepository;
+import com.example.surveyanalyze.survey.response.*;
 import com.example.surveyanalyze.survey.restAPI.service.RestAPIService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,14 +37,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 public class AnalyzeServiceTest {
 
-    @Autowired SurveyAnalyzeService surveyAnalyzeService;
-    @Autowired ChiAnalyzeRepository chiAnalyzeRepository;
-    @Autowired CompareAnalyzeRepository compareAnalyzeRepository;
-    @Autowired AprioriAnalyzeRepository aprioriAnalyzeRepository;
-    @Autowired ChoiceAnalyzeRepository choiceAnalyzeRepository;
-    @Autowired QuestionAnalyzeRepository questionAnalyzeRepository;
-    @Autowired SurveyAnalyzeRepository surveyAnalyzeRepository;
-    @Autowired RestAPIService restAPIService;
+//    @Autowired
+    private SurveyAnalyzeService surveyAnalyzeService;
+    @Autowired
+    private ChiAnalyzeRepository chiAnalyzeRepository;
+    @Autowired
+    private CompareAnalyzeRepository compareAnalyzeRepository;
+    @Autowired
+    private AprioriAnalyzeRepository aprioriAnalyzeRepository;
+    @Autowired
+    private ChoiceAnalyzeRepository choiceAnalyzeRepository;
+    @Autowired
+    private QuestionAnalyzeRepository questionAnalyzeRepository;
+    @Autowired
+    private SurveyAnalyzeRepository surveyAnalyzeRepository;
+    @Autowired
+    private RestAPIService restAPIService;
 
     private MockWebServer mockWebServer;
 
@@ -165,19 +174,66 @@ public class AnalyzeServiceTest {
 
         //when
         surveyAnalyzeService.analyze("-1");
-        SurveyAnalyze surveyAnalyze = surveyAnalyzeRepository.findById(1L).get();
+        SurveyAnalyze surveyAnalyze = surveyAnalyzeRepository.findBySurveyDocumentId(-1L);
         //then
-        assertEquals(surveyAnalyze.getSurveyDocumentId(),-1l);
+        assertEquals(surveyAnalyze.getSurveyDocumentId(),-1L);
 
         List<QuestionAnalyze> questionAnalyzeList = surveyAnalyze.getQuestionAnalyzeList();
         QuestionAnalyze questionAnalyze1 = questionAnalyzeList.get(0);
         assertEquals(questionAnalyze1.getQuestionTitle(), "객관식");
 
-        List<ChiAnalyze> chiAnalyzeList = questionAnalyze1.getChiAnalyzeList();
-        assertEquals(chiAnalyzeList.get(0).getQuestionTitle(),"찬부식");
+        List<ChiAnalyze> chiAnalyzeList1 = questionAnalyze1.getChiAnalyzeList();
+        assertEquals(chiAnalyzeList1.get(0).getQuestionTitle(),"찬부식");
+        List<CompareAnalyze> compareAnalyzeList1  = questionAnalyze1.getCompareAnalyzeList();
+        assertEquals(compareAnalyzeList1.get(0).getQuestionTitle(),"찬부식");
 
         QuestionAnalyze questionAnalyze2 = questionAnalyzeList.get(1);
-        assertEquals(questionAnalyze2.getQuestionTitle(), "찬관식");
+        assertEquals(questionAnalyze2.getQuestionTitle(), "찬부식");
+
+        List<ChiAnalyze> chiAnalyzeList2 = questionAnalyze2.getChiAnalyzeList();
+        assertEquals(chiAnalyzeList2.get(0).getQuestionTitle(),"객관식");
+        List<CompareAnalyze> compareAnalyzeList2  = questionAnalyze2.getCompareAnalyzeList();
+        assertEquals(compareAnalyzeList2.get(0).getQuestionTitle(),"객관식");
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Read Survey Analyze Detail Test")
+    public void readAnalyzeDetail() {
+        //given
+        surveyAnalyzeService.analyze("-1");
+        //when
+        SurveyAnalyzeDto surveyAnalyzeDto = surveyAnalyzeService.readSurveyDetailAnalyze(-1L);
+        //then
+        List<AprioriAnalyzeDto> aprioriAnalyzeList = surveyAnalyzeDto.getAprioriAnalyzeList();
+        AprioriAnalyzeDto aprioriAnalyzeDto1 = aprioriAnalyzeList.get(0);
+        assertEquals(aprioriAnalyzeDto1.getQuestionTitle(),"객관식");
+        assertEquals(aprioriAnalyzeDto1.getChoiceTitle(),"짜장");
+        AprioriAnalyzeDto aprioriAnalyzeDto2 = aprioriAnalyzeList.get(1);
+        assertEquals(aprioriAnalyzeDto2.getQuestionTitle(),"객관식");
+        assertEquals(aprioriAnalyzeDto2.getChoiceTitle(),"짬뽕");
+        AprioriAnalyzeDto aprioriAnalyzeDto3 = aprioriAnalyzeList.get(2);
+        assertEquals(aprioriAnalyzeDto3.getQuestionTitle(),"찬부식");
+        assertEquals(aprioriAnalyzeDto3.getChoiceTitle(),"true");
+        AprioriAnalyzeDto aprioriAnalyzeDto4 = aprioriAnalyzeList.get(3);
+        assertEquals(aprioriAnalyzeDto4.getQuestionTitle(),"찬부식");
+        assertEquals(aprioriAnalyzeDto4.getChoiceTitle(),"false");
+
+        List<QuestionAnalyzeDto> questionAnalyzeList = surveyAnalyzeDto.getQuestionAnalyzeList();
+        QuestionAnalyzeDto questionAnalyzeDto1 = questionAnalyzeList.get(0);
+        assertEquals(questionAnalyzeDto1.getQuestionTitle(),"객관식");
+        List<ChiAnalyzeDto> chiAnalyzeList1 = questionAnalyzeDto1.getChiAnalyzeList();
+        assertEquals(chiAnalyzeList1.get(0).getQuestionTitle(), "찬부식");
+        List<CompareAnalyzeDto> compareAnalyzeList1 = questionAnalyzeDto1.getCompareAnalyzeList();
+        assertEquals(compareAnalyzeList1.get(0).getQuestionTitle(), "찬부식");
+
+
+        QuestionAnalyzeDto questionAnalyzeDto2 = questionAnalyzeList.get(1);
+        assertEquals(questionAnalyzeDto2.getQuestionTitle(),"찬부식");
+        List<ChiAnalyzeDto> chiAnalyzeList2 = questionAnalyzeDto2.getChiAnalyzeList();
+        assertEquals(chiAnalyzeList2.get(0).getQuestionTitle(), "객관식");
+        List<CompareAnalyzeDto> compareAnalyzeList2 = questionAnalyzeDto2.getCompareAnalyzeList();
+        assertEquals(compareAnalyzeList2.get(0).getQuestionTitle(), "객관식");
     }
 
     private static SurveyDocument createSurveyDocument() {
@@ -228,14 +284,14 @@ public class AnalyzeServiceTest {
 
         Choice choice3 = Choice.builder()
                 .title("true")
-                .question_id(questionDocument1)
+                .question_id(questionDocument2)
                 .build();
         choiceList2.add(choice3);
         choice3.setId(3L);
 
         Choice choice4 = Choice.builder()
                 .title("false")
-                .question_id(questionDocument1)
+                .question_id(questionDocument2)
                 .build();
         choice4.setId(4L);
         choiceList2.add(choice4);
