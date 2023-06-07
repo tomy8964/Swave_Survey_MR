@@ -644,7 +644,7 @@ public class SurveyAnalyzeService {
         try {
             resources = ResourcePatternUtils
                     .getResourcePatternResolver(new DefaultResourceLoader())
-                    .getResources("classpath*:python/python3.py");
+                    .getResources("classpath*:python/python5.py");
         } catch (IOException e) {
             throw new InvalidPythonException(e);
         }
