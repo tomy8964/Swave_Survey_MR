@@ -217,7 +217,12 @@ public class SurveyAnswerService {
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
+
+        surveyDetailDto.setFont(surveyDocument.getFont());
+        surveyDetailDto.setFontSize(surveyDocument.getFontSize());
+        surveyDetailDto.setBackColor(surveyDocument.getBackColor());
         surveyDetailDto.setReliability(surveyDocument.getReliability());
+
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
             QuestionDetailDto questionDto = new QuestionDetailDto();

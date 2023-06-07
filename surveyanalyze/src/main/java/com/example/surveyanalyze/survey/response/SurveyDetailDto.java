@@ -19,9 +19,7 @@ public class SurveyDetailDto {
     private int countAnswer;
     private List<QuestionDetailDto> questionList;
 
-    // design 필요 없음
-    String font;
-    int fontSize;
-    String backColor;
+    // 파이차트 같은 응답 수치화 이기 때문에 design 필요 없음
+
     // getter, setter 생략
 }
