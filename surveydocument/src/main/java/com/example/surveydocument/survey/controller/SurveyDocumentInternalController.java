@@ -1,5 +1,6 @@
 package com.example.surveydocument.survey.controller;
 
+import com.example.surveydocument.restAPI.service.InterRestApiSurveyDocumentService;
 import com.example.surveydocument.survey.domain.Choice;
 import com.example.surveydocument.survey.domain.QuestionDocument;
 import com.example.surveydocument.survey.domain.SurveyDocument;
@@ -9,6 +10,7 @@ import com.example.surveydocument.survey.request.SurveyRequestDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
+import com.example.surveydocument.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.redisson.RedissonRedLock;
@@ -27,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class SurveyDocumentInternalController {
 
     private final SurveyDocumentService surveyService;
+    private final InterRestApiSurveyDocumentService apiService;
     private final RedissonClient redissonClient;
 
     @GetMapping(value = "/survey-list/{id}")
@@ -110,6 +113,12 @@ public class SurveyDocumentInternalController {
         } finally {
             lock.unlock();
         }
+    }
+
+    // 유저 정보 저장하기
+    @PostMapping(value = "/saveUser")
+    public void saveUser(@RequestBody User user) {
+        apiService.saveUserInSurvey(user);
     }
 
 }

@@ -4,6 +4,7 @@ import com.example.surveydocument.survey.domain.Choice;
 import com.example.surveydocument.survey.domain.QuestionDocument;
 import com.example.surveydocument.survey.domain.SurveyDocument;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
+import com.example.surveydocument.survey.request.DateDto;
 import com.example.surveydocument.survey.request.PageRequestDto;
 import com.example.surveydocument.survey.request.SurveyRequestDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
@@ -33,6 +34,7 @@ public class SurveyDocumentExternalController {
         return "Success";
     }
 
+    // todo : QueryDsl 에서 date 수정
     // grid 로 조회
     @PostMapping(value = "/survey-list-grid")
     public List<SurveyDocument> readListGrid(HttpServletRequest request, @RequestBody PageRequestDto pageRequest) {
@@ -53,19 +55,19 @@ public class SurveyDocumentExternalController {
     // 설문 수정
     @PutMapping("/update/{id}")
     public void updateSurvey(HttpServletRequest request,@RequestBody SurveyRequestDto requestDto, @PathVariable Long id) {
-        surveyService.updateSurvey(request,requestDto, id);
+        surveyService.updateSurvey(request, requestDto, id);
     }
 
     // 설문 삭제
-    @PostMapping("/delete/{id}")
+    @PatchMapping("/delete/{id}")
     public void deleteSurvey(@PathVariable Long id) {
         surveyService.deleteSurvey(id);
     }
 
     // 설문 관리
     @PostMapping("/management/{id}")
-    public void managementSurvey(@PathVariable Long id) {
-
+    public void managementSurvey(@PathVariable Long id, @RequestBody DateDto dateRequest) {
+        surveyService.managementSurvey(id, dateRequest);
     }
 
     // 설문 응답수 추가

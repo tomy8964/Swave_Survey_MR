@@ -3,10 +3,7 @@ package com.example.user.user.domain;
 import com.example.user.survey.domain.Survey;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -42,19 +39,18 @@ public class User {
     @CreationTimestamp //(4)
     private Timestamp createTime;
 
-    private Boolean isDeleted;
+    private Boolean isDeleted = Boolean.FALSE;
 
     @Builder
     public User(Long id, String profileImg, String nickname,
-                String email,String provider, String userRole,Boolean isDeleted) {
-
+                String email,String provider, String userRole, Survey survey) {
+        this.survey = survey;
         this.id = id;
         this.profileImg = profileImg;
         this.nickname = nickname;
         this.email = email;
         this.provider=provider;
         this.userRole = userRole;
-        this.isDeleted=isDeleted;
     }
 
 }

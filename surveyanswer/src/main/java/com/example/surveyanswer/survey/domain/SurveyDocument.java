@@ -29,8 +29,7 @@ public class SurveyDocument {
     private Date startDate;
     @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_deadline")
     private Date deadline;
-    @Column(name = "url")
-    private String url;
+
     @Column(name = "answer_count")
     private int countAnswer;
 

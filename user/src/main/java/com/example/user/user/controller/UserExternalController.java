@@ -1,7 +1,6 @@
 package com.example.user.user.controller;
 
-import com.example.user.restAPI.service.RestApiUserService;
-import com.example.user.survey.domain.Survey;
+import com.example.user.restAPI.service.InterRestApiUserService;
 import com.example.user.survey.response.SurveyMyPageDto;
 import com.example.user.user.domain.User;
 import com.example.user.user.repository.UserRepository;
@@ -30,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class UserExternalController {
     private final UserService2 userService;
-    private final RestApiUserService restApiService;
+    private final InterRestApiUserService restApiService;
     private final UserRepository userRepository;
     private final RedissonClient redissonClient;
 
@@ -44,13 +43,14 @@ public class UserExternalController {
         return userService.getCurrentUser(request);
     }
 
+    // todo : 없어도 되는 부분
     @GetMapping("/mypage")
     public List<SurveyMyPageDto> getMyPage(HttpServletRequest request) { //(1)
         return userService.mySurveyList(request);
     }
 
-    @PostMapping("/updatepage")
-    public String updateMyPage(HttpServletRequest request,@RequestBody UserUpdateRequest user) throws ServletException { //(1)
+    @PatchMapping("/updatepage")
+    public String updateMyPage(HttpServletRequest request, @RequestBody UserUpdateRequest user) throws ServletException { //(1)
         RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("/research/analyze/create"));
 
         try {
@@ -67,7 +67,7 @@ public class UserExternalController {
         }
     }
 
-    @PostMapping("/deleteuser")
+    @PatchMapping("/deleteuser")
     public String deleteUs(HttpServletRequest request) {
         userService.deleteUser(request);
         return "success";
