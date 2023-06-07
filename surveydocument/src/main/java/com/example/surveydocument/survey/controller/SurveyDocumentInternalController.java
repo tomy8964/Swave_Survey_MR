@@ -46,45 +46,33 @@ public class SurveyDocumentInternalController {
         return surveyService.getSurveyDocument(id);
     }
 
-
+    // choice count ++
     @PostMapping(value = "/count/{id}")
-    public String countChoice(@PathVariable Long id) {
-        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("choiceId"));
+    public void countChoice(@PathVariable Long id) throws Exception {
+        surveyService.countChoice(id);
 
-        try {
-            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
-                // transaction
-                surveyService.countChoice(id);
-                choiceRepository.flush();
-                return "count choice success";
-            } else {
-                throw new RuntimeException("Failed to acquire lock.");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            lock.unlock();
-        }
+//        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("choiceId"));
+//
+//        try {
+//            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+//                // transaction
+//                surveyService.countChoice(id);
+//                choiceRepository.flush();
+//                return "count choice success";
+//            } else {
+//                throw new RuntimeException("Failed to acquire lock.");
+//            }
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//            lock.unlock();
+//        }
     }
 
-    @PostMapping(value = "/countAnswer/{id}")
-    public String countAnswer(@PathVariable Long id) {
-        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("$surveydocument"));
-
-        try {
-            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
-                // transaction
-                surveyService.countAnswer(id);
-                surveyDocumentRepository.flush();
-                return "count answer success";
-            } else {
-                throw new RuntimeException("Failed to acquire lock.");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            lock.unlock();
-        }
+    // Survey Document 응답자 ++
+    @GetMapping(value = "/countAnswer/{id}")
+    public void countAnswer(@PathVariable Long id) throws Exception {
+        surveyService.countSurveyDocument(id);
     }
 
     @GetMapping(value = "/getChoice/{id}")
