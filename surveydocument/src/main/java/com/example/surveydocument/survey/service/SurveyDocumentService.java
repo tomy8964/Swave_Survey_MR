@@ -4,7 +4,6 @@ import com.example.surveydocument.restAPI.service.OuterRestApiSurveyDocumentServ
 //import com.auth0.jwt.JWT;
 //import com.auth0.jwt.algorithms.Algorithm;
 
-import com.example.surveydocument.restAPI.service.RestApiSurveyDocumentService;
 import com.example.surveydocument.survey.domain.*;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
@@ -50,7 +49,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.surveydocument.survey.domain.DateManagement.*;
-import static com.example.surveydocument.survey.domain.Design.*;
 import static com.example.surveydocument.survey.domain.DesignTemplate.designRequestToEntity;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
@@ -160,7 +158,7 @@ public class SurveyDocumentService {
 
         // 디자인 저장
         // Design Request To Entity
-        Design design = designRequestToEntity(
+        DesignTemplate design = designRequestToEntity(
                 surveyRequest.getFont(),
                 surveyRequest.getFontSize(),
                 surveyRequest.getBackColor()
@@ -422,9 +420,9 @@ public class SurveyDocumentService {
         surveyDetailDto.setReliability(surveyDocument.getReliability());
 
 
-        surveyDetailDto.setFont(surveyDocument.getFont());
-        surveyDetailDto.setFontSize(surveyDocument.getFontSize());
-        surveyDetailDto.setBackColor(surveyDocument.getBackColor());
+        surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
+        surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
+        surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
 
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();

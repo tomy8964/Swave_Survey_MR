@@ -46,7 +46,7 @@ public class SurveyDocument {
 
     @OneToOne
     @JoinColumn(name = "Design_id")
-    private Design design;
+    private DesignTemplate design;
 
     @Column(name = "content")
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
