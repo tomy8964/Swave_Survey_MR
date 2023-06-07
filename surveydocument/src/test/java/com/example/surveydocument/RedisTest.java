@@ -1,13 +1,10 @@
 package com.example.surveydocument;
 
-import com.example.surveydocument.survey.domain.QSurveyDocument;
-import com.example.surveydocument.survey.domain.QuestionDocument;
 import com.example.surveydocument.survey.domain.SurveyDocument;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
 import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
-import com.example.surveydocument.user.domain.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

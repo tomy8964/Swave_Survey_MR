@@ -17,10 +17,7 @@ import com.example.surveydocument.survey.repository.template.questionTemplate.Qu
 import com.example.surveydocument.survey.repository.template.surveyTemplate.SurveyTemplateRepository;
 import com.example.surveydocument.survey.repository.wordCloud.WordCloudRepository;
 import com.example.surveydocument.survey.request.*;
-import com.example.surveydocument.survey.response.ChoiceDetailDto;
-import com.example.surveydocument.survey.response.QuestionDetailDto;
-import com.example.surveydocument.survey.response.SurveyDetailDto;
-import com.example.surveydocument.survey.response.WordCloudDto;
+import com.example.surveydocument.survey.response.*;
 import com.example.surveydocument.util.page.PageRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +44,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.surveydocument.survey.domain.DateManagement.dateRequestToEntity;
-import static com.example.surveydocument.survey.domain.Design.designRequestToEntity;
 import static com.example.surveydocument.survey.domain.DesignTemplate.designTemplateRequestToEntity;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
@@ -73,8 +69,7 @@ public class SurveyDocumentService {
     Random random = new Random();
     private List<ReliabilityQuestion> questions;
     private int reliabilityquestionNumber;
-    @PersistenceContext
-    private final EntityManager em;
+
     // redis 분산 락 사용
     // 분산 락은 Transactional 과 같이 진행되지 않아서 따로 관리로직을 만들어야한다
     private final RedissonClient redissonClient;
@@ -116,7 +111,7 @@ public class SurveyDocumentService {
 //        }
     }
     @Transactional
-    public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
+    public Long createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
 
         // 유저 정보 받아오기
         // User Module 에서 현재 유저 가져오기
@@ -124,45 +119,46 @@ public class SurveyDocumentService {
 
         // 유저 코드에 해당하는 survey 찾기
         Survey survey = surveyRepository.findByUserCode(userCode);
-        createTest(survey, surveyRequest);
+        Long documentId = createTest(survey, surveyRequest);
 
         // User Module 에 저장된 Survey 보내기
         apiService.sendSurveyToUser(request, survey);
+
+        return documentId;
     }
 
-    public void createTest(Survey userSurvey, SurveyRequestDto surveyRequest) {
+    @Transactional
+    public Long createTest(Survey userSurvey, SurveyRequestDto surveyRequest) {
         // Survey Request 를 Survey Document 에 저장하기
         SurveyDocument surveyDocument = SurveyDocument.builder()
                 .survey(userSurvey)
                 .title(surveyRequest.getTitle())
                 .description(surveyRequest.getDescription())
                 .type(surveyRequest.getType())
-                .questionDocumentList(new ArrayList<>())
                 .reliability(surveyRequest.getReliability()) // 진정성 검사
                 .countAnswer(0)
+                .questionDocumentList(new ArrayList<>())
                 .build();
         surveyDocumentRepository.save(surveyDocument);
 
-        // 디자인 저장
-        // Design Request To Entity
         Design design = Design.builder()
                 .font(surveyRequest.getDesign().getFont())
                 .fontSize(surveyRequest.getDesign().getFontSize())
                 .backColor(surveyRequest.getDesign().getBackColor())
                 .build();
+        surveyDocument.setDesign(design);
+        surveyDocumentRepository.flush();
         designRepository.save(design);
 
-        // 날짜 저장
-        // Date Request To Entity
         DateManagement dateManagement = DateManagement.builder()
                 .startDate(surveyRequest.getStartDate())
                 .deadline(surveyRequest.getEndDate())
+                .isEnabled(surveyRequest.getEnable())
                 .build();
-        dateRepository.save(dateManagement);
 
-        surveyDocument.setDesign(design);
         surveyDocument.setDate(dateManagement);
         surveyDocumentRepository.flush();
+        dateRepository.save(dateManagement);
 
         // 설문 문항
         for (QuestionRequestDto questionRequestDto : surveyRequest.getQuestionRequest()) {
@@ -197,6 +193,8 @@ public class SurveyDocumentService {
         // Survey 에 SurveyDocument 저장
         userSurvey.setDocument(surveyDocument);
         surveyRepository.flush();
+
+        return surveyDocument.getId();
     }
 
     public void createTemplateSurvey(HttpServletRequest request, SurveyTemplateRequestDTO surveyRequest) throws InvalidTokenException, UnknownHostException {
@@ -304,15 +302,57 @@ public class SurveyDocumentService {
         return surveyDocumentRepository.findById(surveyDocumentId).get();
     }
 
-    //count +1
-    @Transactional
-    public void countChoice(Long choiceId) {
-        Optional<Choice> findChoice = choiceRepository.findById(choiceId);
+    public void countChoice(Long choiceId) throws Exception {
+        // survey document id 값을 키로 하는 lock 을 조회합니다.
+        RLock rLock = redissonClient.getLock("choice : lock");
+        // Lock 획득 시도
+        boolean isLocked = rLock.tryLock(5, 10, TimeUnit.SECONDS);
 
-        if (findChoice.isPresent()) {
-            choiceRepository.incrementCount(choiceId);
+        log.info(Thread.currentThread().getName() + " lock 획득 시도!");
+
+        TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        log.info(Thread.currentThread().getName() + " Transaction 시작");
+
+        // @Transactional 대신 코드로 트랜잭션을 관리한다
+        try {
+            if(!isLocked) {
+                throw new MessagingException("failed to get RLock");
+            }
+
+            // 조회수 증가 로직 실행
+            try {
+                Choice getChoice = choiceRepository.findById(choiceId).orElse(null);
+                choiceRepository.choiceCount(getChoice);
+
+                // 실행하면 커밋후 트랜잭션 종료
+                transactionManager.commit(status);
+                log.info(Thread.currentThread().getName() + " 커밋 후 트랜잭션 종료");
+            } catch (RuntimeException e) {
+                // 로직 실행 중 예외가 발생하면 롤백
+                transactionManager.rollback(status);
+                log.info(Thread.currentThread().getName() + " 로직 실행 실패");
+                throw new Exception(e.getMessage());
+            }
+
+        } catch (InterruptedException e) {
+            throw new Exception("Thread Interrupted");
+        } finally {
+            // 로직 수행이 끝나면 Lock 반환
+            if (rLock.isLocked() && rLock.isHeldByCurrentThread()) {
+                rLock.unlock();
+                log.info(Thread.currentThread().getName() + " Lock 해제");
+            }
         }
     }
+    //count +1
+//    @Transactional
+//    public void countChoice(Long choiceId) {
+//        Optional<Choice> findChoice = choiceRepository.findById(choiceId);
+//
+//        if (findChoice.isPresent()) {
+//            choiceRepository.incrementCount(choiceId);
+//        }
+//    }
 
     // 설문 응답자 수 + 1
     // 분산락 실행
@@ -364,6 +404,8 @@ public class SurveyDocumentService {
         ReliabilityQuestion reliabilityQuestion = null;
         QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
         List<ChoiceDetailDto> reliabiltyChoiceDtos = new ArrayList<>();
+        DesignResponseDto designResponse = new DesignResponseDto();
+
         if(surveyDocument.getReliability()){
             try {
                 Long l = Long.valueOf(-1);
@@ -384,17 +426,23 @@ public class SurveyDocumentService {
                 throw new RuntimeException(e);
             }
         }
-        // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
+
+        // SurveyDocument에서 SurveyDetailDto로 데이터 복사
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
         surveyDetailDto.setReliability(surveyDocument.getReliability());
 
+        // 디자인
+        designResponse.setFont(surveyDocument.getDesign().getFont());
+        designResponse.setFontSize(surveyDocument.getDesign().getFontSize());
+        designResponse.setBackColor(surveyDocument.getDesign().getBackColor());
+        surveyDetailDto.setDesign(designResponse);
 
-        surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
-        surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
-        surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
-
+        // 날짜
+        surveyDetailDto.setStartDate(surveyDocument.getDate().getStartDate());
+        surveyDetailDto.setEndDate(surveyDocument.getDate().getDeadline());
+        surveyDetailDto.setEnable(surveyDocument.getDate().isEnabled());
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
@@ -487,13 +535,14 @@ public class SurveyDocumentService {
         questionDocumentRepository.flush();
     }
 
-    @Transactional
-    public void countAnswer(Long id) {
-        Optional<SurveyDocument> byId = surveyDocumentRepository.findById(id);
-        if (byId.isPresent()) {
-            surveyDocumentRepository.incrementCountAnswer(id);
-        }
-    }
+    // countSurveyDocument 로 대체
+//    @Transactional
+//    public void countAnswer(Long id) {
+//        Optional<SurveyDocument> byId = surveyDocumentRepository.findById(id);
+//        if (byId.isPresent()) {
+//            surveyDocumentRepository.incrementCountAnswer(id);
+//        }
+//    }
 
     @Transactional
     public void updateSurvey(HttpServletRequest request,SurveyRequestDto requestDto, Long surveyId) {
@@ -545,7 +594,7 @@ public class SurveyDocumentService {
         surveyDocumentRepository.save(surveyDocument);
     }
 
-    public void managementSurvey(Long id, DateDto dateRequest) {
+    public void managementDate(Long id, DateDto dateRequest) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).get();
         surveyDocument.setDate(
                 dateRequestToEntity(dateRequest.getStartDate(), dateRequest.getEndDate())
@@ -556,6 +605,7 @@ public class SurveyDocumentService {
     public SurveyDetailDto getSurveyTemplateDetailDto(Long surveyDocumentId) {
         SurveyTemplate surveyTemplate = surveyTemplateRepository.findById(surveyDocumentId).get();
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
+        DesignResponseDto designResponseDto = new DesignResponseDto();
 
         // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
         surveyDetailDto.setTitle(surveyTemplate.getTitle());
@@ -563,9 +613,12 @@ public class SurveyDocumentService {
         surveyDetailDto.setReliability(surveyTemplate.getReliability());
 
         DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
-        surveyDetailDto.setFont(designTemplate.getFont());
-        surveyDetailDto.setFontSize(designTemplate.getFontSize());
-        surveyDetailDto.setBackColor(designTemplate.getBackColor());
+
+        designResponseDto.setFont(designTemplate.getFont());
+        designResponseDto.setFontSize(designTemplate.getFontSize());
+        designResponseDto.setBackColor(designTemplate.getBackColor());
+
+        surveyDetailDto.setDesign(designResponseDto);
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionTemplate questionTemplate : surveyTemplate.getQuestionTemplateList()) {
@@ -609,5 +662,19 @@ public class SurveyDocumentService {
 
         log.info(String.valueOf(surveyDetailDto));
         return surveyDetailDto;
+    }
+
+    public void managementEnable(Long id, Boolean enable) {
+        SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElse(null);
+        surveyDocument.getDate().setEnabled(enable);
+    }
+
+    public ManagementResponseDto managementSurvey(Long id) {
+        SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElse(null);
+        return ManagementResponseDto.builder()
+                .startDate(surveyDocument.getDate().getStartDate())
+                .endDate(surveyDocument.getDate().getDeadline())
+                .enable(surveyDocument.getDate().isEnabled())
+                .build();
     }
 }

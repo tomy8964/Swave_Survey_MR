@@ -32,25 +32,24 @@ public class User {
 
     private String Description;
 
-    @OneToOne(mappedBy = "user",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnore
-    private Survey survey;
-
     @CreationTimestamp //(4)
     private Timestamp createTime;
 
-    private Boolean isDeleted = Boolean.FALSE;
+    private boolean isDeleted = false;
 
     @Builder
     public User(Long id, String profileImg, String nickname,
-                String email,String provider, String userRole, Survey survey) {
-        this.survey = survey;
+                String email,String provider, String userRole) {
         this.id = id;
         this.profileImg = profileImg;
         this.nickname = nickname;
         this.email = email;
         this.provider=provider;
         this.userRole = userRole;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
 }

@@ -23,7 +23,7 @@ public class QuestionDocument {
     @Column(name = "wordCloud_list")
     private List<WordCloud> wordCloudList;
 
-    @OneToMany(mappedBy = "question_id", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "question_id", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Column(name = "choice_list")
     private List<Choice> choiceList;
 

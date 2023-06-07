@@ -257,7 +257,6 @@ public class OAuthService {
                         .nickname(profile.getKakao_account().getProfile().getNickname())
                         .email(profile.getKakao_account().getEmail())
                         .provider(provider)
-                        .survey(new Survey())
                         .userRole("ROLE_USER").build();
 
                 userRepository.save(user);

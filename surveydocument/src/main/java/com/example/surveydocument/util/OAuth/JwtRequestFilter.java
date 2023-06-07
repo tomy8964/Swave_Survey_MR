@@ -28,7 +28,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 
     // 인증에서 제외할 url
-    private static final String Exclude_url="/**, /api/response/create/**,/api/survey/load/**,/api/count/**,/api/countAnswer/**";
+    private static final String Exclude_url="/api/answer/internal/**";
     private static final List<String> EXCLUDE_URL =
             Collections.unmodifiableList(
                     Arrays.asList(

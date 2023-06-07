@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Data
@@ -18,32 +19,28 @@ public class DateManagement {
     private long id;
 
     @Column(name = "survey_start_date")
-    @DateTimeFormat(pattern = "yy-mm-dd")
     @NotNull
-    private LocalDate startDate;
+    private Date startDate;
 
     @Column(name = "survey_deadline")
-    @DateTimeFormat(pattern = "yy-mm-dd")
     @NotNull
-    private LocalDate deadline;
+    private Date deadline;
 
-    @OneToOne(mappedBy = "date")
-    private SurveyDocument surveyDocument;
-
-    // todo : enable boolean 추가
+    @Column(name = "survey_enable")
+    private boolean isEnabled;
 
     @Builder
-    public DateManagement(LocalDate startDate, LocalDate deadline, SurveyDocument surveyDocument) {
+    public DateManagement(Date startDate, Date deadline, Boolean isEnabled) {
         this.startDate = startDate;
         this.deadline = deadline;
-        this.surveyDocument = surveyDocument;
+        this.isEnabled = isEnabled;
     }
 
     // RequestDto -> Entity
-    public static DateManagement dateRequestToEntity(String start, String end, SurveyDocument surveyDocument) {
+    public static DateManagement dateRequestToEntity(Date start, Date end) {
         return DateManagement.builder()
-                .startDate(LocalDate.parse(start))
-                .deadline(LocalDate.parse(end))
-                .surveyDocument(surveyDocument).build();
+                .startDate(start)
+                .deadline(end)
+                .build();
     }
 }
