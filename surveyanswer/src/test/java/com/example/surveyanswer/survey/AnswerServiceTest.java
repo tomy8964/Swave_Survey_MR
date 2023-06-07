@@ -68,10 +68,10 @@ public class AnswerServiceTest {
                 MockResponse response = new MockResponse();
 
                 // Customize the response based on the request URL
-                if (path.startsWith("/api/internal/count/")) {
+                if (path.startsWith("/api/document/internal/count/")) {
                     response.setResponseCode(200)
                             .setBody("endpoint count 확인");
-                } else if (path.startsWith("/api/internal/getSurveyDocument/")) {
+                } else if (path.startsWith("/api/document/internal/getSurveyDocument/")) {
                     System.out.println("getSurveyDocument");
                     response.setResponseCode(200)
                             .setBody(survey)
