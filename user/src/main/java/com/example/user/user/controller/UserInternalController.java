@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @Getter
 @Setter
-@RequestMapping("/user/internal")
+@RequestMapping("/api/user/internal")
 @RequiredArgsConstructor
 public class UserInternalController {
     private final UserService2 userService;

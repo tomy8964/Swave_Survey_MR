@@ -17,12 +17,12 @@ public class SurveyAnalyze {
     @Column(name = "survey_document_id")
     private Long surveyDocumentId;
 
-    @OneToMany(mappedBy = "surveyAnalyzeId", fetch = FetchType.LAZY, orphanRemoval = true)
-    @Column(name = "연관분석")
+    @OneToMany(mappedBy = "surveyAnalyzeId", fetch = FetchType.LAZY)
+    @Column(name = "question_analyze_list")
     private List<QuestionAnalyze> questionAnalyzeList;
 
 
-    @OneToMany(mappedBy = "surveyAnalyzeId", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "surveyAnalyzeId", fetch = FetchType.LAZY)
     @Column(name = "apriori_list")
     private List<AprioriAnalyze> aprioriAnalyzeList;
 

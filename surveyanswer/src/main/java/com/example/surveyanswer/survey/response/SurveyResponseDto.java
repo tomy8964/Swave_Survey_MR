@@ -21,7 +21,8 @@ public class SurveyResponseDto {
 
     //    @ConstructorProperties({"title", "description", "type", "questionResponse"})
     @Builder
-    public SurveyResponseDto(String title, String description, int type,String font,int fontSize,String backColor,Boolean reliability, List<QuestionResponseDto> questionResponse) {        this.title = title;
+    public SurveyResponseDto(Long id, String title, String description, int type,String font,int fontSize,String backColor,Boolean reliability, List<QuestionResponseDto> questionResponse) {        this.title = title;
+        this.id = id;
         this.description = description;
         this.type = type;
         this.font=font;

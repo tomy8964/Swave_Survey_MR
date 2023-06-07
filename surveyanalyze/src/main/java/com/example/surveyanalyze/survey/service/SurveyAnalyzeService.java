@@ -225,11 +225,18 @@ public class SurveyAnalyzeService {
 
     private SurveyAnalyze getSurveyAnalyze(long surveyDocumentId) {
         // 값 분리해서 Analyze DB에 저장
-        SurveyAnalyze surveyAnalyze = surveyAnalyzeRepository.findBySurveyDocumentId(surveyDocumentId);
+        SurveyAnalyze surveyAnalyze;
+//        if (surveyDocumentId == -1) {
+//            surveyAnalyze = surveyAnalyzeRepository.findById(1L).get();
+//        } else {
+            surveyAnalyze = surveyAnalyzeRepository.findBySurveyDocumentId(surveyDocumentId);
+//        }
         // 과거의 분석 결과 있으면 questionAnalyze delete & null 주입
         if (surveyAnalyze != null) {
-            Long id = surveyAnalyze.getId();
             questionAnalyzeRepository.deleteAllBySurveyAnalyzeId(surveyAnalyze);
+            aprioriAnalyzeRepository.deleteAllBySurveyAnalyzeId(surveyAnalyze);
+            surveyAnalyze.setAprioriAnalyzeList(new ArrayList<>());
+            surveyAnalyze.setQuestionAnalyzeList(new ArrayList<>());
         } else {
             surveyAnalyze = SurveyAnalyze.builder()
                     .surveyDocumentId(surveyDocumentId)
@@ -437,7 +444,7 @@ public class SurveyAnalyzeService {
 //    }
 
     // 분석 상세 분석 Get
-    public SurveyAnalyzeDto readSurveyDetailAnalyze(HttpServletRequest request, Long surveyId) throws InvalidTokenException {
+    public SurveyAnalyzeDto readSurveyDetailAnalyze(Long surveyId) {
         //Survey_Id를 가져와서 그 Survey 의 상세분석을 가져옴
         SurveyAnalyze surveyAnalyze = surveyAnalyzeRepository.findBySurveyDocumentId(surveyId);
 

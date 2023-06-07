@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @Getter
 @Setter
-@RequestMapping("/user/external")
+@RequestMapping("/api/user/external")
 @RequiredArgsConstructor
 public class UserExternalController {
     private final UserService2 userService;

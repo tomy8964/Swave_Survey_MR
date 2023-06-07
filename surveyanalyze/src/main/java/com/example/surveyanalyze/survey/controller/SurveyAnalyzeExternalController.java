@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/analyze/external")
+@RequestMapping("api/analyze/external")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
 public class SurveyAnalyzeExternalController {
 
@@ -47,7 +47,7 @@ public class SurveyAnalyzeExternalController {
     // 설문 상세 분석 조회
     @Cacheable(value = "/research/analyze/{id}", key = "#id")
     @GetMapping(value = "/research/analyze/{id}")
-    public SurveyAnalyzeDto readDetailAnalyze(HttpServletRequest request, @PathVariable Long id) throws InvalidTokenException {
-        return surveyService.readSurveyDetailAnalyze(request, id);
+    public SurveyAnalyzeDto readDetailAnalyze(@PathVariable Long id) {
+        return surveyService.readSurveyDetailAnalyze(id);
     }
 }

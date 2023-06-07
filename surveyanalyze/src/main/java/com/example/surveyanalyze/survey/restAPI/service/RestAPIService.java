@@ -45,7 +45,7 @@ public class RestAPIService {
                 .build();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/" + surveyDocumentId;
+        String apiUrl = "http://" + gateway + "/api/document/internal/getSurveyDocument/" + surveyDocumentId;
 
         // Make a GET request to the API and retrieve the response
         SurveyDocument get = webClient.get()
@@ -68,7 +68,7 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getChoice/"+ choiceId;
+        String apiUrl = "http://" + gateway + "/api/document/internal/getChoice/"+ choiceId;
 
         // Make a GET request to the API and retrieve the response
         Choice get = webClient.get()
@@ -91,7 +91,7 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getQuestion/"+ questionId;
+        String apiUrl = "http://" + gateway + "/api/document/internal/getQuestion/"+ questionId;
 
         // Make a GET request to the API and retrieve the response
         QuestionDocument get = webClient.get()
@@ -114,7 +114,7 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getQuestionByChoiceId/"+ choiceId;
+        String apiUrl = "http://" + gateway + "/api/document/internal/getQuestionByChoiceId/"+ choiceId;
 
         // Make a GET request to the API and retrieve the response
         QuestionDocument get = webClient.get()
@@ -137,7 +137,7 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/survey/internal/getQuestionAnswerByCheckAnswerId/"+ id;
+        String apiUrl = "http://" + gateway + "/api/answer/internal/getQuestionAnswerByCheckAnswerId/"+ id;
 
         // Make a GET request to the API and retrieve the response
         List<QuestionAnswer> questionAnswerList = webClient.get()
@@ -169,7 +169,7 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/setWordCloud/"+ id;
+        String apiUrl = "http://" + gateway + "/api/document/internal/setWordCloud/"+ id;
 
         // Make a GET request to the API and retrieve the response
         String response = webClient.post()

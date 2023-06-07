@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
-@RequestMapping("/api/internal")
+@RequestMapping("/api/document/internal")
 public class SurveyDocumentInternalController {
 
     private final SurveyDocumentService surveyService;

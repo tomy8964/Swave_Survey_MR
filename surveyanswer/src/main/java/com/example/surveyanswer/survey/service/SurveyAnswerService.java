@@ -112,12 +112,11 @@ public class SurveyAnswerService {
         surveyAnswerRepository.save(surveyAnswer);
 
         // Survey Response 를 Question Answer 에 저장하기
-        surveyAnswerRepository.findById(surveyAnswer.getId());
         for (QuestionResponseDto questionResponseDto : surveyResponse.getQuestionResponse()) {
             // Question Answer 에 저장
             // todo: 주관식0 / 찬부식1, 객관식2 구분 저장
             QuestionAnswer questionAnswer = QuestionAnswer.builder()
-                    .surveyAnswerId(surveyAnswerRepository.findById(surveyAnswer.getId()).get())
+                    .surveyAnswerId(surveyAnswer)
                     .title(questionResponseDto.getTitle())
                     .questionType(questionResponseDto.getType())
                     .checkAnswer(questionResponseDto.getAnswer())
@@ -258,13 +257,15 @@ public class SurveyAnswerService {
             questionDto.setChoiceList(choiceDtos);
 
             List<WordCloudDto> wordCloudDtos = new ArrayList<>();
-            for (WordCloud wordCloud : questionDocument.getWordCloudList()) {
-                WordCloudDto wordCloudDto = new WordCloudDto();
-                wordCloudDto.setId(wordCloud.getId());
-                wordCloudDto.setTitle(wordCloud.getTitle());
-                wordCloudDto.setCount(wordCloud.getCount());
+            if (questionDocument.getWordCloudList() != null) {
+                for (WordCloud wordCloud : questionDocument.getWordCloudList()) {
+                    WordCloudDto wordCloudDto = new WordCloudDto();
+                    wordCloudDto.setId(wordCloud.getId());
+                    wordCloudDto.setTitle(wordCloud.getTitle());
+                    wordCloudDto.setCount(wordCloud.getCount());
 
-                wordCloudDtos.add(wordCloudDto);
+                    wordCloudDtos.add(wordCloudDto);
+                }
             }
             questionDto.setWordCloudDtos(wordCloudDtos);
 

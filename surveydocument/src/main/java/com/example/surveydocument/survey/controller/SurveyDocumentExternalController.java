@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
-@RequestMapping("/api/external")
+@RequestMapping("/api/document/external")
 public class SurveyDocumentExternalController {
 
     private final SurveyDocumentService surveyService;
