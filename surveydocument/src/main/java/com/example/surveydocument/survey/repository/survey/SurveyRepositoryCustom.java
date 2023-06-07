@@ -9,9 +9,9 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface SurveyRepositoryCustom {
-    Page<SurveyDocument> surveyDocumentPaging(User user, Pageable pageable);
-    SurveyDocument surveyDocumentDetail(User userRequest, SurveyDocument surveyDocumentRequest);
+    Page<SurveyDocument> surveyDocumentPaging(Long userCode, Pageable pageable);
+    SurveyDocument surveyDocumentDetail(Long userCode, SurveyDocument surveyDocumentRequest);
     void surveyDocumentCount(SurveyDocument surveyDocument);
-    List<SurveyDocument> getSurveyDocumentListGrid(User user, PageRequestDto pageRequest);
+    List<SurveyDocument> getSurveyDocumentListGrid(Long userCode, PageRequestDto pageRequest);
 
 }

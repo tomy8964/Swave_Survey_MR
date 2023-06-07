@@ -21,7 +21,6 @@ import com.example.surveydocument.survey.response.ChoiceDetailDto;
 import com.example.surveydocument.survey.response.QuestionDetailDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
-import com.example.surveydocument.user.domain.User;
 import com.example.surveydocument.util.page.PageRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,28 +116,18 @@ public class SurveyDocumentService {
 //        }
     }
     @Transactional
-    // todo : 날짜 생성
     public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
 
         // 유저 정보 받아오기
         // User Module 에서 현재 유저 가져오기
-        User getUser = apiService.getCurrentUserFromUser(request);
-        Survey userSurvey = getUser.getSurvey();
+        Long userCode = apiService.getCurrentUserFromUser(request);
 
-        // 유저에 Survey 가 없다면 넣어주기
-        if(userSurvey == null) {
-            userSurvey = Survey.builder()
-                    .user(getUser)
-                    .surveyDocumentList(new ArrayList<>())
-                    .build();
-            surveyRepository.save(userSurvey);
-        }
-
-        Survey survey = surveyRepository.findByUser(getUser);
+        // 유저 코드에 해당하는 survey 찾기
+        Survey survey = surveyRepository.findByUserCode(userCode);
         createTest(survey, surveyRequest);
 
         // User Module 에 저장된 Survey 보내기
-        apiService.sendSurveyToUser(request,userSurvey);
+        apiService.sendSurveyToUser(request, survey);
     }
 
     public void createTest(Survey userSurvey, SurveyRequestDto surveyRequest) {
@@ -273,9 +262,9 @@ public class SurveyDocumentService {
     public List<SurveyDocument> readSurveyListByGrid(HttpServletRequest request, PageRequestDto pageRequest) {
 
         // User Module 에서 현재 유저 가져오기
-        User getUser = apiService.getCurrentUserFromUser(request);
+        Long userCode = apiService.getCurrentUserFromUser(request);
 
-        return surveyRepository.getSurveyDocumentListGrid(getUser, pageRequest);
+        return surveyRepository.getSurveyDocumentListGrid(userCode, pageRequest);
     }
 
     // list method 로 SurveyDocument 조회
@@ -283,7 +272,7 @@ public class SurveyDocumentService {
 
 
         // User Module 에서 현재 유저 가져오기
-        User getUser = apiService.getCurrentUserFromUser(request);
+        Long userCode = apiService.getCurrentUserFromUser(request);
 
         PageRequest page = PageRequest.builder()
                 .page(pageRequest.getPage())
@@ -299,7 +288,7 @@ public class SurveyDocumentService {
         // 4. sort on How : ascending or descending
         Pageable pageable = page.of(page.getSortProperties(), page.getDirection(page.getDirect()));
 
-        return surveyRepository.surveyDocumentPaging(getUser, pageable);
+        return surveyRepository.surveyDocumentPaging(userCode, pageable);
     }
 
     public SurveyDetailDto readSurveyDetail(HttpServletRequest request, Long id) throws InvalidTokenException {
@@ -509,14 +498,6 @@ public class SurveyDocumentService {
     @Transactional
     public void updateSurvey(HttpServletRequest request,SurveyRequestDto requestDto, Long surveyId) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyId).orElseGet(null);
-
-        // User Module 로 부터 현재 유저 정보 가져오기
-        User currentUser = apiService.getCurrentUserFromUser(request);
-
-        // 유저 확인 검사
-        if(!surveyDocument.getSurvey().getUser().equals(currentUser)) {
-            // todo: User 확인 Exception 처리
-        }
 
         updateTest(surveyDocument, requestDto);
     }

@@ -263,7 +263,7 @@ public class OAuthService {
                 userRepository.save(user);
 
                 // Document 에 알리기
-                apiUserService.sendUserToSurveyDocument(user);
+                apiUserService.sendUserToSurveyDocument(user.getUserCode());
 
             } else {
                 log.info("기존 회원 -> 회원 가입 건너 뜀");
@@ -287,7 +287,7 @@ public class OAuthService {
                 userRepository.save(user);
 
                 // Document 에 알리기
-                apiUserService.sendUserToSurveyDocument(user);
+                apiUserService.sendUserToSurveyDocument(user.getUserCode());
 
             } else {
                 log.info("기존 회원 -> 회원 가입 건너 뜀");
@@ -320,7 +320,7 @@ public class OAuthService {
                 userRepository.save(user);
 
                 // Document 에 알리기
-                apiUserService.sendUserToSurveyDocument(user);
+                apiUserService.sendUserToSurveyDocument(user.getUserCode());
 
             } else {
                 log.info(String.valueOf(user));

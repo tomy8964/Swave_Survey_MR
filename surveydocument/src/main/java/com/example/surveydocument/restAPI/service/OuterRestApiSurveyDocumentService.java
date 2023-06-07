@@ -2,7 +2,6 @@ package com.example.surveydocument.restAPI.service;
 
 import com.example.surveydocument.survey.domain.QuestionAnswer;
 import com.example.surveydocument.survey.domain.Survey;
-import com.example.surveydocument.user.domain.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Reference
@@ -27,8 +27,9 @@ public class OuterRestApiSurveyDocumentService {
     @Value("${gateway.host}")
     private String gateway;
     private static String userInternalUrl = "/api/user/internal";
+
     // Current User 정보 가져오기
-    public User getCurrentUserFromUser(HttpServletRequest request) {
+    public Long getCurrentUserFromUser(HttpServletRequest request) {
         String jwtHeader = ((HttpServletRequest)request).getHeader("Authorization");
         // WebClient 가져오기
         log.info("현재 유저정보를 가져옵니다");
@@ -37,29 +38,41 @@ public class OuterRestApiSurveyDocumentService {
         // Current User URL
         String getCurrentUserUrl = "http://" + gateway + userInternalUrl + "/me";
 
-        final User[] getUser = new User[1];
+        final Long[] userCode = new Long[1];
 
         webClient.get()
                 .uri(getCurrentUserUrl)
                 .header("Authorization", jwtHeader)
                 .retrieve()
-                .bodyToMono(User.class)
+                .bodyToMono(Long.class)
                 .subscribe(response -> {
-                    getUser[0] = User.builder()
-                            .id(response.getId())
-                            .email(response.getEmail())
-                            .nickname(response.getNickname())
-                            .userRole(response.getUserRole())
-                            .provider(response.getProvider())
-                            .survey(response.getSurvey())
-                            .build();
+                    userCode[0] = response;
                 });
 
 
-        // check log
-        log.info("현재 유저의 설문 정보: " + getUser[0].getNickname());
+//        final User[] getUser = new User[1];
+//
+//        webClient.get()
+//                .uri(getCurrentUserUrl)
+//                .header("Authorization", jwtHeader)
+//                .retrieve()
+//                .bodyToMono(User.class)
+//                .subscribe(response -> {
+//                    getUser[0] = User.builder()
+//                            .id(response.getId())
+//                            .email(response.getEmail())
+//                            .nickname(response.getNickname())
+//                            .userRole(response.getUserRole())
+//                            .provider(response.getProvider())
+//                            .survey(response.getSurvey())
+//                            .build();
+//                });
 
-        return getUser[0];
+
+        // check log
+        log.info("현재 유저의 설문 정보: " + userCode[0]);
+
+        return userCode[0];
     }
 
     // User 에 Survey 정보 보내기
@@ -77,7 +90,7 @@ public class OuterRestApiSurveyDocumentService {
                 .header("Authorization", jwtHeader)
                 .bodyValue(survey);
 
-        log.info(survey.getUser().getNickname() +"에게 정보 보냅니다");
+        log.info(survey.getUserCode() +"에게 정보 보냅니다");
     }
 
     // Answer Id 값을 통해 Question Answer 불러오기

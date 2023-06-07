@@ -14,7 +14,7 @@ public class OuterRestApiUserService {
     private static String gateway = "localhost:8080";
 
     // Document 에 유저 정보 보내기
-    public void sendUserToSurveyDocument(User user) {
+    public void sendUserToSurveyDocument(Long userCode) {
         log.info("Document 에 User 정보를 보냅니다");
 
         WebClient webClient = WebClient.create();
@@ -22,8 +22,8 @@ public class OuterRestApiUserService {
 
         webClient.post()
                 .uri(documentUrl)
-                .bodyValue(user);
+                .bodyValue(userCode);
 
-        log.info(user.getNickname() + " 정보를 Document에 보냅니다");
+        log.info(userCode + " 정보를 Document에 보냅니다");
     }
 }

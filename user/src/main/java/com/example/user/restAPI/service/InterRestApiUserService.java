@@ -21,14 +21,14 @@ public class InterRestApiUserService {
     private final UserRepository userRepository;
     private final UserService2 userService;
 
-    public User getCurrentUser(HttpServletRequest request) {
+    public Long getCurrentUser(HttpServletRequest request) {
         Long userCode = (Long) request.getAttribute("userCode");
 
         String jwtHeader = ((HttpServletRequest)request).getHeader(JwtProperties.HEADER_STRING);
         String token = jwtHeader.replace(JwtProperties.TOKEN_PREFIX, "");
 
         userCode = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token).getClaim("id").asLong();
-        return userRepository.findByUserCode(userCode).orElseGet(null);
+        return userCode;
     }
 
     public void saveSurveyInUser(HttpServletRequest request, Survey survey) {

@@ -10,7 +10,6 @@ import com.example.surveydocument.survey.request.SurveyRequestDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
 import com.example.surveydocument.survey.response.WordCloudDto;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
-import com.example.surveydocument.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.redisson.RedissonRedLock;
@@ -117,8 +116,8 @@ public class SurveyDocumentInternalController {
 
     // 유저 정보 저장하기
     @PostMapping(value = "/saveUser")
-    public void saveUser(@RequestBody User user) {
-        apiService.saveUserInSurvey(user);
+    public void saveUser(@RequestBody Long userCode) {
+        apiService.saveUserInSurvey(userCode);
     }
 
 }

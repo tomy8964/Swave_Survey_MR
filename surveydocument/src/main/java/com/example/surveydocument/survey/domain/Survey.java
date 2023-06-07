@@ -1,6 +1,5 @@
 package com.example.surveydocument.survey.domain;
 
-import com.example.surveydocument.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,10 +21,7 @@ public class Survey {
     @Column(name = "survey_id")
     private Long id;
 
-    @OneToOne
-    @JsonIgnore
-    @JoinColumn(name = "user_Id")
-    private User user;
+    private Long userCode;
 
     @OneToMany(mappedBy = "survey", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore //순환참조 방지
@@ -38,8 +34,8 @@ public class Survey {
     }
 
     @Builder
-    public Survey(User user, List<SurveyDocument> surveyDocumentList) {
-        this.user = user;
+    public Survey(Long userCode, List<SurveyDocument> surveyDocumentList) {
+        this.userCode = userCode;
         this.surveyDocumentList = surveyDocumentList;
     }
 }

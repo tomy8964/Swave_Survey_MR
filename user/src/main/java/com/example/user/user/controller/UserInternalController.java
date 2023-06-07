@@ -31,7 +31,7 @@ public class UserInternalController {
     private final RedissonClient redissonClient;
 
     @GetMapping("/me")
-    public User getCurrentUser(HttpServletRequest request) {
+    public Long getCurrentUser(HttpServletRequest request) {
         return interRestApiUserService.getCurrentUser(request);
     }
 

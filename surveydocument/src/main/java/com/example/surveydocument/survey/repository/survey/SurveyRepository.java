@@ -5,5 +5,5 @@ import com.example.surveydocument.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SurveyRepository extends JpaRepository<Survey, Long>, SurveyRepositoryCustom {
-    Survey findByUser(User user);
+    Survey findByUserCode(Long userCode);
 }

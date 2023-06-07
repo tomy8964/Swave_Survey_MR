@@ -30,7 +30,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
 
     // survey document 의 list 를 페이징 처리하여 조회
     @Override
-    public Page<SurveyDocument> surveyDocumentPaging(User userRequest, Pageable pageable) {
+    public Page<SurveyDocument> surveyDocumentPaging(Long userRequest, Pageable pageable) {
         List<SurveyDocument> results = getSurveyDocumentList(userRequest, pageable);
 
         QSurveyDocument surveyDocument = QSurveyDocument.surveyDocument;
@@ -44,7 +44,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
         return new PageImpl<>(results, pageable, count);
     }
 
-    public List<SurveyDocument> getSurveyDocumentList(User userRequest, Pageable pageable) {
+    public List<SurveyDocument> getSurveyDocumentList(Long userRequest, Pageable pageable) {
         QSurveyDocument surveyDocument = QSurveyDocument.surveyDocument;
         QSurvey survey = QSurvey.survey;
         QUser user = QUser.user;
@@ -52,7 +52,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
         List<SurveyDocument> result = jpaQueryFactory
                 .select(surveyDocument)
                 .from(surveyDocument)
-                .where(surveyDocument.survey.user.eq(userRequest))
+                .where(surveyDocument.survey.userCode.eq(userRequest))
                 .orderBy(SurveyDocumentSort(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -62,7 +62,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
     }
 
     // survey Document 를 gird 형식으로 조회할 때 페이징 처리 없이 모두 다 조회
-    public List<SurveyDocument> getSurveyDocumentListGrid(User user, PageRequestDto pageRequest) {
+    public List<SurveyDocument> getSurveyDocumentListGrid(Long userRequest, PageRequestDto pageRequest) {
         QSurveyDocument surveyDocument = QSurveyDocument.surveyDocument;
 
         String sort1 = pageRequest.getSort1(); // date or title
@@ -70,14 +70,14 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
         return jpaQueryFactory
                 .select(surveyDocument)
                 .from(surveyDocument)
-                .where(surveyDocument.survey.user.eq(user))
+                .where(surveyDocument.survey.userCode.eq(userRequest))
                 .orderBy(SurveyDocumentSort(sort1, sort2))
                 .fetch();
     }
 
     // survey document 상세 조회
     @Override
-    public SurveyDocument surveyDocumentDetail(User userRequest, SurveyDocument surveyDocumentRequest) {
+    public SurveyDocument surveyDocumentDetail(Long userRequest, SurveyDocument surveyDocumentRequest) {
         QUser user = QUser.user;
         QSurvey survey = QSurvey.survey;
         QSurveyDocument surveyDocument = QSurveyDocument.surveyDocument;
@@ -85,7 +85,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
         SurveyDocument result = (SurveyDocument) jpaQueryFactory
                 .select(survey.surveyDocumentList)
                 .from(survey)
-                .where(survey.user.eq(userRequest)
+                .where(survey.userCode.eq(userRequest)
                         .and(survey.surveyDocumentList.contains(surveyDocumentRequest)))
                 .fetch();
         return null;
