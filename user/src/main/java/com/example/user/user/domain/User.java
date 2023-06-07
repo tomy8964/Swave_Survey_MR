@@ -39,7 +39,7 @@ public class User {
     @CreationTimestamp //(4)
     private Timestamp createTime;
 
-    private Boolean isDeleted;
+    private Boolean isDeleted = Boolean.FALSE;
 
     @Builder
     public User(Long id, String profileImg, String nickname,
@@ -51,7 +51,6 @@ public class User {
         this.email = email;
         this.provider=provider;
         this.userRole = userRole;
-        this.isDeleted=isDeleted;
     }
 
 }
