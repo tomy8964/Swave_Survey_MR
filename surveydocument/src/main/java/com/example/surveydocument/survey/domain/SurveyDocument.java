@@ -39,20 +39,23 @@ public class SurveyDocument {
     @Column(name = "isDeleted")
     private boolean isDeleted = false;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "Date_id")
     private DateManagement date;
 
     @Column(name = "reliability")
     private Boolean reliability;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "Design_id")
-    private DesignTemplate design;
+    private Design design;
 
     @Column(name = "content")
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionDocument> questionDocumentList;
+
     @ManyToOne
     @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "survey_id")

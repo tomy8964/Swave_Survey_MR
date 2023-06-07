@@ -37,7 +37,6 @@ import java.util.Map;
 public class OAuthService {
 
     private final UserRepository userRepository;
-    private final UserService2 userService;
     private final OuterRestApiUserService apiUserService;
 
     public OauthToken getAccessToken(String code, String provider) {
