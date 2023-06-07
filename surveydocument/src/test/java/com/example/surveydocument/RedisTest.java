@@ -4,6 +4,7 @@ import com.example.surveydocument.survey.domain.QSurveyDocument;
 import com.example.surveydocument.survey.domain.QuestionDocument;
 import com.example.surveydocument.survey.domain.SurveyDocument;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
+import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
 import com.example.surveydocument.user.domain.User;
@@ -11,7 +12,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.mockwebserver.MockWebServer;
+import org.hibernate.query.sqm.tree.SqmNode;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +31,7 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
+@Slf4j
 public class RedisTest {
     @Autowired
     SurveyDocumentService documentService;
@@ -35,6 +39,8 @@ public class RedisTest {
     SurveyDocumentRepository documentRepository;
     @Autowired
     QuestionDocumentRepository questionDocumentRepository;
+    @Autowired
+    SurveyRepository surveyRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -44,9 +50,16 @@ public class RedisTest {
         documentRepository.deleteAll();
     }
 
-    @Test @DisplayName("동시에 설문 문항 100개 생성")
+    @Test @DisplayName("동시에 응답자 수 추가 100개")
     void Redis_test1() throws InterruptedException {
         // given
+        SurveyDocument surveyDocument = SurveyDocument.builder()
+                .title("설문 테스트")
+                .description("설문 설명")
+                .countAnswer(0)
+                .build();
+        documentRepository.save(surveyDocument);
+
         ExecutorService executorService = Executors.newFixedThreadPool(100);
         CountDownLatch countDownLatch = new CountDownLatch(100);
 
@@ -54,12 +67,7 @@ public class RedisTest {
         for(int i = 0 ; i < 100; i++) {
             executorService.submit(() ->{
                 try{
-                    questionDocumentRepository.save(
-                            QuestionDocument.builder()
-                                    .title("설문 문항 ")
-                                    .questionType(1)
-                                    .build()
-                    );
+                    surveyRepository.surveyDocumentCount(surveyDocument);
                 }
                 finally {
                     countDownLatch.countDown();
@@ -69,7 +77,7 @@ public class RedisTest {
         countDownLatch.await();
 
         // then
-        assertThat(questionDocumentRepository.count()).isEqualTo(100);
+        assertThat(documentRepository.findById(surveyDocument.getId()).get().getCountAnswer()).isEqualTo(100);
     }
 
     @Test @DisplayName("설문 응답자 수 1 추가할 때")
@@ -80,17 +88,15 @@ public class RedisTest {
         SurveyDocument surveyDocument = SurveyDocument.builder()
                 .title("설문 테스트")
                 .description("설문 설명")
-                .countAnswer(1)
+                .countAnswer(0)
                 .build();
         documentRepository.save(surveyDocument);
 
-        entityManager.flush();
-        entityManager.clear();
         // when
-        int countAnswer = documentRepository.findById(surveyDocument.getId()).orElse(null)
-                .getCountAnswer();
+        documentService.countSurveyDocument(surveyDocument.getId());
+
         // then
-        assertThat(countAnswer).isEqualTo(2);
+        assertThat(documentRepository.findById(surveyDocument.getId()).get().getCountAnswer()).isEqualTo(1);
     }
 
     @Test @DisplayName("Redis 조회수 증가 테스트")
@@ -108,18 +114,19 @@ public class RedisTest {
         int numberOfThread = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(100);
         for(int i = 0 ; i < numberOfThread; i++) {
-            executorService.execute(() -> {
+            executorService.submit(() -> {
                 try {
                     documentService.countSurveyDocument(surveyDocument.getId());
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    log.error(Thread.currentThread().getName() + " 닫혔습니다" , e);
                 }
             });
         }
 
+        Thread.sleep(1000);
         // then
         executorService.shutdownNow();
-        assertThat(surveyDocument.getCountAnswer()).isEqualTo(100);
+        assertThat(documentRepository.findById(surveyDocument.getId()).get().getCountAnswer()).isEqualTo(100);
     }
 
 }

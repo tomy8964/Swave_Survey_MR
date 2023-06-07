@@ -91,6 +91,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
         return null;
     }
 
+    // 설문 참여자 수 증가
     public void surveyDocumentCount(SurveyDocument surveyDocument) {
         QSurveyDocument qSurveyDocument = QSurveyDocument.surveyDocument;
 
@@ -99,7 +100,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
                 .set(qSurveyDocument.countAnswer, qSurveyDocument.countAnswer.add(1))
                 .where(qSurveyDocument.id.eq(surveyDocument.getId()))
                 .execute();
-
+        entityManager.flush();
         entityManager.clear();
     }
 

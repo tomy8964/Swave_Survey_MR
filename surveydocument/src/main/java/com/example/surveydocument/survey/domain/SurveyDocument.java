@@ -1,15 +1,16 @@
 package com.example.surveydocument.survey.domain;
 
+import com.example.surveydocument.survey.request.DateDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @Entity
 @NoArgsConstructor
 public class SurveyDocument {
@@ -33,6 +34,7 @@ public class SurveyDocument {
     @Column(name = "answer_count")
     private int countAnswer;
 
+    @Column(name = "isDeleted")
     private boolean isDeleted = false;
 
     @OneToOne
@@ -42,20 +44,9 @@ public class SurveyDocument {
     @Column(name = "reliability")
     private Boolean reliability;
 
-    @Column(name = "font")
-    private String font;
-
-    @Column(name = "size")
-    private int fontSize;
-
-    @Column(name = "backcolor")
-    private String backColor;
-
-
-//    @Column(name="survey_design")
-//    @OneToOne(mappedBy = "design_id",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private SurveyDesign surveyDesign;
-
+    @OneToOne
+    @JoinColumn(name = "Design_id")
+    private DesignTemplate design;
 
     @Column(name = "content")
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -66,29 +57,20 @@ public class SurveyDocument {
     private Survey survey;
 
     @Builder
-    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, Survey survey, String title, int type,Boolean reliability, String description, String font,int fontSize,String backColor,List<QuestionDocument> questionDocumentList) {
+    public SurveyDocument(int countAnswer, Survey survey, String title, int type,Boolean reliability, String description, List<QuestionDocument> questionDocumentList, DateManagement dateManagement) {
         this.survey = survey;
         this.title = title;
         this.type = type;
         this.description = description;
         this.questionDocumentList = questionDocumentList;
         this.reliability=reliability;
-        this.font=font;
-        this.fontSize=fontSize;
-        this.backColor=backColor;
-//        this.surveyAnswerList = surveyAnswerList;
         this.countAnswer = countAnswer;
+        this.date = dateManagement;
     }
 
-    //    public void setAnswer(SurveyAnswer surveyAnswer) {
-//        this.surveyAnswerList.add(surveyAnswer);
-//    }
     // 문항 list 에 넣어주기
     public void setQuestion(QuestionDocument questionDocument) {
         this.questionDocumentList.add(questionDocument);
     }
-    // 문항 analyze 에 넣어주기
-//    public void setAnalyze(surveyAnswer surveyAnswer) {
-//        this.surveyAnswer=surveyAnswer;
-//    }
+
 }

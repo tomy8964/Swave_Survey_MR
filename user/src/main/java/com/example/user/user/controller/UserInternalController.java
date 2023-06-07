@@ -1,6 +1,6 @@
 package com.example.user.user.controller;
 
-import com.example.user.restAPI.service.RestApiUserService;
+import com.example.user.restAPI.service.InterRestApiUserService;
 import com.example.user.survey.domain.Survey;
 import com.example.user.user.domain.User;
 import com.example.user.user.repository.UserRepository;
@@ -27,22 +27,23 @@ import java.util.concurrent.TimeUnit;
 public class UserInternalController {
     private final UserService2 userService;
     private final UserRepository userRepository;
-    private final RestApiUserService restApiUserService;
+    private final InterRestApiUserService interRestApiUserService;
     private final RedissonClient redissonClient;
 
     @GetMapping("/me")
     public User getCurrentUser(HttpServletRequest request) {
-        return restApiUserService.getCurrentUser(request);
+        return interRestApiUserService.getCurrentUser(request);
     }
 
     @PostMapping("/survey/save")
     public void saveSurveyInUser(HttpServletRequest request, Survey survey) {
+
         RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("/survey/save"));
 
         try {
             if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
                 // transaction
-                restApiUserService.saveSurveyInUser(request, survey);
+                interRestApiUserService.saveSurveyInUser(request, survey);
             } else {
                 throw new RuntimeException("Failed to acquire lock.");
             }

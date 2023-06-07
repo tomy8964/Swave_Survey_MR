@@ -1,12 +1,13 @@
 package com.example.surveydocument.survey.service;
 
+import com.example.surveydocument.restAPI.service.OuterRestApiSurveyDocumentService;
 //import com.auth0.jwt.JWT;
 //import com.auth0.jwt.algorithms.Algorithm;
 
-import com.example.surveydocument.restAPI.service.RestApiSurveyDocumentService;
 import com.example.surveydocument.survey.domain.*;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
+import com.example.surveydocument.survey.repository.date.DateRepository;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
 import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
@@ -42,12 +43,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.surveydocument.survey.domain.DateManagement.*;
 import static com.example.surveydocument.survey.domain.DesignTemplate.designRequestToEntity;
 
 //import static com.example.surveyAnswer.util.SurveyTypeCheck.typeCheck;
@@ -63,8 +62,8 @@ public class SurveyDocumentService {
     private final QuestionDocumentRepository questionDocumentRepository;
     private final ChoiceRepository choiceRepository;
     private final WordCloudRepository wordCloudRepository;
-
-    private final RestApiSurveyDocumentService apiService;
+    private final DateRepository dateRepository;
+    private final OuterRestApiSurveyDocumentService apiService;
 
 
     private final SurveyTemplateRepository surveyTemplateRepository;
@@ -118,6 +117,7 @@ public class SurveyDocumentService {
 //        }
     }
     @Transactional
+    // todo : 날짜 생성
     public void createSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
 
         // 유저 정보 받아오기
@@ -125,6 +125,7 @@ public class SurveyDocumentService {
         User getUser = apiService.getCurrentUserFromUser(request);
         Survey userSurvey = getUser.getSurvey();
 
+        // 유저에 Survey 가 없다면 넣어주기
         if(userSurvey == null) {
             userSurvey = Survey.builder()
                     .user(getUser)
@@ -133,6 +134,14 @@ public class SurveyDocumentService {
             surveyRepository.save(userSurvey);
         }
 
+        Survey survey = surveyRepository.findByUser(getUser.getId());
+        createTest(userSurvey, surveyRequest);
+
+        // User Module 에 저장된 Survey 보내기
+        apiService.sendSurveyToUser(request,userSurvey);
+    }
+
+    public void createTest(Survey userSurvey, SurveyRequestDto surveyRequest) {
         // Survey Request 를 Survey Document 에 저장하기
         SurveyDocument surveyDocument = SurveyDocument.builder()
                 .survey(userSurvey)
@@ -140,17 +149,34 @@ public class SurveyDocumentService {
                 .description(surveyRequest.getDescription())
                 .type(surveyRequest.getType())
                 .questionDocumentList(new ArrayList<>())
-                .surveyAnswerList(new ArrayList<>())
-                .reliability(surveyRequest.getReliability())
-                .font(surveyRequest.getFont())
-                .fontSize(surveyRequest.getFontSize())
-                .backColor(surveyRequest.getBackColor())
+                .reliability(surveyRequest.getReliability()) // 진정성 검사
                 .countAnswer(0)
                 .build();
         surveyDocumentRepository.save(surveyDocument);
 
-        // 설문 문항
+        // 디자인 저장
+        // Design Request To Entity
+        DesignTemplate design = designRequestToEntity(
+                surveyRequest.getFont(),
+                surveyRequest.getFontSize(),
+                surveyRequest.getBackColor()
+        );
+
+        // 날짜 저장
+        // Date Request To Entity
+        DateManagement dateManagement = dateRequestToEntity(
+                surveyRequest.getStartDate(),
+                surveyRequest.getEndDate(),
+                surveyDocumentRepository.findById(surveyDocument.getId()).get()
+        );
+
+        dateRepository.save(dateManagement);
+
+        surveyDocument.setDesign(design);
+        surveyDocument.setDate(dateManagement);
         surveyDocumentRepository.findById(surveyDocument.getId());
+
+        // 설문 문항
         for (QuestionRequestDto questionRequestDto : surveyRequest.getQuestionRequest()) {
             // 설문 문항 저장
             QuestionDocument questionDocument = QuestionDocument.builder()
@@ -183,9 +209,6 @@ public class SurveyDocumentService {
         // Survey 에 SurveyDocument 저장
         userSurvey.setDocument(surveyDocument);
         surveyRepository.flush();
-
-        // User Module 에 저장된 Survey 보내기
-        apiService.sendSurveyToUser(request,userSurvey);
     }
 
     public void createTemplateSurvey(HttpServletRequest request, SurveyRequestDto surveyRequest) throws InvalidTokenException, UnknownHostException {
@@ -320,11 +343,13 @@ public class SurveyDocumentService {
     // 분산락 실행
     public void countSurveyDocument(Long surveyDocumentId) throws Exception {
         // survey document id 값을 키로 하는 lock 을 조회합니다.
-        RLock rLock = redissonClient.getLock("$surveyDocumentId");
+        RLock rLock = redissonClient.getLock("survey : lock");
         // Lock 획득 시도
-        boolean isLocked = rLock.tryLock(1, 3, TimeUnit.SECONDS);
-
+        boolean isLocked = rLock.tryLock(5, 10, TimeUnit.SECONDS);
+        log.info(Thread.currentThread().getName() + " lock 획득 시도!");
         TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        log.info(Thread.currentThread().getName() + " Transaction 시작");
+
         // @Transactional 대신 코드로 트랜잭션을 관리한다
         try {
             if(!isLocked) {
@@ -336,29 +361,23 @@ public class SurveyDocumentService {
                 SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyDocumentId).orElse(null);
                 surveyRepository.surveyDocumentCount(surveyDocument);
 
-                // 영속성 컨텍스트 clear
-                em.flush();
-                em.clear();
-
-                // 더티 체크
-//                SurveyDocument nowSurveyDocument = surveyDocumentRepository.findById(surveyDocumentId).orElse(null);
-//                nowSurveyDocument.updateAnswerCount(nowSurveyDocument.getCountAnswer());
-
-                // 실행하면 커밋
+                // 실행하면 커밋후 트랜잭션 종료
                 transactionManager.commit(status);
-
+                log.info(Thread.currentThread().getName() + " 커밋 후 트랜잭션 종료");
             } catch (RuntimeException e) {
                 // 로직 실행 중 예외가 발생하면 롤백
                 transactionManager.rollback(status);
+                log.info(Thread.currentThread().getName() + " 로직 실행 실패");
                 throw new Exception(e.getMessage());
             }
 
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             throw new Exception("Thread Interrupted");
         } finally {
             // 로직 수행이 끝나면 Lock 반환
             if (rLock.isLocked() && rLock.isHeldByCurrentThread()) {
                 rLock.unlock();
+                log.info(Thread.currentThread().getName() + " Lock 해제");
             }
         }
     }
@@ -397,9 +416,9 @@ public class SurveyDocumentService {
         surveyDetailDto.setReliability(surveyDocument.getReliability());
 
 
-        surveyDetailDto.setFont(surveyDocument.getFont());
-        surveyDetailDto.setFontSize(surveyDocument.getFontSize());
-        surveyDetailDto.setBackColor(surveyDocument.getBackColor());
+        surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
+        surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
+        surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
 
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
@@ -501,6 +520,7 @@ public class SurveyDocumentService {
         }
     }
 
+    @Transactional
     public void updateSurvey(HttpServletRequest request,SurveyRequestDto requestDto, Long surveyId) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyId).orElseGet(null);
 
@@ -512,6 +532,10 @@ public class SurveyDocumentService {
             // todo: User 확인 Exception 처리
         }
 
+        updateTest(surveyDocument, requestDto);
+    }
+
+    public void updateTest(SurveyDocument surveyDocument, SurveyRequestDto requestDto) {
         // 초기 값 수정
         surveyDocument.setTitle(requestDto.getTitle());
         surveyDocument.setDescription(requestDto.getDescription());
@@ -520,6 +544,7 @@ public class SurveyDocumentService {
         // Question List 수정
         // survey document 의 Question List 초기화
         surveyDocument.getQuestionDocumentList().clear();
+
         for (QuestionRequestDto questionRequestDto : requestDto.getQuestionRequest()) {
             QuestionDocument question = QuestionDocument.builder()
                     .surveyDocument(surveyDocument)
@@ -545,16 +570,19 @@ public class SurveyDocumentService {
             surveyDocument.setQuestion(question);
         }
         surveyDocumentRepository.save(surveyDocument);
-
     }
 
     public void deleteSurvey(Long id) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElseGet(null);
         surveyDocument.setDeleted(true);
+        surveyDocumentRepository.save(surveyDocument);
     }
 
-    public void managementSurvey(Long id) {
-
+    public void managementSurvey(Long id, DateDto dateRequest) {
+        SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).get();
+        surveyDocument.setDate(
+                dateRequestToEntity(dateRequest.getStartDate(), dateRequest.getEndDate(), surveyDocument)
+        );
     }
 
     public SurveyDetailDto getSurveyTemplateDetailDto(Long surveyDocumentId) {
