@@ -44,10 +44,10 @@ public class UserExternalController {
     }
 
     // todo : 없어도 되는 부분
-    @GetMapping("/mypage")
-    public List<SurveyMyPageDto> getMyPage(HttpServletRequest request) { //(1)
-        return userService.mySurveyList(request);
-    }
+//    @GetMapping("/mypage")
+//    public List<SurveyMyPageDto> getMyPage(HttpServletRequest request) { //(1)
+//        return userService.mySurveyList(request);
+//    }
 
     @PatchMapping("/updatepage")
     public String updateMyPage(HttpServletRequest request, @RequestBody UserUpdateRequest user) throws ServletException { //(1)

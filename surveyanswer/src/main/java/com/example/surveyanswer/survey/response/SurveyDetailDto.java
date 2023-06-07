@@ -1,6 +1,5 @@
 package com.example.surveyanswer.survey.response;
 
-import com.example.surveyanswer.survey.domain.DesignTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

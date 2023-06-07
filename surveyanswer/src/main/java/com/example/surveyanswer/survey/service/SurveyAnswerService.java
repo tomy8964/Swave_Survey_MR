@@ -186,6 +186,8 @@ public class SurveyAnswerService {
     private SurveyDetailDto getSurveyDetailDto(Long surveyDocumentId) {
         SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
 
+        surveyDocument.getDesign();
+
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
         QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
 
@@ -218,9 +220,10 @@ public class SurveyAnswerService {
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
 
-        surveyDetailDto.setFont(surveyDocument.getFont());
-        surveyDetailDto.setFontSize(surveyDocument.getFontSize());
-        surveyDetailDto.setBackColor(surveyDocument.getBackColor());
+        surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
+        surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
+        surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
+
         surveyDetailDto.setReliability(surveyDocument.getReliability());
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();

@@ -34,7 +34,7 @@ public class DesignTemplate {
     }
 
     // Request -> Entity
-    public static DesignTemplate designRequestToEntity(String font, int fontSize, String backColor) {
+    public static DesignTemplate designTemplateRequestToEntity(String font, int fontSize, String backColor) {
         return DesignTemplate.builder()
                 .font(font)
                 .fontSize(fontSize)
