@@ -120,6 +120,7 @@ public class SurveyDocumentService {
 
         // 유저 코드에 해당하는 survey 찾기
         Survey survey = surveyRepository.findByUserCode(userCode);
+        System.out.println(survey);
         Long documentId = createTest(survey, surveyRequest);
 
         // User Module 에 저장된 Survey 보내기
@@ -389,7 +390,7 @@ public class SurveyDocumentService {
         surveyDetailDto.setDescription(surveyDocument.getDescription());
         surveyDetailDto.setReliability(surveyDocument.getReliability());
 
-
+        design
         surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
         surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
         surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
@@ -561,10 +562,16 @@ public class SurveyDocumentService {
         surveyDetailDto.setDescription(surveyTemplate.getDescription());
         surveyDetailDto.setReliability(surveyTemplate.getReliability());
 
-        DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
-        surveyDetailDto.setFont(designTemplate.getFont());
-        surveyDetailDto.setFontSize(designTemplate.getFontSize());
-        surveyDetailDto.setBackColor(designTemplate.getBackColor());
+//        DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
+//        surveyDetailDto.setFont(designTemplate.getFont());
+//        surveyDetailDto.setFontSize(designTemplate.getFontSize());
+//        surveyDetailDto.setBackColor(designTemplate.getBackColor());
+
+        DesignResponseDto designResponseDto = new DesignResponseDto();
+        designResponseDto.setFont(surveyTemplate.getDesignTemplate().getFont());
+        designResponseDto.setFontSize(surveyTemplate.getDesignTemplate().getFontSize());
+        designResponseDto.setBackColor(surveyTemplate.getDesignTemplate().getBackColor());
+        surveyDetailDto.setDesign(designResponseDto);
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionTemplate questionTemplate : surveyTemplate.getQuestionTemplateList()) {
@@ -612,7 +619,7 @@ public class SurveyDocumentService {
 
     public void managementEnable(Long id, Boolean enable) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElse(null);
-        surveyDocument.getDate().setEnabled(enable);
+        surveyDocument.getDate().setIsEnabled(enable);
     }
 
     public ManagementResponseDto managementSurvey(Long id) {
@@ -620,7 +627,7 @@ public class SurveyDocumentService {
         return ManagementResponseDto.builder()
                 .startDate(surveyDocument.getDate().getStartDate())
                 .endDate(surveyDocument.getDate().getDeadline())
-                .enable(surveyDocument.getDate().isEnabled())
+                .enable(surveyDocument.getDate().getIsEnabled())
                 .build();
     }
 }

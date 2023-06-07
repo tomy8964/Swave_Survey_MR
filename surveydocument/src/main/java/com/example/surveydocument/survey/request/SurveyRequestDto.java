@@ -24,7 +24,7 @@ public class SurveyRequestDto {
     Boolean enable;
 
     @Builder
-    public SurveyRequestDto(
+    public SurveyRequestDto(Boolean enable,
             Date startDate, Date endDate, String title, String description, int type, List<QuestionRequestDto> questionRequest, DesignRequestDto design, Boolean reliability) {
         this.title = title;
         this.description = description;
@@ -34,5 +34,6 @@ public class SurveyRequestDto {
         this.reliability=reliability;
         this.design = design;
         this.questionRequest = questionRequest;
+        this.enable=enable;
     }
 }

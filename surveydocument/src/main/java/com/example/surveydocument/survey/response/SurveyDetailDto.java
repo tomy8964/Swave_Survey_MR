@@ -18,8 +18,10 @@ public class SurveyDetailDto {
     private int countAnswer;
     private List<QuestionDetailDto> questionList;
     Boolean reliability;
-    String font;
-    int fontSize;
-    String backColor;
+//    String font;
+//    int fontSize;
+//    String backColor;
     // getter, setter 생략
+
+    DesignResponseDto design;
 }

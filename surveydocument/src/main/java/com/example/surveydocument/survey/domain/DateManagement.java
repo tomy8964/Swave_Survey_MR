@@ -29,7 +29,7 @@ public class DateManagement {
     @NotNull
     private Date deadline;
     @Column(name = "survey_enable")
-    private boolean isEnabled;
+    private Boolean isEnabled;
     @Builder
     public DateManagement(Boolean isEnabled, @NotNull Date startDate, @NotNull Date deadline) {
         this.startDate = startDate;
