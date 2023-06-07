@@ -245,7 +245,7 @@ public class OAuthService {
             KakaoProfile profile = findKakaoProfile(token);
 
             //회원 정보 조회 by Email
-//            User user = userRepository.findByEmail(profile.getKakao_account().getEmail());
+//          User user = userRepository.findByEmail(profile.getKakao_account().getEmail());
             User user = userRepository.findByEmailAndProvider(profile.getKakao_account().getEmail(),provider);
             if (user == null) {
                 user = User.builder()
@@ -254,6 +254,7 @@ public class OAuthService {
                         .nickname(profile.getKakao_account().getProfile().getNickname())
                         .email(profile.getKakao_account().getEmail())
                         .provider(provider)
+                        .isDeleted(Boolean.FALSE)
                         .userRole("ROLE_USER").build();
 
                 userRepository.save(user);

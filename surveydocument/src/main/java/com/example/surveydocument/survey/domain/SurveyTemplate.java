@@ -51,6 +51,10 @@ public class SurveyTemplate {
     @Column(name = "backcolor")
     private String backColor;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "Design_id")
+    private DesignTemplate designTemplate;
+
 
 //    @Column(name="survey_design")
 //    @OneToOne(mappedBy = "design_id",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -73,9 +77,6 @@ public class SurveyTemplate {
         this.description = description;
         this.questionTemplateList = questionTemplateList;
         this.reliability=reliability;
-        this.font=font;
-        this.fontSize=fontSize;
-        this.backColor=backColor;
 //        this.surveyAnswerList = surveyAnswerList;
         this.countAnswer = countAnswer;
     }
