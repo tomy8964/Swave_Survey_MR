@@ -8,6 +8,7 @@ import com.example.surveydocument.survey.domain.*;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
 import com.example.surveydocument.survey.repository.date.DateRepository;
+import com.example.surveydocument.survey.repository.design.DesignRepository;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
 import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
@@ -59,14 +60,12 @@ import static com.example.surveydocument.survey.domain.DesignTemplate.designTemp
 public class SurveyDocumentService {
     private final SurveyRepository surveyRepository;
     private final SurveyDocumentRepository surveyDocumentRepository;
-
+    private final DesignRepository designRepository;
     private final QuestionDocumentRepository questionDocumentRepository;
     private final ChoiceRepository choiceRepository;
     private final WordCloudRepository wordCloudRepository;
     private final DateRepository dateRepository;
     private final OuterRestApiSurveyDocumentService apiService;
-
-
     private final SurveyTemplateRepository surveyTemplateRepository;
     private final QuestionTemplateRepository questionTemplateRepository;
     private final ChoiceTemplateRepository choiceTemplateRepository;
@@ -135,8 +134,8 @@ public class SurveyDocumentService {
             surveyRepository.save(userSurvey);
         }
 
-        Survey survey = surveyRepository.findByUser(getUser.getId());
-        createTest(userSurvey, surveyRequest);
+        Survey survey = surveyRepository.findByUser(getUser);
+        createTest(survey, surveyRequest);
 
         // User Module 에 저장된 Survey 보내기
         apiService.sendSurveyToUser(request,userSurvey);
@@ -162,6 +161,7 @@ public class SurveyDocumentService {
                 surveyRequest.getDesign().getFontSize(),
                 surveyRequest.getDesign().getBackColor()
         );
+        designRepository.save(design);
 
         // 날짜 저장
         // Date Request To Entity
@@ -170,7 +170,6 @@ public class SurveyDocumentService {
                 surveyRequest.getEndDate(),
                 surveyDocumentRepository.findById(surveyDocument.getId()).get()
         );
-
         dateRepository.save(dateManagement);
 
         surveyDocument.setDesign(design);
