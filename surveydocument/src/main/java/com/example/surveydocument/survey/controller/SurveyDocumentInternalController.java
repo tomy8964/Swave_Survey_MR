@@ -5,6 +5,8 @@ import com.example.surveydocument.survey.domain.Choice;
 import com.example.surveydocument.survey.domain.QuestionDocument;
 import com.example.surveydocument.survey.domain.SurveyDocument;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
+import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
+import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
 import com.example.surveydocument.survey.request.PageRequestDto;
 import com.example.surveydocument.survey.request.SurveyRequestDto;
 import com.example.surveydocument.survey.response.SurveyDetailDto;
@@ -30,6 +32,8 @@ public class SurveyDocumentInternalController {
     private final SurveyDocumentService surveyService;
     private final InterRestApiSurveyDocumentService apiService;
     private final RedissonClient redissonClient;
+    private final ChoiceRepository choiceRepository;
+    private final SurveyDocumentRepository surveyDocumentRepository;
 
     @GetMapping(value = "/survey-list/{id}")
     public SurveyDetailDto readDetail(HttpServletRequest request, @PathVariable Long id) throws InvalidTokenException {
@@ -50,6 +54,7 @@ public class SurveyDocumentInternalController {
             if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
                 // transaction
                 surveyService.countChoice(id);
+                choiceRepository.flush();
                 return "count choice success";
             } else {
                 throw new RuntimeException("Failed to acquire lock.");
@@ -69,6 +74,7 @@ public class SurveyDocumentInternalController {
             if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
                 // transaction
                 surveyService.countAnswer(id);
+                surveyDocumentRepository.flush();
                 return "count answer success";
             } else {
                 throw new RuntimeException("Failed to acquire lock.");

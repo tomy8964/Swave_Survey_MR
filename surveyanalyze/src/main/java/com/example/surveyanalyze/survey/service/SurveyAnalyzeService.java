@@ -60,6 +60,7 @@ public class SurveyAnalyzeService {
             }
             else {
                 line = getAnalyzeResult(surveyDocumentId);
+//                line = testString;
             }
             List<Object> testList = getListResult(line);
 
