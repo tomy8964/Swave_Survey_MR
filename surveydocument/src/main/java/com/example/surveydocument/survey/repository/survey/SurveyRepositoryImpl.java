@@ -1,16 +1,15 @@
 package com.example.surveydocument.survey.repository.survey;
 
-import com.example.surveydocument.survey.domain.*;
+import com.example.surveydocument.survey.domain.QDateManagement;
+import com.example.surveydocument.survey.domain.QSurvey;
+import com.example.surveydocument.survey.domain.QSurveyDocument;
+import com.example.surveydocument.survey.domain.SurveyDocument;
 import com.example.surveydocument.survey.request.PageRequestDto;
-import com.example.surveydocument.user.domain.QUser;
-import com.example.surveydocument.user.domain.User;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,7 +37,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
         Long count = jpaQueryFactory
                 .select(surveyDocument.count())
                 .from(surveyDocument)
-                .where(surveyDocument.survey.user.eq(userRequest))
+                .where(surveyDocument.survey.userCode.eq(userRequest))
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, count);
@@ -47,7 +46,6 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
     public List<SurveyDocument> getSurveyDocumentList(Long userRequest, Pageable pageable) {
         QSurveyDocument surveyDocument = QSurveyDocument.surveyDocument;
         QSurvey survey = QSurvey.survey;
-        QUser user = QUser.user;
 
         List<SurveyDocument> result = jpaQueryFactory
                 .select(surveyDocument)
@@ -78,7 +76,6 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
     // survey document 상세 조회
     @Override
     public SurveyDocument surveyDocumentDetail(Long userRequest, SurveyDocument surveyDocumentRequest) {
-        QUser user = QUser.user;
         QSurvey survey = QSurvey.survey;
         QSurveyDocument surveyDocument = QSurveyDocument.surveyDocument;
 
@@ -152,11 +149,11 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
         return null;
     }
 
+/*
 
     public List<SurveyDocument> findBySurveyList(User userRequest){
         QSurveyDocument surveyDocument = QSurveyDocument.surveyDocument;
         QSurvey survey = QSurvey.survey;
-        QUser user = QUser.user;
 
         List<SurveyDocument> results = jpaQueryFactory
                 .selectFrom(surveyDocument)
@@ -164,5 +161,6 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom{
                 .fetch();
         return results;
     }
+*/
 
 }
