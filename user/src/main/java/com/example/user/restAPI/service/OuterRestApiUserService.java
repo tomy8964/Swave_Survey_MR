@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 public class OuterRestApiUserService {
     private static String surveyDocumentInternalUrl = "/api/document/internal";
-    @Value("${gateway-service}")
+    @Value("${gateway.host}")
     private String gateway;
 
     // Document 에 유저 정보 보내기
