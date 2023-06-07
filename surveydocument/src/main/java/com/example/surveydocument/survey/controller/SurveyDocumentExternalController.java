@@ -34,6 +34,7 @@ public class SurveyDocumentExternalController {
         return "Success";
     }
 
+    // todo : QueryDsl 에서 date 수정
     // grid 로 조회
     @PostMapping(value = "/survey-list-grid")
     public List<SurveyDocument> readListGrid(HttpServletRequest request, @RequestBody PageRequestDto pageRequest) {

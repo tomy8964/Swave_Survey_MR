@@ -29,8 +29,10 @@ public class SurveyDocument {
     @Column(name = "accept_response")
     private boolean acceptResponse;
 
+    // todo : Url 필요 없음
     @Column(name = "url")
     private String url;
+
     @Column(name = "answer_count")
     private int countAnswer;
 

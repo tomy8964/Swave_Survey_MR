@@ -33,6 +33,8 @@ public class DateManagement {
     @OneToOne(mappedBy = "date")
     private SurveyDocument surveyDocument;
 
+    // todo : enable boolean 추가
+
     @Builder
     public DateManagement(LocalDate startDate, LocalDate deadline, SurveyDocument surveyDocument) {
         this.startDate = startDate;

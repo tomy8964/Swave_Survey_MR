@@ -43,13 +43,14 @@ public class UserExternalController {
         return userService.getCurrentUser(request);
     }
 
+    // todo : 없어도 되는 부분
     @GetMapping("/mypage")
     public List<SurveyMyPageDto> getMyPage(HttpServletRequest request) { //(1)
         return userService.mySurveyList(request);
     }
 
-    @PostMapping("/updatepage")
-    public String updateMyPage(HttpServletRequest request,@RequestBody UserUpdateRequest user) throws ServletException { //(1)
+    @PatchMapping("/updatepage")
+    public String updateMyPage(HttpServletRequest request, @RequestBody UserUpdateRequest user) throws ServletException { //(1)
         RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("/research/analyze/create"));
 
         try {
@@ -66,7 +67,7 @@ public class UserExternalController {
         }
     }
 
-    @PostMapping("/deleteuser")
+    @PatchMapping("/deleteuser")
     public String deleteUs(HttpServletRequest request) {
         userService.deleteUser(request);
         return "success";
