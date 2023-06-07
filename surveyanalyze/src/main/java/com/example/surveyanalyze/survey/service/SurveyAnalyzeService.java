@@ -52,9 +52,15 @@ public class SurveyAnalyzeService {
         long surveyDocumentId = Long.parseLong(stringId);
 
         try {
-            String line = getAnalyzeResult(surveyDocumentId);
-//            String testString = "[[['1', [0.6666666666666666, '3'], [0.3333333333333333, '4']], ['2', [0.6666666666666666, '4'], [0.3333333333333333, '3']], ['3', [0.6666666666666666, '1'], [0.3333333333333333, '2']], ['4', [0.6666666666666666, '2'], [0.3333333333333333, '1']]], [[[1.0], [1.0]], [[1.0], [1.0]]], [[0.10247043485974942, 1.0], [1.0, 0.10247043485974942]]]";
-
+            String testString = "[[['1', [0.6666666666666666, '3'], [0.3333333333333333, '4']], ['2', [0.6666666666666666, '4'], [0.3333333333333333, '3']], ['3', [0.6666666666666666, '1'], [0.3333333333333333, '2']], ['4', [0.6666666666666666, '2'], [0.3333333333333333, '1']]], [[[1.0], [1.0]], [[1.0], [1.0]]], [[0.10247043485974942, 1.0], [1.0, 0.10247043485974942]]]";
+            String line;
+            // for test
+            if (surveyDocumentId == -1) {
+                line = testString;
+            }
+            else {
+                line = getAnalyzeResult(surveyDocumentId);
+            }
             List<Object> testList = getListResult(line);
 
             ArrayList<Object> apriori = (ArrayList<Object>) testList.get(0);
@@ -146,6 +152,7 @@ public class SurveyAnalyzeService {
     }
 
     private void saveAprioriSecond(List<Object> dataList, AprioriAnalyze aprioriAnalyze, QuestionDocument questionDocument1) {
+        List<ChoiceAnalyze> choiceAnalyzeList = new ArrayList<>();
         for (int i = 0; i < dataList.size()-1; i++) {
             List<Object> subList = (List<Object>) dataList.get(i+1);
             ChoiceAnalyze choiceAnalyze = new ChoiceAnalyze();
@@ -160,7 +167,10 @@ public class SurveyAnalyzeService {
                     .questionTitle(questionDocument1.getTitle())
                     .build();
             choiceAnalyzeRepository.save(choiceAnalyze);
+            choiceAnalyzeList.add(choiceAnalyze);
         }
+        aprioriAnalyze.setChoiceAnalyzeList(choiceAnalyzeList);
+        aprioriAnalyzeRepository.flush();
     }
 
     private void saveChi(QuestionAnalyze questionAnalyze, List<QuestionDocument> questionDocumentList, int size, int o, List<Object> chiList) {
