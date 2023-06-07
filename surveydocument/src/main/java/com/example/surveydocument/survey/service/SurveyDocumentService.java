@@ -363,6 +363,8 @@ public class SurveyDocumentService {
         ReliabilityQuestion reliabilityQuestion = null;
         QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
         List<ChoiceDetailDto> reliabiltyChoiceDtos = new ArrayList<>();
+        DesignResponseDto designResponse = new DesignResponseDto();
+
         if(surveyDocument.getReliability()){
             try {
                 Long l = Long.valueOf(-1);
@@ -383,17 +385,23 @@ public class SurveyDocumentService {
                 throw new RuntimeException(e);
             }
         }
-        // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
+
+        // SurveyDocument에서 SurveyDetailDto로 데이터 복사
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
         surveyDetailDto.setReliability(surveyDocument.getReliability());
 
+        // 디자인
+        designResponse.setFont(surveyDocument.getDesign().getFont());
+        designResponse.setFontSize(surveyDocument.getDesign().getFontSize());
+        designResponse.setBackColor(surveyDocument.getDesign().getBackColor());
+        surveyDetailDto.setDesign(designResponse);
 
-        surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
-        surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
-        surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
-
+        // 날짜
+        surveyDetailDto.setStartDate(surveyDocument.getDate().getStartDate());
+        surveyDetailDto.setEndDate(surveyDocument.getDate().getDeadline());
+        surveyDetailDto.setEnable(surveyDocument.getDate().isEnabled());
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
@@ -555,6 +563,7 @@ public class SurveyDocumentService {
     public SurveyDetailDto getSurveyTemplateDetailDto(Long surveyDocumentId) {
         SurveyTemplate surveyTemplate = surveyTemplateRepository.findById(surveyDocumentId).get();
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
+        DesignResponseDto designResponseDto = new DesignResponseDto();
 
         // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
         surveyDetailDto.setTitle(surveyTemplate.getTitle());
@@ -562,9 +571,12 @@ public class SurveyDocumentService {
         surveyDetailDto.setReliability(surveyTemplate.getReliability());
 
         DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
-        surveyDetailDto.setFont(designTemplate.getFont());
-        surveyDetailDto.setFontSize(designTemplate.getFontSize());
-        surveyDetailDto.setBackColor(designTemplate.getBackColor());
+
+        designResponseDto.setFont(designTemplate.getFont());
+        designResponseDto.setFontSize(designTemplate.getFontSize());
+        designResponseDto.setBackColor(designTemplate.getBackColor());
+
+        surveyDetailDto.setDesign(designResponseDto);
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionTemplate questionTemplate : surveyTemplate.getQuestionTemplateList()) {
