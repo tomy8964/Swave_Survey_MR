@@ -14,6 +14,7 @@ import java.util.Date;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class DateManagement {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Date_id")

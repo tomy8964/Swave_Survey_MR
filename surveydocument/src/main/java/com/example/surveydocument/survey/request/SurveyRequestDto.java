@@ -23,12 +23,11 @@ public class SurveyRequestDto {
     String startDate;
     String endDate;
 
-    //    @ConstructorProperties({"title", "description", "type", "questionRequest"})
-    @Builder
-    public SurveyRequestDto(String title, String description, int type,Boolean reliability,String font, int fontSize, String backColor, List<QuestionRequestDto> questionRequest) {
-        this.title = title;
-    }
-    // 날짜
+//    @Builder
+//    public SurveyRequestDto(String title, String description, int type,Boolean reliability,String font, int fontSize, String backColor, List<QuestionRequestDto> questionRequest) {
+//        this.title = title;
+//    }
+//    // 날짜
 
     @Builder
     public SurveyRequestDto(String startDate, String endDate, String title, String description, int type, List<QuestionRequestDto> questionRequest) {

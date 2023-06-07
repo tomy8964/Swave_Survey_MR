@@ -57,7 +57,7 @@ public class SurveyDocumentExternalController {
     }
 
     // 설문 삭제
-    @PostMapping("/delete/{id}")
+    @PatchMapping("/delete/{id}")
     public void deleteSurvey(@PathVariable Long id) {
         surveyService.deleteSurvey(id);
     }

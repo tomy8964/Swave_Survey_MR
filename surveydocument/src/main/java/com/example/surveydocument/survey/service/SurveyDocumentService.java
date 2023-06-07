@@ -3,6 +3,7 @@ package com.example.surveydocument.survey.service;
 import com.example.surveydocument.restAPI.service.OuterRestApiSurveyDocumentService;
 import com.example.surveydocument.survey.exception.InvalidTokenException;
 import com.example.surveydocument.survey.repository.choice.ChoiceRepository;
+import com.example.surveydocument.survey.repository.date.DateRepository;
 import com.example.surveydocument.survey.repository.questionDocument.QuestionDocumentRepository;
 import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
@@ -35,10 +36,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.surveydocument.survey.domain.DateManagement.*;
@@ -56,7 +54,7 @@ public class SurveyDocumentService {
     private final QuestionDocumentRepository questionDocumentRepository;
     private final ChoiceRepository choiceRepository;
     private final WordCloudRepository wordCloudRepository;
-
+    private final DateRepository dateRepository;
     private final OuterRestApiSurveyDocumentService apiService;
 
     private static String gateway="localhost:8080";
@@ -123,6 +121,14 @@ public class SurveyDocumentService {
             surveyRepository.save(userSurvey);
         }
 
+        Survey survey = surveyRepository.findByUser(getUser.getId());
+        createTest(userSurvey, surveyRequest);
+
+        // User Module 에 저장된 Survey 보내기
+        apiService.sendSurveyToUser(request,userSurvey);
+    }
+
+    public void createTest(Survey userSurvey, SurveyRequestDto surveyRequest) {
         // Survey Request 를 Survey Document 에 저장하기
         SurveyDocument surveyDocument = SurveyDocument.builder()
                 .survey(userSurvey)
@@ -151,11 +157,13 @@ public class SurveyDocumentService {
                 surveyDocumentRepository.findById(surveyDocument.getId()).get()
         );
 
+        dateRepository.save(dateManagement);
+
         surveyDocument.setDesign(design);
         surveyDocument.setDate(dateManagement);
+        surveyDocumentRepository.findById(surveyDocument.getId());
 
         // 설문 문항
-        surveyDocumentRepository.findById(surveyDocument.getId());
         for (QuestionRequestDto questionRequestDto : surveyRequest.getQuestionRequest()) {
             // 설문 문항 저장
             QuestionDocument questionDocument = QuestionDocument.builder()
@@ -188,9 +196,6 @@ public class SurveyDocumentService {
         // Survey 에 SurveyDocument 저장
         userSurvey.setDocument(surveyDocument);
         surveyRepository.flush();
-
-        // User Module 에 저장된 Survey 보내기
-        apiService.sendSurveyToUser(request,userSurvey);
     }
 
     // gird method 로 SurveyDocument 조회
@@ -418,6 +423,7 @@ public class SurveyDocumentService {
         surveyDocumentRepository.flush();
     }
 
+    @Transactional
     public void updateSurvey(HttpServletRequest request,SurveyRequestDto requestDto, Long surveyId) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(surveyId).orElseGet(null);
 
@@ -441,6 +447,7 @@ public class SurveyDocumentService {
         // Question List 수정
         // survey document 의 Question List 초기화
         surveyDocument.getQuestionDocumentList().clear();
+
         for (QuestionRequestDto questionRequestDto : requestDto.getQuestionRequest()) {
             QuestionDocument question = QuestionDocument.builder()
                     .surveyDocument(surveyDocument)
@@ -471,6 +478,7 @@ public class SurveyDocumentService {
     public void deleteSurvey(Long id) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElseGet(null);
         surveyDocument.setDeleted(true);
+        surveyDocumentRepository.save(surveyDocument);
     }
 
     public void managementSurvey(Long id, DateDto dateRequest) {
