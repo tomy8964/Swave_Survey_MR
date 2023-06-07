@@ -1,6 +1,8 @@
 package com.example.user.restAPI.service;
 
 import com.example.user.user.domain.User;
+import com.example.user.util.OAuth.JwtProperties;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,12 +21,17 @@ public class OuterRestApiUserService {
     public void sendUserToSurveyDocument(Long userCode) {
         log.info("Document 에 User 정보를 보냅니다");
 
+//        String jwtHeader = ((HttpServletRequest)request).getHeader(JwtProperties.HEADER_STRING);
         WebClient webClient = WebClient.create();
         String documentUrl = "http://" + gateway + surveyDocumentInternalUrl + "/saveUser";
 
         webClient.post()
                 .uri(documentUrl)
-                .bodyValue(userCode);
+                .header("Authorization","NouNull")
+                .bodyValue(String.valueOf(userCode))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
         log.info(userCode + " 정보를 Document에 보냅니다");
     }
