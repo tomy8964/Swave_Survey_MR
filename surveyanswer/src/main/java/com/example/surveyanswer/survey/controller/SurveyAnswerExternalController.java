@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/survey/external")
+@RequestMapping("api/answer/external")
 //@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
 public class SurveyAnswerExternalController {
 

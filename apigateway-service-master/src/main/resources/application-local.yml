@@ -37,13 +37,13 @@ spring:
         - id: survey-analyze
           uri: http://localhost:8084/
           predicates:
-            - Path=/analyze/internal/**
+            - Path=/api/analyze/internal/**
             - Method=GET,POST
 
         - id: survey-analyze
           uri: http://localhost:8084/
           predicates:
-            - Path=/analyze/external/**
+            - Path=/api/analyze/external/**
             - Method=GET,POST
           filters:
             - AuthorizationHeaderFilter
@@ -51,40 +51,40 @@ spring:
         - id: surveyanswer
           uri: http://localhost:8083/
           predicates:
-            - Path=/survey/external/**
+            - Path=/api/answer/external/**
             - Method=GET,POST
         - id: surveyanswer
           uri: http://localhost:8083/
           predicates:
-            - Path=/survey/internal/**
+            - Path=/api/answer/internal/**
             - Method=GET,POST
         - id: surveydocument
           uri: http://localhost:8082/
           predicates:
-            - Path=/api/external/**
+            - Path=/api/document/external/**
             - Method=GET,POST
           filters:
             - AuthorizationHeaderFilter
         - id: surveydocument
           uri: http://localhost:8082/
           predicates:
-            - Path=/api/internal/**
+            - Path=/api/document/internal/**
             - Method=GET,POST
         - id: surveydocument
           uri: http://localhost:8082/
           predicates:
-            - Path=/api/oauth/**
+            - Path=/api/document/oauth/**
             - Method=GET,POST
 
         - id: user
           uri: http://localhost:8081/
           predicates:
-            - Path=/user/external/** # 프론트에서 요청
+            - Path=/api/user/external/** # 프론트에서 요청
             - Method=GET,POST
         - id: user
           uri: http://localhost:8081/
           predicates:
-            - Path=/user/internal/** # 모듈간 통신
+            - Path=/api/user/internal/** # 모듈간 통신
             - Method=GET,POST
 
 management:

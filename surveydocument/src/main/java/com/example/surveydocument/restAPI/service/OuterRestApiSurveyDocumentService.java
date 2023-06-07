@@ -26,7 +26,7 @@ public class OuterRestApiSurveyDocumentService {
 
     @Value("${gateway.host}")
     private String gateway;
-    private static String userInternalUrl = "/user/internal";
+    private static String userInternalUrl = "/api/user/internal";
     // Current User 정보 가져오기
     public User getCurrentUserFromUser(HttpServletRequest request) {
         String jwtHeader = ((HttpServletRequest)request).getHeader("Authorization");
@@ -88,7 +88,7 @@ public class OuterRestApiSurveyDocumentService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://"+ gateway +"/survey/internal/getQuestionAnswerByCheckAnswerId/"+ id;
+        String apiUrl = "http://"+ gateway +"/api/answer/internal/getQuestionAnswerByCheckAnswerId/"+ id;
 
         // Make a GET request to the API and retrieve the response
         List<QuestionAnswer> questionAnswerList = webClient.get()

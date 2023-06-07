@@ -29,7 +29,7 @@ public class RestAPIService {
         log.info("응답 저장 후 -> 분석 시작 REST API 전달");
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/analyze/internal/research/analyze/create";
+        String apiUrl = "http://" + gateway + "/api/analyze/internal/research/analyze/create";
 
         log.info(apiUrl);
 
@@ -53,7 +53,7 @@ public class RestAPIService {
             log.info("응답 저장 후 -> choice count 전달");
 
             // Define the API URL
-            String apiUrl = "http://" + gateway + "/api/internal/count/"+choiceId;
+            String apiUrl = "http://" + gateway + "/api/document/internal/count/"+choiceId;
             log.info(apiUrl);
 
             // Make a GET request to the API and retrieve the response
@@ -78,7 +78,7 @@ public class RestAPIService {
             log.info("응답 저장 후 -> count answer 전달");
 
             // Define the API URL
-            String apiUrl = "http://" + gateway + "/api/internal/countAnswer/"+surveyDocumentId;
+            String apiUrl = "http://" + gateway + "/api/document/internal/countAnswer/"+surveyDocumentId;
             log.info(apiUrl);
 
             // Make a GET request to the API and retrieve the response
@@ -102,7 +102,7 @@ public class RestAPIService {
         log.info("GET SurveyDocument");
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/getSurveyDocument/" + surveyDocumentId;
+        String apiUrl = "http://" + gateway + "/api/document/internal/getSurveyDocument/" + surveyDocumentId;
         log.info(apiUrl);
 
         // Make a GET request to the API and retrieve the response
