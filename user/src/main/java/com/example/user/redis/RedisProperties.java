@@ -11,5 +11,5 @@ import org.springframework.stereotype.Component;
 @Component
 public class RedisProperties {
     private String host = "localhost";
-    private int port=6379;
+    private int port=16379;
 }

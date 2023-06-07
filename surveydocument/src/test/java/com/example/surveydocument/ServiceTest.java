@@ -1,5 +1,6 @@
 package com.example.surveydocument;
 
+import com.example.surveydocument.survey.domain.Design;
 import com.example.surveydocument.survey.domain.QuestionDocument;
 import com.example.surveydocument.survey.domain.Survey;
 import com.example.surveydocument.survey.domain.SurveyDocument;
@@ -57,7 +58,12 @@ public class ServiceTest {
                 .startDate("2022-06-01")
                 .endDate("2022-06-02")
                 .questionRequest(questionRequestList)
+                .design(Design.builder()
+                        .font("font")
+                        .fontSize(1)
+                        .backColor("color").build())
                 .build();
+
 
 
         Survey survey = Survey.builder()
