@@ -31,24 +31,19 @@ public class DateManagement {
     @NotNull
     private LocalDate deadline;
 
-    @OneToOne(mappedBy = "date",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnore // 순환참조 방지
-    private SurveyDocument surveyDocument;
-
     // todo : enable boolean 추가
 
     @Builder
-    public DateManagement(LocalDate startDate, LocalDate deadline, SurveyDocument surveyDocument) {
-        this.startDate = startDate;
-        this.deadline = deadline;
-        this.surveyDocument = surveyDocument;
+    public DateManagement(String startDate, String deadline) {
+        this.startDate = LocalDate.parse(startDate);
+        this.deadline = LocalDate.parse(deadline);
     }
 
     // RequestDto -> Entity
-    public static DateManagement dateRequestToEntity(String start, String end, SurveyDocument surveyDocument) {
+    public static DateManagement dateRequestToEntity(String start, String end) {
         return DateManagement.builder()
-                .startDate(LocalDate.parse(start))
-                .deadline(LocalDate.parse(end))
-                .surveyDocument(surveyDocument).build();
+                .startDate(start)
+                .deadline(end)
+                .build();
     }
 }

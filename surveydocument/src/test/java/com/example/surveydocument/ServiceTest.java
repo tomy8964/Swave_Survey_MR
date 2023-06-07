@@ -8,6 +8,7 @@ import com.example.surveydocument.survey.repository.questionDocument.QuestionDoc
 import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
 import com.example.surveydocument.survey.request.DateDto;
+import com.example.surveydocument.survey.request.DesignRequestDto;
 import com.example.surveydocument.survey.request.QuestionRequestDto;
 import com.example.surveydocument.survey.request.SurveyRequestDto;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +47,11 @@ public class ServiceTest {
     @Order(1)
     void service_test_1() {
         // given
+        DesignRequestDto design = DesignRequestDto.builder()
+                .font("폰트")
+                .fontSize(1)
+                .backColor("검은색").build();
+
         QuestionRequestDto questionRequest = QuestionRequestDto.builder()
                 .title("설문 문항")
                 .build();
@@ -58,13 +65,8 @@ public class ServiceTest {
                 .startDate("2022-06-01")
                 .endDate("2022-06-02")
                 .questionRequest(questionRequestList)
-                .design(Design.builder()
-                        .font("font")
-                        .fontSize(1)
-                        .backColor("color").build())
+                .design(design)
                 .build();
-
-
 
         Survey survey = Survey.builder()
                 .surveyDocumentList(new ArrayList<>())
@@ -79,7 +81,9 @@ public class ServiceTest {
         SurveyDocument surveyDocument = documentRepository.findAll().get(0);
 
         assertThat(surveyRequest.getTitle()).isEqualTo(surveyDocument.getTitle());
-        assertThat(surveyRequest.getStartDate()).isEqualTo(surveyDocument.getDate().getStartDate());
+//        assertThat(questionRequest.getTitle()).isEqualTo(surveyDocument.getQuestionDocumentList().get(0).getTitle());
+        assertThat(surveyRequest.getDesign().getFont()).isEqualTo(surveyDocument.getDesign().getFont());
+        assertThat(LocalDate.parse(surveyRequest.getStartDate())).isEqualTo(surveyDocument.getDate().getStartDate());
 
     }
     @Test @DisplayName("설문 수정") @Transactional

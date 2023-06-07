@@ -39,7 +39,11 @@ public class SurveyDocument {
     @Column(name = "isDeleted")
     private boolean isDeleted = false;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @JsonIgnore // 순환참조 방지
+    @JoinColumn(name = "Design_id")
+    private Design design;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "Date_id")
     private DateManagement date;
@@ -47,10 +51,6 @@ public class SurveyDocument {
     @Column(name = "reliability")
     private Boolean reliability;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnore // 순환참조 방지
-    @JoinColumn(name = "Design_id")
-    private Design design;
 
     @Column(name = "content")
     @OneToMany(mappedBy = "surveyDocumentId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -62,7 +62,7 @@ public class SurveyDocument {
     private Survey survey;
 
     @Builder
-    public SurveyDocument(int countAnswer, Survey survey, String title, int type,Boolean reliability, String description, List<QuestionDocument> questionDocumentList, DateManagement dateManagement) {
+    public SurveyDocument(int countAnswer, Survey survey, String title, int type,Boolean reliability, String description, List<QuestionDocument> questionDocumentList, DateManagement dateManagement, Design design) {
         this.survey = survey;
         this.title = title;
         this.type = type;
@@ -71,6 +71,7 @@ public class SurveyDocument {
         this.reliability=reliability;
         this.countAnswer = countAnswer;
         this.date = dateManagement;
+        this.design = design;
     }
 
     // 문항 list 에 넣어주기
@@ -78,4 +79,13 @@ public class SurveyDocument {
         this.questionDocumentList.add(questionDocument);
     }
 
+    // 날짜 넣기
+    public void setDesign(Design design) {
+        this.design = design;
+    }
+
+    // 디자인 넣기
+    public void setDate(DateManagement date) {
+        this.date = date;
+    }
 }

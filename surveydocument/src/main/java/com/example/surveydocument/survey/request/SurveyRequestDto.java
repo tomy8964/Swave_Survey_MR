@@ -15,7 +15,7 @@ public class SurveyRequestDto {
     int type;
     List<QuestionRequestDto> questionRequest;
     Boolean reliability;
-    Design design;
+    DesignRequestDto design;
     String startDate;
     String endDate;
 
@@ -23,7 +23,7 @@ public class SurveyRequestDto {
 
     @Builder
     public SurveyRequestDto(
-            String startDate, String endDate, String title, String description, int type, List<QuestionRequestDto> questionRequest, Design design, Boolean reliability) {
+            String startDate, String endDate, String title, String description, int type, List<QuestionRequestDto> questionRequest, DesignRequestDto design, Boolean reliability) {
         this.title = title;
         this.description = description;
         this.startDate = startDate;

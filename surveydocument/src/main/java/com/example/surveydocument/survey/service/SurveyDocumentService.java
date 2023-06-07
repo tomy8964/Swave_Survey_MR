@@ -47,7 +47,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.surveydocument.survey.domain.DateManagement.*;
+import static com.example.surveydocument.survey.domain.DateManagement.dateRequestToEntity;
 import static com.example.surveydocument.survey.domain.Design.designRequestToEntity;
 import static com.example.surveydocument.survey.domain.DesignTemplate.designTemplateRequestToEntity;
 
@@ -156,31 +156,30 @@ public class SurveyDocumentService {
 
         // 디자인 저장
         // Design Request To Entity
-        Design design = designRequestToEntity(
-                surveyRequest.getDesign().getFont(),
-                surveyRequest.getDesign().getFontSize(),
-                surveyRequest.getDesign().getBackColor()
-        );
+        Design design = Design.builder()
+                .font(surveyRequest.getDesign().getFont())
+                .fontSize(surveyRequest.getDesign().getFontSize())
+                .backColor(surveyRequest.getDesign().getBackColor())
+                .build();
         designRepository.save(design);
 
         // 날짜 저장
         // Date Request To Entity
-        DateManagement dateManagement = dateRequestToEntity(
-                surveyRequest.getStartDate(),
-                surveyRequest.getEndDate(),
-                surveyDocumentRepository.findById(surveyDocument.getId()).get()
-        );
+        DateManagement dateManagement = DateManagement.builder()
+                .startDate(surveyRequest.getStartDate())
+                .deadline(surveyRequest.getEndDate())
+                .build();
         dateRepository.save(dateManagement);
 
         surveyDocument.setDesign(design);
         surveyDocument.setDate(dateManagement);
-        surveyDocumentRepository.findById(surveyDocument.getId());
+        surveyDocumentRepository.flush();
 
         // 설문 문항
         for (QuestionRequestDto questionRequestDto : surveyRequest.getQuestionRequest()) {
             // 설문 문항 저장
             QuestionDocument questionDocument = QuestionDocument.builder()
-                    .surveyDocument(surveyDocumentRepository.findById(surveyDocument.getId()).get())
+                    .surveyDocument(surveyDocument)
                     .title(questionRequestDto.getTitle())
                     .questionType(questionRequestDto.getType())
                     .build();
@@ -568,7 +567,7 @@ public class SurveyDocumentService {
     public void managementSurvey(Long id, DateDto dateRequest) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).get();
         surveyDocument.setDate(
-                dateRequestToEntity(dateRequest.getStartDate(), dateRequest.getEndDate(), surveyDocument)
+                dateRequestToEntity(dateRequest.getStartDate(), dateRequest.getEndDate())
         );
         surveyDocumentRepository.save(surveyDocument);
     }
