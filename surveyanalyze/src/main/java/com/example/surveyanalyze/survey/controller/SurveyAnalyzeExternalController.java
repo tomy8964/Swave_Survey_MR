@@ -25,7 +25,7 @@ public class SurveyAnalyzeExternalController {
     }
 
     // 설문 상세 분석 조회
-    @Cacheable(value = "/research/analyze/{id}", key = "#id")
+//    @Cacheable(value = "/research/analyze/{id}", key = "#id")
     @GetMapping(value = "/research/analyze/{id}")
     public SurveyAnalyzeDto readDetailAnalyze(@PathVariable Long id) {
         return surveyService.readSurveyDetailAnalyze(id);

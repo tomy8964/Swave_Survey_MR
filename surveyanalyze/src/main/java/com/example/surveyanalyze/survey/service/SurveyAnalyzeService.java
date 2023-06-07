@@ -127,13 +127,15 @@ public class SurveyAnalyzeService {
             List<Object> chiList = (List<Object>) chi.get(p);
             saveChi(questionAnalyze, questionDocumentList, questionDocumentList.size(), 0, chiList);
 
-            // apriori
-            saveApriori(apriori, surveyAnalyze);
 
             questionAnalyzeRepository.flush();
             p++;
             questionAnalyzeList.add(questionAnalyze);
         }
+        // apriori
+        // Define a custom Comparator
+        log.info(String.valueOf(apriori));
+        saveApriori(apriori, surveyAnalyze);
         surveyAnalyze.setQuestionAnalyzeList(questionAnalyzeList);
         surveyAnalyzeRepository.flush();
     }
@@ -165,6 +167,11 @@ public class SurveyAnalyzeService {
             aprioriAnalyzeList.add(aprioriAnalyze);
             aprioriAnalyzeRepository.flush();
         }
+        // Define a custom Comparator
+        Comparator<AprioriAnalyze> choiceIdComparator = Comparator.comparing(AprioriAnalyze::getChoiceId);
+
+        // Sort the list using the custom Comparator
+        Collections.sort(aprioriAnalyzeList, choiceIdComparator);
         surveyAnalyze.setAprioriAnalyzeList(aprioriAnalyzeList);
         surveyAnalyzeRepository.flush();
     }

@@ -293,18 +293,9 @@ def analyze_for_all(survey_document_id):
                         select.append([ultimateApriori[i][t][p][p1][0],ultimateApriori[i][t][p][p1][1][0][-1]])
 
             result_list.append(select)
-   # print("------------------")
-
-   # print(result_list)
-   # print("------------------")
-   # print(compare)
-   # print("------------------")
-   # print(chi)
-
-   # print("------------------")
-   # print("------------------")
-   # print([ultimateApriori, compare, chi])
-   return [result_list, compare, chi]
+   # Sort the list based on the value '1'
+   sorted_list = sorted(result_list, key=lambda x: x[0][0])
+   return [sorted_list, compare, chi]
 
 def main(id):
    input_param = analyze_for_all(id)
