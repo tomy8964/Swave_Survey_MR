@@ -111,8 +111,8 @@ public class SurveyDocumentInternalController {
 
     // 유저 정보 저장하기
     @PostMapping(value = "/saveUser")
-    public void saveUser(@RequestBody String userCode) {
-        apiService.saveUserInSurvey(Long.valueOf(userCode));
+    public void saveUser(@RequestBody Long userCode) {
+        apiService.saveUserInSurvey(userCode);
     }
 
 }
