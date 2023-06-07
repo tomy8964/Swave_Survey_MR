@@ -177,10 +177,9 @@ public class SurveyAnswerService {
     private SurveyDetailDto getSurveyDetailDto(Long surveyDocumentId) {
         SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
 
-        surveyDocument.getDesign();
-
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
         QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
+        DesignResponseDto designResponseDto = new DesignResponseDto();
 
         ReliabilityQuestion reliabilityQuestion = null;
         List<ChoiceDetailDto> reliabiltyChoiceDtos = new ArrayList<>();
@@ -211,10 +210,18 @@ public class SurveyAnswerService {
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
 
-        surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
-        surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
-        surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
+        // 디자인
+        designResponseDto.setFont(surveyDocument.getDesign().getFont());
+        designResponseDto.setFontSize(surveyDocument.getDesign().getFontSize());
+        designResponseDto.setBackColor(surveyDocument.getDesign().getBackColor());
+        surveyDetailDto.setDesign(designResponseDto);
 
+        // 날짜
+        surveyDetailDto.setStartDate(surveyDocument.getDate().getStartDate());
+        surveyDetailDto.setEndDate(surveyDocument.getDate().getDeadline());
+        surveyDetailDto.setEnable(surveyDocument.getDate().isEnabled());
+
+        // 진정성
         surveyDetailDto.setReliability(surveyDocument.getReliability());
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();

@@ -26,7 +26,6 @@ public class DateManagement {
     private Date startDate;
 
     @Column(name = "survey_deadline")
-    @DateTimeFormat(pattern = "yy-mm-dd")
     @NotNull
     private Date deadline;
     @Column(name = "survey_enable")
