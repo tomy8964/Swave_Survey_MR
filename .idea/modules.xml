@@ -10,7 +10,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/surveyanalyze.main.iml" filepath="$PROJECT_DIR$/.idea/modules/surveyanalyze.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/surveyanswer.main.iml" filepath="$PROJECT_DIR$/.idea/modules/surveyanswer.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/surveydocument.main.iml" filepath="$PROJECT_DIR$/.idea/modules/surveydocument.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/surveydocument.test.iml" filepath="$PROJECT_DIR$/.idea/modules/surveydocument.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/user.main.iml" filepath="$PROJECT_DIR$/.idea/modules/user.main.iml" />
     </modules>
   </component>
 </project>

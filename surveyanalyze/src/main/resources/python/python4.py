@@ -5,15 +5,17 @@ import pandas as pd
 import copy
 import scipy.stats as stats
 import sys
+import warnings
+warnings.filterwarnings(action='ignore') 
 
 
 def analyze_for_all(survey_document_id):
    sourceConnect = pymysql.connect(
-      host='mysql:3306',
+      host='localhost',
       port=3306,
       user='root',
       password='admin',
-      db='surveydb'
+      db='answerdb'
     )
 
    # SQL 예제 : SQL 테이블 둘러보고 다 가져오기
@@ -57,6 +59,7 @@ def analyze_for_all(survey_document_id):
          answer.append(t[0])
       tempResult.append(answer)
    resultSources = tempResult
+
    # print(resultSources)
 
    # resultSources =  (
@@ -78,12 +81,12 @@ def analyze_for_all(survey_document_id):
    '''
 
    totalCount = len(resultSources)
-   print('Total Count of response : ', totalCount)
+   # print('Total Count of response : ', totalCount)
    # apriori 구현을 위하여 문항별 마스킹
    for i in range(0,len(resultSources)):
       for t in range(0,len(resultSources[i])):
          resultSources[i][t] = f'{t}_{resultSources[i][t]}'
-   print('ResultSources(The list of responses) : ',resultSources)
+   # print('ResultSources(The list of responses) : ',resultSources)
    answers = []
    for i in range(0,len(resultSources[0])):
        # i = i번째 문항답. 이를 모두 추려야함
@@ -91,38 +94,38 @@ def analyze_for_all(survey_document_id):
        for t in range(0, len(resultSources)):
            answers[i].append(resultSources[t][i])
 
-   for i in range(0,len(answers)):
-       print('답변번호별 나눔',answers[i])
+   # for i in range(0,len(answers)):
+   #     print('답변번호별 나눔',answers[i])
    temp = list(resultSources)
-   for i in range(0, len(temp)):
-      print('See!', temp[i], temp[i][0][0:1])
+   # for i in range(0, len(temp)):
+   #    print('See!', temp[i], temp[i][0][0:1])
 
-   print('답변 번호별 모음 리스트: ',answers)
+   # print('답변 번호별 모음 리스트: ',answers)
    counterForAnswers = []
-   print(answers)
+   # print(answers)
    for  i in range(0, len(answers)):
        counterForAnswers.append({})
        for t in answers[i]: #답변별로 분류
-           print(i, ' ' ,t, '번째 답변  : ',answers[i], ' ',counterForAnswers[i])
+         #   print(i, ' ' ,t, '번째 답변  : ',answers[i], ' ',counterForAnswers[i])
            if t in counterForAnswers[i]:
                counterForAnswers[i][t] +=1
            else:
                counterForAnswers[i][t] = 1
-   print('CounterForAnswers: ',counterForAnswers) # 각 문항별로 숫자 세고, 그것들 기반으로 나누기
+   # print('CounterForAnswers: ',counterForAnswers) # 각 문항별로 숫자 세고, 그것들 기반으로 나누기
    answerKind = []
    for i in range(0,len(counterForAnswers)):
       answerKind.append(list(counterForAnswers[i].keys()))
-      print(i ,' 번째 문항 답안들 : ', answerKind[i])
+      # print(i ,' 번째 문항 답안들 : ', answerKind[i])
 
-   print('Answerkind: ',answerKind) # 문항별 답안수.
+   # print('Answerkind: ',answerKind) # 문항별 답안수.
    answerKindForCopy = []
    for i in range(0,len(answerKind)): # AnswerKindFOrCopy = 문항별 답안 복사용
       answerKindForCopy.append([])
-      print(answerKind[i])
+      # print(answerKind[i])
       for t in range(0,len(answerKind[i])):
-         print('\t', answerKind[i][t])
+         # print('\t', answerKind[i][t])
          answerKindForCopy[i].append(0)
-   print(answerKindForCopy , answerKind)
+   # print(answerKindForCopy , answerKind)
    responsePerAnswer = [] # 모든 문항별로 분류된 매우 큰 리스트
    '''
    큰 문항 리스트 자료구조
@@ -150,30 +153,30 @@ def analyze_for_all(survey_document_id):
          responsePerAnswer[i].append([])
          for p in range(0, len(resultSources)): # 모든 문항 한번씩 순회. 필요한 것: 비교
             if resultSources[p][i] == answerKind[i][k]:
-               print('i ',i,'k ',k,'p :',p, ' ' ,resultSources[p][i],' ', answerKind[i][k], ' ',resultSources[p]) # append 하게하면될듯
+               # print('i ',i,'k ',k,'p :',p, ' ' ,resultSources[p][i],' ', answerKind[i][k], ' ',resultSources[p]) # append 하게하면될듯
                responsePerAnswer[i][k].append(resultSources[p])
             #if resultSources[p][int()]
    countPerAnswer = []
    for i in range(0,len(responsePerAnswer)):
-      print(f'{i} 번째 문항: {answerKind[i]}')
+      # print(f'{i} 번째 문항: {answerKind[i]}')
       countPerAnswer.append([])
       for k in range(0,len(responsePerAnswer[i])):
          countPerAnswer[i].append(copy.deepcopy(answerKindForCopy))
-         print(f'\t {k} 번째 보기: {answerKind[i][k]} ')
+         # print(f'\t {k} 번째 보기: {answerKind[i][k]} ')
          for p in range(0, len(responsePerAnswer[i][k])):
-            print(f'\t\t {p} 답안? : {responsePerAnswer[i][k][p]}')
+            # print(f'\t\t {p} 답안? : {responsePerAnswer[i][k][p]}')
             for q in range(0,len(responsePerAnswer[i][k][p])):
-               print(f'\t\t\t{i}, {k} , {q} {answerKind[q]}: {responsePerAnswer[i][k][p][q]}') # 하나단위로 분해 /
+               # print(f'\t\t\t{i}, {k} , {q} {answerKind[q]}: {responsePerAnswer[i][k][p][q]}') # 하나단위로 분해 /
                countPerAnswer[i][k][q][answerKind[q].index(responsePerAnswer[i][k][p][q])] +=1
 
             # print('RPA i : ',i, '|','k ',k,'p',p,'|', responsePerAnswer[i][k][p][i] , '|',  responsePerAnswer[i][k][p]) # i :  4(문제 번호수) | k(답변 번호수)  2 p(갯수에 따른 분류) 0 | 4_기권 | ['0_남성', '1_짬뽕', '2_싫음', '3_찬성', '4_기권']
    #해야 할것: 문항별 APRIORI 구현
-   for i in range(0,len(countPerAnswer)):
-      print(f'{i} 번째 : {answerKind[i]} 집표수 (비고 : {countPerAnswer[i]})')
-      for k in range(0,len(countPerAnswer[i])):
-         print(f'\t {k} 번째 : {answerKind[i][k]} | {countPerAnswer[i][k]}')
-         for p in range(0,len(countPerAnswer[i][k])):
-            print(f'\t\t {p} 번째 : { countPerAnswer[i][k][p]}')
+   # for i in range(0,len(countPerAnswer)):
+   #    # print(f'{i} 번째 : {answerKind[i]} 집표수 (비고 : {countPerAnswer[i]})')
+   #    for k in range(0,len(countPerAnswer[i])):
+   #       # print(f'\t {k} 번째 : {answerKind[i][k]} | {countPerAnswer[i][k]}')
+   #       for p in range(0,len(countPerAnswer[i][k])):
+   #          # print(f'\t\t {p} 번째 : { countPerAnswer[i][k][p]}')
 
    compare = [] # 비교분석
    chi = [] # 교차분석
@@ -182,12 +185,12 @@ def analyze_for_all(survey_document_id):
    d
    '''
    for i in range(0,len(countPerAnswer)):
-      print('! ')
+      # print('! ')
       compare.append([])
       chi.append([])
-      print(countPerAnswer[i])
+      # print(countPerAnswer[i])
       tempForAnalyze = []
-      for t in range(0,len(countPerAnswer[i][0])): 
+      for t in range(0,len(countPerAnswer[i][0])):
          # if len(countPerAnswer[i][0][t]) <=2: #T-Test
          #    print( f' !!!{countPerAnswer[i][0][t]} !!!')
          # else: #anova
@@ -195,56 +198,58 @@ def analyze_for_all(survey_document_id):
          tempForAnalyze.append([])
          # compare[i].append([])
          # chi[i].append([])
-         for p in range(0,len(countPerAnswer[i])): 
-            print(countPerAnswer[i][p][t])
+         for p in range(0,len(countPerAnswer[i])):
+            # print(countPerAnswer[i][p][t])
             # compare[i][t].append?
             tempForAnalyze[t].append(countPerAnswer[i][p][t])
-      for t in range(0, len(countPerAnswer[i])):
-         print(countPerAnswer[i][t])
-      print('!!!',tempForAnalyze) #각 문항별 교차표 
+      # for t in range(0, len(countPerAnswer[i])):
+         # print(countPerAnswer[i][t])
+      # print('!!!',tempForAnalyze) #각 문항별 교차표
       '''
       즉 D E F ( 각 문항 )
       A 1 2 3
       B 4 5 6
-      C 7 8 9 
+      C 7 8 9
       (각 응답별 번호)
       ... 의 표가 만들어짐.
 
       '''
 
-      # Anova / T / Chi 구현구간  
+      # Anova / T / Chi 구현구간
       for t in range(0,len(tempForAnalyze)):
          compare[i].append([])
          chi[i].append([])
-         df = pd.DataFrame(tempForAnalyze[t]) 
+         df = pd.DataFrame(tempForAnalyze[t])
          # print(tempForAnalyze[t], ' ',answerKind[t],' ',len(answerKind[t])) # 각 문항별로 내부가 일치
-         if len(tempForAnalyze[t]) == 2 : # T테스트
-            # print(f'{tempForAnalyze[t]} is T Test ') 
+         if len(tempForAnalyze[t]) == 1:
+            compare[i][t].append(0)
+         elif len(tempForAnalyze[t]) == 2 : # T테스트
+            # print(f'{tempForAnalyze[t]} is T Test ')
             _ , pvalue = stats.ttest_ind(*tempForAnalyze[t])
             compare[i][t].append(pvalue)
 
-         else: # ANOVA 
+         else: # ANOVA
             # print(f'{tempForAnalyze[t]} is ANOVA Test ')
             _ , pvalue = stats.f_oneway(*tempForAnalyze[t])
-            compare[i][t].append(pvalue) 
+            compare[i][t].append(pvalue)
          _, pvalue, _, _ = stats.chi2_contingency(df)
          chi[i][t]=  pvalue
 
-         print( f'\t {chi[i][t]} | {compare[i][t]} | {tempForAnalyze[t]}')
- 
+         # print( f'\t {chi[i][t]} | {compare[i][t]} | {tempForAnalyze[t]}')
 
-      
+
+
       # Anova / T / chi time
 
-   # print(compare) 
+   # print(compare)
    # print(chi)
    # for i in range(0,len(chi)):
    #    print(f'{i} th : ')
    #    for t in range(0,len(chi[i])):
    #       print(f'\t \t {t} th : {chi[i][t]} | {compare[i][t]}| ' )
-         
 
-      
+
+
 
 
    #Apriori 코드
@@ -264,20 +269,42 @@ def analyze_for_all(survey_document_id):
             support = row['support']
             itemset = list(row['itemsets'])
             #print('T!',support,  '|', itemset )
-            tempList.append([support, itemset]) 
+            tempList.append([support, itemset])
          ultimateApriori[i][k].append(tempList)
             #print(responsePerAnswer[i][k])# 각 문항별 apriori
-   print("------------------")
-   print(ultimateApriori)
-   print("------------------")
-   print(compare)
-   print("------------------")
-   print(chi)
+   result_list=[]
+   for i in range(0, len(ultimateApriori)):
+        for t in range(0, len(ultimateApriori[i])):
+            select=[]
+            for p in range(0, len(ultimateApriori[i][t])):
+                count = 0
+                select.append(answerKind[i][t][-1])
+                select1=[]
 
-   print("------------------")
-   print("------------------")
+                for p1 in range(0,len(ultimateApriori[i][t][p])):
+                    if count >= 3:
+                        break
+                    if len(ultimateApriori[i][t][p][p1][1])>1:
+                        continue
+                    elif (ultimateApriori[i][t][p][p1][1][0][-1] == answerKind[i][t][-1]):
+                        continue
+                    else:
+                        count+=1
+                        select.append([ultimateApriori[i][t][p][p1][0],ultimateApriori[i][t][p][p1][1][0][-1]])
+
+            result_list.append(select)
+   # print("------------------")
+
+   # print(result_list)
+   # print("------------------")
+   # print(compare)
+   # print("------------------")
+   # print(chi)
+
+   # print("------------------")
+   # print("------------------")
    # print([ultimateApriori, compare, chi])
-   return [ultimateApriori, compare, chi]
+   return [result_list, compare, chi]
 
 def main(id):
    input_param = analyze_for_all(id)
@@ -307,8 +334,7 @@ questionID
 교차분석
 비교분석
 연관분석 구현
-MySQL 쿼리연동
-현재 진행예정: 제일 많은 값 1개만
+f현재 진행예정: 제일 많은 값 1개만
 2개 이상 최빈값: 1개 유기
 
 연관분석 하면서 깨달은것

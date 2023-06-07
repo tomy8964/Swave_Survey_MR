@@ -75,7 +75,7 @@ public class SurveyAnswerService {
 //        }
     }
     // 설문 응답 저장
-    @Transactional
+//    @Transactional
     public void createSurveyAnswer(SurveyResponseDto surveyResponse){
         if(surveyResponse.getReliability()) {
             for (QuestionResponseDto questionResponseDto : surveyResponse.getQuestionResponse()) {

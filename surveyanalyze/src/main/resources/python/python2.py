@@ -7,11 +7,11 @@ import sys
 
 def analyze_for_all(survey_document_id):
     sourceConnect = pymysql.connect(
-        host='mysql:3306',
+        host='localhost',
         port=3306,
         user='root',
         password='admin',
-        db='surveydb'
+        db='answerdb'
     )
 
     # SQL 예제 : SQL 테이블 둘러보고 다 가져오기
