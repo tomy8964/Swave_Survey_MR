@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +28,11 @@ public class SurveyAnswerService {
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final QuestionAnswerRepository questionAnswerRepository;
     private final RestAPIService restAPIService;
-    Random random = new Random();
     private List<ReliabilityQuestion> questions;
     private int reliabilityquestionNumber;
+
+    Random random = new Random();
+
     // 설문 응답 참여
     public SurveyDetailDto getParticipantSurvey(Long id){
         return getSurveyDetailDto(id);
@@ -72,6 +75,7 @@ public class SurveyAnswerService {
 //        }
     }
     // 설문 응답 저장
+    @Transactional
     public void createSurveyAnswer(SurveyResponseDto surveyResponse){
         if(surveyResponse.getReliability()) {
             for (QuestionResponseDto questionResponseDto : surveyResponse.getQuestionResponse()) {

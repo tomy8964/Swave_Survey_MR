@@ -17,9 +17,11 @@ public class RestAPIService {
 
     public WebClient webClient = WebClient.create();
 
-    public void setWebClient(String baseurl) {
-        this.webClient = WebClient.create(baseurl);
+    public void setGateway(String baseUrl) {
+        this.gateway = baseUrl;
+        this.webClient = WebClient.create(gateway);
     }
+
 
     public void restAPItoAnalyzeController(Long surveyDocumentId) {
         //REST API로 분석 시작 컨트롤러로 전달
@@ -28,6 +30,8 @@ public class RestAPIService {
 
         // Define the API URL
         String apiUrl = "http://" + gateway + "/analyze/internal/research/analyze/create";
+
+        log.info(apiUrl);
 
         // Make a GET request to the API and retrieve the response
         String post = webClient.post()
@@ -43,45 +47,53 @@ public class RestAPIService {
     }
 
     public void giveChoiceIdToCount(Long choiceId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("응답 저장 후 -> 분석 시작 REST API 전달");
+        if (choiceId != null) {
+            //REST API로 분석 시작 컨트롤러로 전달
+            // Create a WebClient instance
+            log.info("응답 저장 후 -> choice count 전달");
 
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/count/"+choiceId;
+            // Define the API URL
+            String apiUrl = "http://" + gateway + "/api/internal/count/"+choiceId;
+            log.info(apiUrl);
 
-        // Make a GET request to the API and retrieve the response
-        String post = webClient.post()
-                .uri(apiUrl)
-                .header("Authorization","NouNull")
-                .bodyValue(String.valueOf(choiceId))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+            // Make a GET request to the API and retrieve the response
+            String post = webClient.post()
+                    .uri(apiUrl)
+                    .header("Authorization","NouNull")
+                    .bodyValue(String.valueOf(choiceId))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
 
-        // Process the response as needed
-        System.out.println("Request: " + post);
+            // Process the response as needed
+            System.out.println("Request: " + post);
+        }
+        log.info("test choice count REST API 전달");
     }
 
     public void giveDocumentIdtoCountAnswer(Long surveyDocumentId) {
-        //REST API로 분석 시작 컨트롤러로 전달
-        // Create a WebClient instance
-        log.info("응답 저장 후 -> 분석 시작 REST API 전달");
+        if (surveyDocumentId != null) {
+            //REST API로 분석 시작 컨트롤러로 전달
+            // Create a WebClient instance
+            log.info("응답 저장 후 -> count answer 전달");
 
-        // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/internal/countAnswer/"+surveyDocumentId;
+            // Define the API URL
+            String apiUrl = "http://" + gateway + "/api/internal/countAnswer/"+surveyDocumentId;
+            log.info(apiUrl);
 
-        // Make a GET request to the API and retrieve the response
-        String post = webClient.post()
-                .uri(apiUrl)
-                .header("Authorization","NouNull")
-                .bodyValue(String.valueOf(surveyDocumentId))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+            // Make a GET request to the API and retrieve the response
+            String post = webClient.post()
+                    .uri(apiUrl)
+                    .header("Authorization","NouNull")
+                    .bodyValue(String.valueOf(surveyDocumentId))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
 
-        // Process the response as needed
-        System.out.println("Request: " + post);
+            // Process the response as needed
+            System.out.println("Request: " + post);
+        }
+        log.info("test 분석 시작 REST API 전달");
     }
 
     public SurveyDocument getSurveyDocument(Long surveyDocumentId) {

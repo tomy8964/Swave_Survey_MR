@@ -1,16 +1,17 @@
 package com.example.surveyanswer.survey.controller;
 
-import com.example.surveyanswer.survey.domain.QuestionAnswer;
 import com.example.surveyanswer.survey.domain.SurveyAnswer;
 import com.example.surveyanswer.survey.response.SurveyDetailDto;
 import com.example.surveyanswer.survey.response.SurveyResponseDto;
 import com.example.surveyanswer.survey.service.SurveyAnswerService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.redisson.RedissonRedLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ import java.util.List;
 public class SurveyAnswerExternalController {
 
     private final SurveyAnswerService surveyService;
+    private final RedissonClient redissonClient;
 
     @GetMapping(value = "/test")
     public String test() {
@@ -36,13 +38,25 @@ public class SurveyAnswerExternalController {
     // 설문 응답 저장
     @PostMapping(value = "/response/create")
     public String createResponse(@RequestBody SurveyResponseDto surveyForm) {
-        // 설문 응답 저장
-        System.out.println("survey answer");
-        surveyService.createSurveyAnswer(surveyForm);
-        return "Success";
+        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("$surveyDocumentId"));
+
+        try {
+            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+                // transaction
+                surveyService.createSurveyAnswer(surveyForm);
+                return "Success";
+            } else {
+                throw new RuntimeException("Failed to acquire lock.");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+        }
     }
 
     // 설문 응답들 조회
+    @Cacheable(value = "get-csv", key = "#id")
     @GetMapping(value = "/response/{id}")
     public List<SurveyAnswer> readResponse(@PathVariable Long id){
         return surveyService.getSurveyAnswersBySurveyDocumentId(id);

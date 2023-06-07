@@ -13,11 +13,14 @@ import com.example.surveydocument.survey.service.SurveyDocumentService;
 import com.example.surveydocument.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.redisson.RedissonRedLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class SurveyDocumentInternalController {
 
     private final SurveyDocumentService surveyService;
     private final InterRestApiSurveyDocumentService apiService;
+    private final RedissonClient redissonClient;
 
     @GetMapping(value = "/survey-list/{id}")
     public SurveyDetailDto readDetail(HttpServletRequest request, @PathVariable Long id) throws InvalidTokenException {
@@ -38,16 +42,43 @@ public class SurveyDocumentInternalController {
         return surveyService.getSurveyDocument(id);
     }
 
+
     @PostMapping(value = "/count/{id}")
     public String countChoice(@PathVariable Long id) {
-         surveyService.countChoice(id);
-         return "count success";
+        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("choiceId"));
+
+        try {
+            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+                // transaction
+                surveyService.countChoice(id);
+                return "count choice success";
+            } else {
+                throw new RuntimeException("Failed to acquire lock.");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @PostMapping(value = "/countAnswer/{id}")
     public String countAnswer(@PathVariable Long id) {
-        surveyService.countAnswer(id);
-        return "count success";
+        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("$surveydocument"));
+
+        try {
+            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+                // transaction
+                surveyService.countAnswer(id);
+                return "count answer success";
+            } else {
+                throw new RuntimeException("Failed to acquire lock.");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @GetMapping(value = "/getChoice/{id}")
@@ -68,7 +99,20 @@ public class SurveyDocumentInternalController {
 
     @PostMapping(value = "/setWordCloud/{id}")
     public void setWordCloud(@PathVariable Long id, @RequestBody List<WordCloudDto> wordCloudList) {
-        surveyService.setWordCloud(id, wordCloudList);
+        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("$surveyDocumentId"));
+
+        try {
+            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+                // transaction
+                surveyService.setWordCloud(id, wordCloudList);
+            } else {
+                throw new RuntimeException("Failed to acquire lock.");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+        }
     }
 
     // 유저 정보 저장하기

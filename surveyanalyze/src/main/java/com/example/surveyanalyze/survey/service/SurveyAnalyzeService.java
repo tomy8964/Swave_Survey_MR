@@ -11,6 +11,7 @@ import com.example.surveyanalyze.survey.repository.questionAnlayze.QuestionAnaly
 import com.example.surveyanalyze.survey.repository.surveyAnalyze.SurveyAnalyzeRepository;
 import com.example.surveyanalyze.survey.response.*;
 import com.example.surveyanalyze.survey.restAPI.service.RestAPIService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -45,217 +47,27 @@ public class SurveyAnalyzeService {
 
 
     // 파이썬에 DocumentId 보내주고 분석결과 Entity에 매핑해서 저장
+    @Transactional
     public void analyze(String stringId) throws InvalidPythonException {
         long surveyDocumentId = Long.parseLong(stringId);
 
         try {
-            System.out.println("pythonbuilder 시작");
-            String arg1;
-            ProcessBuilder builder;
-
-            Resource[] resources = ResourcePatternUtils
-                    .getResourcePatternResolver(new DefaultResourceLoader())
-                    .getResources("classpath*:python/python2.py");
-
-            log.info(String.valueOf(resources[0]));
-            String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
-            log.info(substring);
-
-            builder = new ProcessBuilder("python", substring, String.valueOf(surveyDocumentId));
-
-            builder.redirectErrorStream(true);
-            Process process = builder.start();
-
-            // 자식 프로세스가 종료될 때까지 기다림
-            int exitCode;
-            try {
-                exitCode = process.waitFor();
-            } catch (InterruptedException e) {
-                // Handle interrupted exception
-                exitCode = -1;
-            }
-
-            if (exitCode != 0) {
-                BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                String errorLine;
-                System.out.println("Error output:");
-                while ((errorLine = errorReader.readLine()) != null) {
-                    System.out.println(errorLine);
-                }
-            }
-
-            System.out.println("Process exited with code " + exitCode);
-
-            //// 서브 프로세스가 출력하는 내용을 받기 위해
-            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            String line = br.readLine();
-
-            //[[1,[[0.88,3],[0.8,5]]],[2,[[0.7,4],[0.5,6]]]]
-            /**
-             * [
-             * [['1', [0.6666666666666666, '3'], [0.3333333333333333, '4']], ['2', [0.6666666666666666, '4'], [0.3333333333333333, '3']], ['3', [0.6666666666666666, '1'], [0.3333333333333333, '2']], ['4', [0.6666666666666666, '2'], [0.3333333333333333, '1']]],
-             * [[[1.0], [1.0]], [[1.0], [1.0]]],
-             * [[0.10247043485974942, 1.0], [1.0, 0.10247043485974942]]
-             * ]
-             **/
             String testString = "[[['1', [0.6666666666666666, '3'], [0.3333333333333333, '4']], ['2', [0.6666666666666666, '4'], [0.3333333333333333, '3']], ['3', [0.6666666666666666, '1'], [0.3333333333333333, '2']], ['4', [0.6666666666666666, '2'], [0.3333333333333333, '1']]], [[[1.0], [1.0]], [[1.0], [1.0]]], [[0.10247043485974942, 1.0], [1.0, 0.10247043485974942]]]";
-
-//            test
-//            String inputString = line.replaceAll("'", "");
-            String inputString = testString.replaceAll("'", "");
-
-            log.info("result python");
-            log.info(inputString);
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<Object> testList = objectMapper.readValue(inputString, List.class);
-            log.info(String.valueOf(testList));
+            String line;
+            // for test
+            if (surveyDocumentId == -1) {
+                line = testString;
+            }
+            else {
+                line = getAnalyzeResult(surveyDocumentId);
+            }
+            List<Object> testList = getListResult(line);
 
             ArrayList<Object> apriori = (ArrayList<Object>) testList.get(0);
             ArrayList<Object> compare = (ArrayList<Object>) testList.get(1);
-            ArrayList<Object> chi= (ArrayList<Object>) testList.get(2);
+            ArrayList<Object> chi = (ArrayList<Object>) testList.get(2);
 
-            // 값 분리해서 Analyze DB에 저장
-            SurveyAnalyze surveyAnalyze = surveyAnalyzeRepository.findBySurveyDocumentId(surveyDocumentId);
-            // 과거의 분석 결과 있으면 questionAnalyze delete & null 주입
-            if (surveyAnalyze != null) {
-                Long id = surveyAnalyze.getId();
-                questionAnalyzeRepository.deleteAllBySurveyAnalyzeId(surveyAnalyze);
-            } else {
-                surveyAnalyze = SurveyAnalyze.builder()
-                        .surveyDocumentId(surveyDocumentId)
-                        .questionAnalyzeList(new ArrayList<>())
-                        .build();
-            }
-            surveyAnalyzeRepository.save(surveyAnalyze);
-
-            //get surveyDocument
-            SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
-
-            int p = 0;
-            for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
-                if (questionDocument.getQuestionType() == 0) {
-                    continue;
-                }
-                QuestionAnalyze questionAnalyze;
-                questionAnalyze = QuestionAnalyze.builder()
-                        .questionTitle(questionDocument.getTitle())
-                        .surveyAnalyzeId(surveyAnalyze)
-                        .build();
-
-                questionAnalyzeRepository.save(questionAnalyze);
-
-                // compare
-                // [[[1.0], [1.0]], [[1.0], [1.0]]]
-                List<Object> compareList = (List<Object>) compare.get(p);
-                // [[1.0], [1.0]] -> compareList
-                List<QuestionDocument> questionDocumentList = surveyDocument.getQuestionDocumentList();
-                int size = questionDocumentList.size();
-                int o=0;
-                for (int k = 0; k < size; k++) {
-                    if (questionDocumentList.get(k).getQuestionType() == 0) {
-                        continue;
-                    }
-                    if (questionDocumentList.get(k).getTitle() == questionAnalyze.getQuestionTitle()) {
-                        continue;
-                    }
-                    ArrayList<Double> temp = (ArrayList<Double>) compareList.get(o);
-                    Double pValue = temp.get(0); // Assuming you want to retrieve the first Double value from the ArrayList
-
-                    CompareAnalyze compareAnalyze = new CompareAnalyze();
-                    compareAnalyze = CompareAnalyze.builder()
-                            .questionAnalyzeId(questionAnalyze)
-                            .pValue(pValue)
-                            .questionTitle(questionDocumentList.get(k).getTitle())
-                            .build();
-                    o++;
-                    compareAnalyzeRepository.save(compareAnalyze);
-                }
-
-                // chi
-                // [[0.10247043485974942, 1.0], [1.0, 0.10247043485974942]]
-                List<Object> chiList = (List<Object>) chi.get(p);
-                // [0.10247043485974942, 1.0] -> chiList
-                o=0;
-                for (int k = 0; k < size; k++) {
-                    if (questionDocumentList.get(k).getQuestionType() == 0) {
-                        continue;
-                    }
-                    if (questionDocumentList.get(k).getTitle() == questionAnalyze.getQuestionTitle()) {
-                        continue;
-                    }
-                    Double pValue = (Double) chiList.get(o);
-                    ChiAnalyze chiAnalyze = new ChiAnalyze();
-                    chiAnalyze = ChiAnalyze.builder()
-                            .questionAnalyzeId(questionAnalyze)
-                            .pValue(pValue)
-                            .questionTitle(questionDocumentList.get(k).getTitle())
-                            .build();
-                    o++;
-                    chiAnalyzeRepository.save(chiAnalyze);
-                }
-
-                //apriori
-                for (int j = 0; j < apriori.size(); j++) {
-                    // [['1', [0.66, '3'], [0.33, '4']]
-                    List<Object> dataList = (List<Object>) apriori.get(j);
-                    Long choiceId = Long.valueOf((Integer) dataList.get(0));
-                    AprioriAnalyze aprioriAnalyze;
-                    //get Choice
-                    Choice choice = restAPIService.getChoice(choiceId);
-                    QuestionDocument questionDocument1 = restAPIService.getQuestionByChoiceId(choiceId);
-//                    QuestionDocument questionDocument1 = getQuestionDocument(choice.getQuestion_id().getId());
-                    aprioriAnalyze = AprioriAnalyze.builder()
-                            .choiceId(choiceId)
-                            .choiceTitle(choice.getTitle())
-                            .questionTitle(questionDocument1.getTitle())
-                            .choiceAnalyzeList(new ArrayList<>())
-                            .surveyAnalyzeId(surveyAnalyze)
-                            .build();
-
-                    aprioriAnalyzeRepository.save(aprioriAnalyze);
-                    // for문 [0.88,2] 같은 배열의 갯수 만큼
-                    // [[0.88,3],[0.8,5]]
-                    for (int i = 0; i < dataList.size()-1; i++) {
-                        List<Object> subList = (List<Object>) dataList.get(i+1);
-                        ChoiceAnalyze choiceAnalyze = new ChoiceAnalyze();
-                        double support = Math.round((double) subList.get(0) *1000) / 1000.0;
-                        Long choiceId2 = Long.valueOf((Integer) subList.get(1));
-                        Choice choice1 = restAPIService.getChoice(choiceId2);
-                        choiceAnalyze = choiceAnalyze.builder()
-                                .choiceTitle(choice1.getTitle())
-                                .support(support)
-                                .aprioriAnalyzeId(aprioriAnalyze)
-                                .choiceId(choiceId2)
-                                .questionTitle(questionDocument1.getTitle())
-                                .build();
-                        choiceAnalyzeRepository.save(choiceAnalyze);
-                    }
-                    aprioriAnalyzeRepository.flush();
-                }
-
-                questionAnalyzeRepository.flush();
-                p++;
-            }
-
-//            // compare
-//            // 1번 문항에 대해 고른 응답의 비율과 2번 문항에 대해 고른 응답의 비율
-//            // [[[찬부식 - 찬부식],[찬부식 - 객관식]][[객관식-찬부식],[찬부식-객관식]]]
-//            // [[[1.0], [1.0]], [[1.0], [1.0]]]
-//            // compare의 size는 총 question(not 주관식)의 갯수
-//            for (int j = 0; j < compare.size(); j++) {
-//                // [[1.0], [1.0]]
-//                List<Object> dataList = (List<Object>) compare.get(j);
-//                //dataList size == questionList size
-//                for (int i = 0; i < dataList.size(); i++) {
-//
-//                }
-//            }
-
-            // Word Cloud 분석해서 이미지를 외부 서버에 저장 후 url를 가져와서 count 처럼 document에 저장
-            // Word Cloud
-            surveyAnalyzeRepository.flush();
+            saveSurveyAnalyze(surveyDocumentId, apriori, compare, chi);
         }catch (IOException e) {
             // 체크 예외 -> 런타임 커스텀 예외 변환 처리
             // python 파일 오류
@@ -263,6 +75,229 @@ public class SurveyAnalyzeService {
         }
     }
 
+    private void saveSurveyAnalyze(long surveyDocumentId, ArrayList<Object> apriori, ArrayList<Object> compare, ArrayList<Object> chi) {
+        SurveyAnalyze surveyAnalyze = getSurveyAnalyze(surveyDocumentId);
+
+        //get surveyDocument
+        SurveyDocument surveyDocument = restAPIService.getSurveyDocument(surveyDocumentId);
+
+        saveQuestionAnalyze(apriori, compare, chi, surveyAnalyze, surveyDocument);
+        surveyAnalyzeRepository.flush();
+    }
+
+    private void saveQuestionAnalyze(ArrayList<Object> apriori, ArrayList<Object> compare, ArrayList<Object> chi, SurveyAnalyze surveyAnalyze, SurveyDocument surveyDocument) {
+        int p = 0;
+        List<QuestionAnalyze> questionAnalyzeList = new ArrayList<>();
+        for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
+            if (questionDocument.getQuestionType() == 0) {
+                continue;
+            }
+            QuestionAnalyze questionAnalyze;
+            questionAnalyze = QuestionAnalyze.builder()
+                    .questionTitle(questionDocument.getTitle())
+                    .surveyAnalyzeId(surveyAnalyze)
+                    .build();
+
+            questionAnalyzeRepository.save(questionAnalyze);
+
+            // compare
+            List<Object> compareList = (List<Object>) compare.get(p);
+            List<QuestionDocument> questionDocumentList = surveyDocument.getQuestionDocumentList();
+            saveCompare(questionAnalyze, compareList, questionDocumentList, questionDocumentList.size());
+
+            // chi
+            List<Object> chiList = (List<Object>) chi.get(p);
+            saveChi(questionAnalyze, questionDocumentList, questionDocumentList.size(), 0, chiList);
+
+            // apriori
+            saveApriori(apriori, surveyAnalyze);
+
+            questionAnalyzeRepository.flush();
+            p++;
+            questionAnalyzeList.add(questionAnalyze);
+        }
+        surveyAnalyze.setQuestionAnalyzeList(questionAnalyzeList);
+        surveyAnalyzeRepository.flush();
+    }
+
+    private void saveApriori(ArrayList<Object> apriori, SurveyAnalyze surveyAnalyze) {
+        //apriori
+        List<AprioriAnalyze> aprioriAnalyzeList = new ArrayList<>();
+        for (int j = 0; j < apriori.size(); j++) {
+            // [['1', [0.66, '3'], [0.33, '4']]
+            List<Object> dataList = (List<Object>) apriori.get(j);
+            Long choiceId = Long.valueOf((Integer) dataList.get(0));
+            AprioriAnalyze aprioriAnalyze;
+            //get Choice
+            Choice choice = restAPIService.getChoice(choiceId);
+            QuestionDocument questionDocument1 = restAPIService.getQuestionByChoiceId(choiceId);
+//                    QuestionDocument questionDocument1 = getQuestionDocument(choice.getQuestion_id().getId());
+            aprioriAnalyze = AprioriAnalyze.builder()
+                    .choiceId(choiceId)
+                    .choiceTitle(choice.getTitle())
+                    .questionTitle(questionDocument1.getTitle())
+                    .choiceAnalyzeList(new ArrayList<>())
+                    .surveyAnalyzeId(surveyAnalyze)
+                    .build();
+
+            aprioriAnalyzeRepository.save(aprioriAnalyze);
+            // for문 [0.88,2] 같은 배열의 갯수 만큼
+            // [[0.88,3],[0.8,5]]
+            saveAprioriSecond(dataList, aprioriAnalyze, questionDocument1);
+            aprioriAnalyzeList.add(aprioriAnalyze);
+            aprioriAnalyzeRepository.flush();
+        }
+        surveyAnalyze.setAprioriAnalyzeList(aprioriAnalyzeList);
+        surveyAnalyzeRepository.flush();
+    }
+
+    private void saveAprioriSecond(List<Object> dataList, AprioriAnalyze aprioriAnalyze, QuestionDocument questionDocument1) {
+        List<ChoiceAnalyze> choiceAnalyzeList = new ArrayList<>();
+        for (int i = 0; i < dataList.size()-1; i++) {
+            List<Object> subList = (List<Object>) dataList.get(i+1);
+            ChoiceAnalyze choiceAnalyze = new ChoiceAnalyze();
+            double support = Math.round((double) subList.get(0) *1000) / 1000.0;
+            Long choiceId2 = Long.valueOf((Integer) subList.get(1));
+            Choice choice1 = restAPIService.getChoice(choiceId2);
+            choiceAnalyze = choiceAnalyze.builder()
+                    .choiceTitle(choice1.getTitle())
+                    .support(support)
+                    .aprioriAnalyzeId(aprioriAnalyze)
+                    .choiceId(choiceId2)
+                    .questionTitle(questionDocument1.getTitle())
+                    .build();
+            choiceAnalyzeRepository.save(choiceAnalyze);
+            choiceAnalyzeList.add(choiceAnalyze);
+        }
+        aprioriAnalyze.setChoiceAnalyzeList(choiceAnalyzeList);
+        aprioriAnalyzeRepository.flush();
+    }
+
+    private void saveChi(QuestionAnalyze questionAnalyze, List<QuestionDocument> questionDocumentList, int size, int o, List<Object> chiList) {
+        List<ChiAnalyze> chiAnalyzeList = new ArrayList<>();
+        for (int k = 0; k < size; k++) {
+            if (questionDocumentList.get(k).getQuestionType() == 0) {
+                continue;
+            }
+            if (questionDocumentList.get(k).getTitle() == questionAnalyze.getQuestionTitle()) {
+                continue;
+            }
+            Double pValue = (Double) chiList.get(o);
+            ChiAnalyze chiAnalyze = new ChiAnalyze();
+            chiAnalyze = ChiAnalyze.builder()
+                    .questionAnalyzeId(questionAnalyze)
+                    .pValue(pValue)
+                    .questionTitle(questionDocumentList.get(k).getTitle())
+                    .build();
+            o++;
+            chiAnalyzeRepository.save(chiAnalyze);
+            chiAnalyzeList.add(chiAnalyze);
+        }
+        questionAnalyze.setChiAnalyzeList(chiAnalyzeList);
+        questionAnalyzeRepository.flush();
+    }
+
+    private void saveCompare(QuestionAnalyze questionAnalyze, List<Object> compareList, List<QuestionDocument> questionDocumentList, int size) {
+        int o=0;
+        List<CompareAnalyze> compareAnalyzeList = new ArrayList<>();
+        for (int k = 0; k < size; k++) {
+            if (questionDocumentList.get(k).getQuestionType() == 0) {
+                continue;
+            }
+            if (questionDocumentList.get(k).getTitle() == questionAnalyze.getQuestionTitle()) {
+                continue;
+            }
+            ArrayList<Double> temp = (ArrayList<Double>) compareList.get(o);
+            Double pValue = temp.get(0); // Assuming you want to retrieve the first Double value from the ArrayList
+
+            CompareAnalyze compareAnalyze = CompareAnalyze.builder()
+                    .questionAnalyzeId(questionAnalyze)
+                    .pValue(pValue)
+                    .questionTitle(questionDocumentList.get(k).getTitle())
+                    .build();
+            o++;
+            compareAnalyzeRepository.save(compareAnalyze);
+            compareAnalyzeList.add(compareAnalyze);
+        }
+        questionAnalyze.setCompareAnalyzeList(compareAnalyzeList);
+        questionAnalyzeRepository.flush();
+    }
+
+    private SurveyAnalyze getSurveyAnalyze(long surveyDocumentId) {
+        // 값 분리해서 Analyze DB에 저장
+        SurveyAnalyze surveyAnalyze = surveyAnalyzeRepository.findBySurveyDocumentId(surveyDocumentId);
+        // 과거의 분석 결과 있으면 questionAnalyze delete & null 주입
+        if (surveyAnalyze != null) {
+            Long id = surveyAnalyze.getId();
+            questionAnalyzeRepository.deleteAllBySurveyAnalyzeId(surveyAnalyze);
+        } else {
+            surveyAnalyze = SurveyAnalyze.builder()
+                    .surveyDocumentId(surveyDocumentId)
+                    .questionAnalyzeList(new ArrayList<>())
+                    .build();
+        }
+        surveyAnalyzeRepository.save(surveyAnalyze);
+        return surveyAnalyze;
+    }
+
+    private static List<Object> getListResult(String line) throws JsonProcessingException {
+        String inputString = line.replaceAll("'", "");
+//            String inputString = testString.replaceAll("'", "");
+
+        log.info("result python");
+        log.info(inputString);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Object> testList = objectMapper.readValue(inputString, List.class);
+        log.info(String.valueOf(testList));
+        return testList;
+    }
+
+    private static String getAnalyzeResult(long surveyDocumentId) throws IOException {
+        System.out.println("pythonbuilder 시작");
+        ProcessBuilder builder;
+
+        Resource[] resources = ResourcePatternUtils
+                .getResourcePatternResolver(new DefaultResourceLoader())
+                .getResources("classpath*:python/python2.py");
+
+        log.info(String.valueOf(resources[0]));
+        String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
+        log.info(substring);
+
+        builder = new ProcessBuilder("python", substring, String.valueOf(surveyDocumentId));
+
+        builder.redirectErrorStream(true);
+        Process process = builder.start();
+
+        // 자식 프로세스가 종료될 때까지 기다림
+        int exitCode;
+        try {
+            exitCode = process.waitFor();
+        } catch (InterruptedException e) {
+            // Handle interrupted exception
+            exitCode = -1;
+        }
+
+        if (exitCode != 0) {
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String errorLine;
+            System.out.println("Error output:");
+            while ((errorLine = errorReader.readLine()) != null) {
+                System.out.println(errorLine);
+            }
+        }
+
+        System.out.println("Process exited with code " + exitCode);
+
+        //// 서브 프로세스가 출력하는 내용을 받기 위해
+        BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+        String line = br.readLine();
+        return line;
+    }
+
+    @Transactional
     public void wordCloud(String stringId) {
         long surveyDocumentId = Long.parseLong(stringId);
         // 값 분리해서 Analyze DB에 저장
@@ -590,8 +625,6 @@ public class SurveyAnalyzeService {
                 wordCount.put(word, wordCount.getOrDefault(word, 0) + 1);
             }
         }
-
         return wordCount;
     }
-
 }

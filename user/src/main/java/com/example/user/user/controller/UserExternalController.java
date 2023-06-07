@@ -12,10 +12,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.RedissonRedLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -27,6 +31,7 @@ public class UserExternalController {
     private final UserService2 userService;
     private final InterRestApiUserService restApiService;
     private final UserRepository userRepository;
+    private final RedissonClient redissonClient;
 
     @PostMapping("/oauth/token")
     public ResponseEntity getLogin(@RequestParam("code") String code, @RequestParam("provider") String provider) {
@@ -45,7 +50,20 @@ public class UserExternalController {
 
     @PostMapping("/updatepage")
     public String updateMyPage(HttpServletRequest request,@RequestBody UserUpdateRequest user) throws ServletException { //(1)
-        return userService.updateMyPage(request,user);
+        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("/research/analyze/create"));
+
+        try {
+            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+                // transaction
+                 return userService.updateMyPage(request,user);
+            } else {
+                throw new RuntimeException("Failed to acquire lock.");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @PostMapping("/deleteuser")
