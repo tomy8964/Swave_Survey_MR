@@ -1,5 +1,4 @@
-package com.example.surveydocument.survey.domain;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+package com.example.surveyanswer.survey.domain;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -23,8 +22,8 @@ public class DesignTemplate {
     @Column(name = "back_color")
     private String backColor;
 
-    @OneToOne(mappedBy = "designTemplate",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private SurveyTemplate surveyTemplate;
+    @OneToOne(mappedBy = "designTemplate")
+    private SurveyDocument surveyTemplate;
 
     @Builder
     public DesignTemplate(String font, int fontSize, String backColor) {

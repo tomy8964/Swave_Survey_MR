@@ -1,6 +1,7 @@
 package com.example.surveydocument.survey.request;
 
 import com.example.surveydocument.survey.domain.Design;
+import com.example.surveydocument.survey.domain.DesignTemplate;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,21 +10,21 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class SurveyRequestDto {
+public class SurveyTemplateRequestDTO {
     String title;
     String description;
     int type;
     List<QuestionRequestDto> questionRequest;
     Boolean reliability;
-    Design design;
+    DesignTemplate design;
     String startDate;
     String endDate;
 
     // todo : enable
 
     @Builder
-    public SurveyRequestDto(
-            String startDate, String endDate, String title, String description, int type, List<QuestionRequestDto> questionRequest, Design design, Boolean reliability) {
+    public SurveyTemplateRequestDTO(
+            String startDate, String endDate, String title, String description, int type, List<QuestionRequestDto> questionRequest, DesignTemplate design, Boolean reliability) {
         this.title = title;
         this.description = description;
         this.startDate = startDate;

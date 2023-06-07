@@ -31,23 +31,23 @@ public class UserService2 {
     private final OAuthService oAuthService;
     private final UserRepository userRepository;
 
-    public List<SurveyMyPageDto> mySurveyList(HttpServletRequest request) {
-        List<SurveyMyPageDto> surveyMyPageDtos = new ArrayList<>();
-
-        Survey survey= getUser(request).getSurvey();
-        System.out.println(survey);
-        for(SurveyDocument surveyDocument:survey.getSurveyDocumentList()){
-            SurveyMyPageDto surveyMyPageDto = new SurveyMyPageDto();
-            surveyMyPageDto.setId(surveyDocument.getId());
-            surveyMyPageDto.setDescription(surveyDocument.getDescription());
-            surveyMyPageDto.setTitle(surveyDocument.getTitle());
-            surveyMyPageDto.setDeadline(surveyDocument.getDeadline());
-            surveyMyPageDto.setStartDate(surveyDocument.getStartDate());
-            surveyMyPageDtos.add(surveyMyPageDto);
-
-        }
-        return surveyMyPageDtos;
-    }
+//    public List<SurveyMyPageDto> mySurveyList(HttpServletRequest request) {
+//        List<SurveyMyPageDto> surveyMyPageDtos = new ArrayList<>();
+//
+//        Survey survey= getUser(request).getSurvey();
+//        System.out.println(survey);
+//        for(SurveyDocument surveyDocument:survey.getSurveyDocumentList()){
+//            SurveyMyPageDto surveyMyPageDto = new SurveyMyPageDto();
+//            surveyMyPageDto.setId(surveyDocument.getId());
+//            surveyMyPageDto.setDescription(surveyDocument.getDescription());
+//            surveyMyPageDto.setTitle(surveyDocument.getTitle());
+//            surveyMyPageDto.setDeadline(surveyDocument.);
+//            surveyMyPageDto.setStartDate(surveyDocument.getStartDate());
+//            surveyMyPageDtos.add(surveyMyPageDto);
+//
+//        }
+//        return surveyMyPageDtos;
+//    }
 
     public User getUser(HttpServletRequest request) { //(1)
         Long userCode = (Long) request.getAttribute("userCode");

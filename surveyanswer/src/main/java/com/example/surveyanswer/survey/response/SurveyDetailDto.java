@@ -1,5 +1,6 @@
 package com.example.surveyanswer.survey.response;
 
+import com.example.surveyanswer.survey.domain.DesignTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,8 @@ public class SurveyDetailDto implements Serializable {
     private int countAnswer;
     private List<QuestionDetailDto> questionList;
     Boolean reliability;
+
+
 
     // 설문 참여 부분이기 때문에 디자인 필요
     String font;
