@@ -34,11 +34,11 @@ public class SurveyDocument {
     private boolean isDeleted = false;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnore // 순환참조 방지
+//    @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "Design_id")
     private Design design;
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnore // 순환참조 방지
+//    @JsonIgnore // 순환참조 방지
     @JoinColumn(name = "Date_id")
     private DateManagement date;
 
