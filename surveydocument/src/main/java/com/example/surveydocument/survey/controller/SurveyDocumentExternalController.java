@@ -60,8 +60,9 @@ public class SurveyDocumentExternalController {
 
     // 설문 삭제
     @PatchMapping("/delete/{id}")
-    public void deleteSurvey(@PathVariable Long id) {
+    public String deleteSurvey(@PathVariable Long id) {
         surveyService.deleteSurvey(id);
+        return "Success";
     }
 
     // 설문 관리 날짜
