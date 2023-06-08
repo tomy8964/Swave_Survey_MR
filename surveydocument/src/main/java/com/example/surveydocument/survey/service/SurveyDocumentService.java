@@ -592,6 +592,7 @@ public class SurveyDocumentService {
     public void deleteSurvey(Long id) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElseGet(null);
         surveyDocument.setDeleted(true);
+        surveyDocument.setSurvey(null);
         surveyDocumentRepository.save(surveyDocument);
     }
 
