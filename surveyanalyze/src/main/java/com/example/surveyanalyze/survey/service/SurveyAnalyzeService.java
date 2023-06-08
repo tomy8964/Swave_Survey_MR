@@ -294,7 +294,8 @@ public class SurveyAnalyzeService {
                 .getResources("classpath*:python/python4.py");
 
         log.info(String.valueOf(resources[0]));
-        String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
+        //server 5 local 6
+        String substring = String.valueOf(resources[0]).substring(5, String.valueOf(resources[0]).length() -1);
         log.info(substring);
 
         builder = new ProcessBuilder("python", substring, String.valueOf(surveyDocumentId));
@@ -674,7 +675,7 @@ public class SurveyAnalyzeService {
         }
 
         log.info(String.valueOf(resources[0]));
-        String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
+        String substring = String.valueOf(resources[0]).substring(5, String.valueOf(resources[0]).length() -1);
         log.info(substring);
 
         builder = new ProcessBuilder("python", substring, surveyDocumentId);
