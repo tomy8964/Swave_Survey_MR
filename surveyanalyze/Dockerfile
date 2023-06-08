@@ -1,10 +1,16 @@
 FROM openjdk:17
 
-# Install Python and required dependencies
-RUN apt-get update && apt-get install -y python3 python3-pip
+# Install curl and other dependencies
+RUN apt-get update && apt-get install -y curl gnupg
 
-# Set Python in PATH environment variable
-ENV PATH="/usr/bin/python3:${PATH}"
+# Download and install Python
+RUN curl https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz --output python.tgz \
+    && tar -xzf python.tgz \
+    && cd Python-3.9.7 \
+    && ./configure \
+    && make install \
+    && cd .. \
+    && rm -rf python.tgz Python-3.9.7
 
 WORKDIR /usr/src/app
 
@@ -25,6 +31,3 @@ WORKDIR /usr/src/app
 
 # Run the Spring application with Python support
 CMD ["java", "-jar", "-Dspring.profiles.active=server", "./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar"]
-
-#local
-#CMD ["java","-jar","./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar"]
