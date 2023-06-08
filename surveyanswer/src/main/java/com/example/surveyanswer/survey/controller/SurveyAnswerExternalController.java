@@ -29,7 +29,7 @@ public class SurveyAnswerExternalController {
     }
 
     // 설문 참여
-    @Cacheable(value = "load-survey", key = "#id")
+//    @Cacheable(value = "load-survey", key = "#id")
     @GetMapping(value = "/load/{id}")
     public SurveyDetailDto participateSurvey(@PathVariable Long id) {
         return surveyService.getParticipantSurvey(id);

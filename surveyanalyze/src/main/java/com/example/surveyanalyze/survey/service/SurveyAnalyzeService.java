@@ -291,17 +291,17 @@ public class SurveyAnalyzeService {
         System.out.println("pythonbuilder 시작");
         ProcessBuilder builder;
 
-//        Resource[] resources = ResourcePatternUtils
-//                .getResourcePatternResolver(new DefaultResourceLoader())
-//                .getResources("classpath*:python/python4.py");
+        Resource[] resources = ResourcePatternUtils
+                .getResourcePatternResolver(new DefaultResourceLoader())
+                .getResources("classpath*:python/python4.py");
 
-//        log.info(String.valueOf(resources[0]));
-//        //server 5 local 6
-//        String substring = String.valueOf(resources[0]).substring(5, String.valueOf(resources[0]).length() -1);
-//        log.info(substring);
-        String resourceFolderLocation = resourceLocator.getResourceFolderLocation();
+        log.info(String.valueOf(resources[0]));
+        //server 5 local 6
+        String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
+        log.info(substring);
+//        String resourceFolderLocation = resourceLocator.getResourceFolderLocation();
 
-        builder = new ProcessBuilder("python", resourceFolderLocation + "/python/python4.py", String.valueOf(surveyDocumentId));
+        builder = new ProcessBuilder("python", substring, String.valueOf(surveyDocumentId));
 
         builder.redirectErrorStream(true);
         Process process = builder.start();
@@ -669,21 +669,21 @@ public class SurveyAnalyzeService {
         System.out.println("wordcloud pythonbuilder 시작");
         ProcessBuilder builder;
 
-//        Resource[] resources;
-//        try {
-//            resources = ResourcePatternUtils
-//                    .getResourcePatternResolver(new DefaultResourceLoader())
-//                    .getResources("classpath*:python/python5.py");
-//        } catch (IOException e) {
-//            throw new InvalidPythonException(e);
-//        }
+        Resource[] resources;
+        try {
+            resources = ResourcePatternUtils
+                    .getResourcePatternResolver(new DefaultResourceLoader())
+                    .getResources("classpath*:python/python5.py");
+        } catch (IOException e) {
+            throw new InvalidPythonException(e);
+        }
 
-//        log.info(String.valueOf(resources[0]));
-//        String substring = String.valueOf(resources[0]).substring(5, String.valueOf(resources[0]).length() -1);
-//        log.info(substring);
-        String resourceFolderLocation = resourceLocator.getResourceFolderLocation();
+        log.info(String.valueOf(resources[0]));
+        String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
+        log.info(substring);
+//        String resourceFolderLocation = resourceLocator.getResourceFolderLocation();
 
-        builder = new ProcessBuilder("python", resourceFolderLocation + "/python/python5.py", surveyDocumentId);
+        builder = new ProcessBuilder("python", substring, surveyDocumentId);
 
         builder.redirectErrorStream(true);
         Process process;

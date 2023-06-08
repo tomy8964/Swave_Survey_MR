@@ -19,14 +19,14 @@ public class SurveyAnswerInternalController {
     private final SurveyAnswerService surveyService;
 
     // getQuestionAnswer
-    @Cacheable(value = "getQuestionAnswer", key = "#id")
+//    @Cacheable(value = "getQuestionAnswer", key = "#id")
     @GetMapping(value = "/question/list/{id}")
     public List<QuestionAnswer> getQuestionAnswers(@PathVariable Long id){
         return surveyService.getQuestionAnswers(id);
     }
 
     // getQuestionAnswerByCheckAnswerId
-    @Cacheable(value = "getQuestionAnswerByCheckAnswerId", key = "#id")
+//    @Cacheable(value = "getQuestionAnswerByCheckAnswerId", key = "#id")
     @GetMapping(value = "/getQuestionAnswerByCheckAnswerId/{id}")
     public List<QuestionAnswer> getQuestionAnswerByCheckAnswerId(@PathVariable Long id){
         return surveyService.getQuestionAnswerByCheckAnswerId(id);
