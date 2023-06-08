@@ -22,7 +22,7 @@ public class SurveyAnswer {
     private String description;
 
     @OneToMany(mappedBy = "surveyAnswerId", fetch = FetchType.LAZY)
-    @JsonIgnore //순환참조 방지
+//    @JsonIgnore //순환참조 방지
     @Column(name = "content")
     private List<QuestionAnswer> questionanswersList;
 
