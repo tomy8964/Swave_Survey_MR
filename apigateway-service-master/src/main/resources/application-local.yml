@@ -97,4 +97,8 @@ token:
   expiration-time: 86400000 # 하루짜리 토큰 생성
 
   secret: changhwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwanchanghwan2022changhwan
+logging:
+  level:
+    org.springframework.cloud.gateway: trace
+    reactor.netty: trace
 ---

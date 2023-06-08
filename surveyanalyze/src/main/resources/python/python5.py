@@ -79,7 +79,7 @@ def word(str, question_document_id, survey_document_id):
     spwords = set(STOPWORDS)  # 제외할 단어
     # spwords.add('내가')  # 제외하고 싶은 단어 추가
     # Firebase 초기화
-    cred = credentials.Certificate("swave-ba582-firebase-adminsdk-j8kps-d8683bd5ec.json")
+    cred = credentials.Certificate("secretKey.json")
     firebase_admin.initialize_app(cred, {'storageBucket': 'swave-ba582.appspot.com'})
 
     # WordCloud 생성

@@ -25,5 +25,5 @@ public class SurveyDetailDto {
     private Boolean enable;
 
     DesignResponseDto design;
-
+    // getter, setter 생략
 }

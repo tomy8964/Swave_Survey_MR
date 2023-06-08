@@ -52,21 +52,21 @@ public class OAuthService {
             grantType = "authorization_code";
             clientId = "4646a32b25c060e42407ceb8c13ef14a";
             clientSecret = "AWyAH1M24R9EYfUjJ1KCxcsh3DwvK8F7";
-            redirectUri = "http://localhost:3000/oauth/callback/kakao";
+            redirectUri = "http://172.16.210.80:80/oauth/callback/kakao";
         } else if (provider.equals("google")) {
             log.info("code: " + code);
             log.info("Provider: " + provider);
             grantType = "authorization_code";
             clientId = "278703087355-limdvm0almc07ldn934on122iorpfdv5.apps.googleusercontent.com";
             clientSecret = "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";
-            redirectUri = "http://localhost:3000/oauth/callback/google";
+            redirectUri = "http://172.16.210.80:80/oauth/callback/google";
         } else if (provider.equals("git")) {
             log.info("code: " + code);
             log.info("Provider: " + provider);
             grantType = "authorization_code";
             clientId = "Iv1.986aaa4d78140fb7";
             clientSecret = "0c8e730012e8ca8e41a3922358572457f5cc57e4";
-            redirectUri = "http://localhost:3000/oauth/callback/git";
+            redirectUri = "http://172.16.210.80:80/oauth/callback/git";
         } else {
             throw new IllegalArgumentException("Invalid Provider: " + provider);
         }
@@ -257,7 +257,6 @@ public class OAuthService {
                         .nickname(profile.getKakao_account().getProfile().getNickname())
                         .email(profile.getKakao_account().getEmail())
                         .provider(provider)
-                        .survey(new Survey())
                         .userRole("ROLE_USER").build();
 
                 userRepository.save(user);

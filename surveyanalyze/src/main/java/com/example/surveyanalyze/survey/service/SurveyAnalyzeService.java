@@ -1,5 +1,6 @@
 package com.example.surveyanalyze.survey.service;
 
+import com.example.surveyanalyze.ResourceLocator;
 import com.example.surveyanalyze.survey.domain.*;
 import com.example.surveyanalyze.survey.exception.InvalidPythonException;
 import com.example.surveyanalyze.survey.exception.InvalidTokenException;
@@ -44,6 +45,7 @@ public class SurveyAnalyzeService {
     private final QuestionAnalyzeRepository questionAnalyzeRepository;
     private final SurveyAnalyzeRepository surveyAnalyzeRepository;
     private final RestAPIService restAPIService;
+    private final ResourceLocator resourceLocator;
 
 
     // 파이썬에 DocumentId 보내주고 분석결과 Entity에 매핑해서 저장
@@ -63,7 +65,24 @@ public class SurveyAnalyzeService {
 //                line = testString;
             }
             List<Object> testList = getListResult(line);
-
+/*
+[testList
+    [
+        [
+            'ex)1'[[1.0, '0_1']], [[1.0, '0_2']]
+        ],
+        [
+            'ex)2'[[1.0, '1_3']], [[1.0, '1_4']]
+        ]
+    ],
+    [
+        [[0.8075499102701248], [0.42264973081037427]], [[0.42264973081037427], [0.8075499102701248]]
+    ],
+    [
+        [0.1921064408679386, 1.0], [1.0, 0.1921064408679386]
+    ]
+]
+*/
             ArrayList<Object> apriori = (ArrayList<Object>) testList.get(0);
             ArrayList<Object> compare = (ArrayList<Object>) testList.get(1);
             ArrayList<Object> chi = (ArrayList<Object>) testList.get(2);
@@ -110,13 +129,15 @@ public class SurveyAnalyzeService {
             List<Object> chiList = (List<Object>) chi.get(p);
             saveChi(questionAnalyze, questionDocumentList, questionDocumentList.size(), 0, chiList);
 
-            // apriori
-            saveApriori(apriori, surveyAnalyze);
 
             questionAnalyzeRepository.flush();
             p++;
             questionAnalyzeList.add(questionAnalyze);
         }
+        // apriori
+        // Define a custom Comparator
+        log.info(String.valueOf(apriori));
+        saveApriori(apriori, surveyAnalyze);
         surveyAnalyze.setQuestionAnalyzeList(questionAnalyzeList);
         surveyAnalyzeRepository.flush();
     }
@@ -148,6 +169,11 @@ public class SurveyAnalyzeService {
             aprioriAnalyzeList.add(aprioriAnalyze);
             aprioriAnalyzeRepository.flush();
         }
+        // Define a custom Comparator
+        Comparator<AprioriAnalyze> choiceIdComparator = Comparator.comparing(AprioriAnalyze::getChoiceId);
+
+        // Sort the list using the custom Comparator
+        Collections.sort(aprioriAnalyzeList, choiceIdComparator);
         surveyAnalyze.setAprioriAnalyzeList(aprioriAnalyzeList);
         surveyAnalyzeRepository.flush();
     }
@@ -261,19 +287,21 @@ public class SurveyAnalyzeService {
         return testList;
     }
 
-    private static String getAnalyzeResult(long surveyDocumentId) throws IOException {
+    private String getAnalyzeResult(long surveyDocumentId) throws IOException {
         System.out.println("pythonbuilder 시작");
         ProcessBuilder builder;
 
-        Resource[] resources = ResourcePatternUtils
-                .getResourcePatternResolver(new DefaultResourceLoader())
-                .getResources("classpath*:python/python2.py");
+//        Resource[] resources = ResourcePatternUtils
+//                .getResourcePatternResolver(new DefaultResourceLoader())
+//                .getResources("classpath*:python/python4.py");
 
-        log.info(String.valueOf(resources[0]));
-        String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
-        log.info(substring);
+//        log.info(String.valueOf(resources[0]));
+//        //server 5 local 6
+//        String substring = String.valueOf(resources[0]).substring(5, String.valueOf(resources[0]).length() -1);
+//        log.info(substring);
+        String resourceFolderLocation = resourceLocator.getResourceFolderLocation();
 
-        builder = new ProcessBuilder("python", substring, String.valueOf(surveyDocumentId));
+        builder = new ProcessBuilder("python", resourceFolderLocation + "/python/python4.py", String.valueOf(surveyDocumentId));
 
         builder.redirectErrorStream(true);
         Process process = builder.start();
@@ -338,14 +366,15 @@ public class SurveyAnalyzeService {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            String resourceFolderLocation = resourceLocator.getResourceFolderLocation();
 
-            log.info(String.valueOf(resources[0]));
-            String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
-            log.info(substring);
+//            log.info(String.valueOf(resources[0]));
+//            String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
+            log.info(resourceFolderLocation);
 
             List<String> stopwords = new ArrayList<>();
 
-            try (BufferedReader reader = new BufferedReader(new FileReader(substring))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(resourceFolderLocation+"/python/python4.py"))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     stopwords.add(line);
@@ -636,24 +665,25 @@ public class SurveyAnalyzeService {
         return wordCount;
     }
 
-    public static void wordCloudPython(String surveyDocumentId) {
+    public void wordCloudPython(String surveyDocumentId) {
         System.out.println("wordcloud pythonbuilder 시작");
         ProcessBuilder builder;
 
-        Resource[] resources;
-        try {
-            resources = ResourcePatternUtils
-                    .getResourcePatternResolver(new DefaultResourceLoader())
-                    .getResources("classpath*:python/python5.py");
-        } catch (IOException e) {
-            throw new InvalidPythonException(e);
-        }
+//        Resource[] resources;
+//        try {
+//            resources = ResourcePatternUtils
+//                    .getResourcePatternResolver(new DefaultResourceLoader())
+//                    .getResources("classpath*:python/python5.py");
+//        } catch (IOException e) {
+//            throw new InvalidPythonException(e);
+//        }
 
-        log.info(String.valueOf(resources[0]));
-        String substring = String.valueOf(resources[0]).substring(6, String.valueOf(resources[0]).length() -1);
-        log.info(substring);
+//        log.info(String.valueOf(resources[0]));
+//        String substring = String.valueOf(resources[0]).substring(5, String.valueOf(resources[0]).length() -1);
+//        log.info(substring);
+        String resourceFolderLocation = resourceLocator.getResourceFolderLocation();
 
-        builder = new ProcessBuilder("python", substring, surveyDocumentId);
+        builder = new ProcessBuilder("python", resourceFolderLocation + "/python/python5.py", surveyDocumentId);
 
         builder.redirectErrorStream(true);
         Process process;

@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,13 +28,23 @@ public class OuterRestApiUserService {
         WebClient webClient = WebClient.create();
         String documentUrl = "http://" + gateway + surveyDocumentInternalUrl + "/saveUser";
 
+        List<Long> resultList = new ArrayList<>();
+
         webClient.post()
                 .uri(documentUrl)
-                .header("Authorization","NouNull")
-                .bodyValue(String.valueOf(userCode))
+                .header("Authorization", "NotNull")
+                .bodyValue(userCode)
                 .retrieve()
-                .bodyToMono(String.class)
-                .block();
+                .bodyToMono(Long.class)
+                .subscribe(e -> resultList.add(e));
+
+//        webClient.post()
+//                .uri(documentUrl)
+//                .header("Authorization","NouNull")
+//                .bodyValue(String.valueOf(userCode))
+//                .retrieve()
+//                .bodyToMono(String.class)
+//                .block();
 
         log.info(userCode + " 정보를 Document에 보냅니다");
     }

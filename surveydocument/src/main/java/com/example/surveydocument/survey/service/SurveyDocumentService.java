@@ -69,8 +69,7 @@ public class SurveyDocumentService {
     Random random = new Random();
     private List<ReliabilityQuestion> questions;
     private int reliabilityquestionNumber;
-    @PersistenceContext
-    private final EntityManager em;
+
     // redis 분산 락 사용
     // 분산 락은 Transactional 과 같이 진행되지 않아서 따로 관리로직을 만들어야한다
     private final RedissonClient redissonClient;
@@ -304,15 +303,57 @@ public class SurveyDocumentService {
         return surveyDocumentRepository.findById(surveyDocumentId).get();
     }
 
-    //count +1
-    @Transactional
-    public void countChoice(Long choiceId) {
-        Optional<Choice> findChoice = choiceRepository.findById(choiceId);
+    public void countChoice(Long choiceId) throws Exception {
+        // survey document id 값을 키로 하는 lock 을 조회합니다.
+        RLock rLock = redissonClient.getLock("choice : lock");
+        // Lock 획득 시도
+        boolean isLocked = rLock.tryLock(5, 10, TimeUnit.SECONDS);
 
-        if (findChoice.isPresent()) {
-            choiceRepository.incrementCount(choiceId);
+        log.info(Thread.currentThread().getName() + " lock 획득 시도!");
+
+        TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        log.info(Thread.currentThread().getName() + " Transaction 시작");
+
+        // @Transactional 대신 코드로 트랜잭션을 관리한다
+        try {
+            if(!isLocked) {
+                throw new MessagingException("failed to get RLock");
+            }
+
+            // 조회수 증가 로직 실행
+            try {
+                Choice getChoice = choiceRepository.findById(choiceId).orElse(null);
+                choiceRepository.choiceCount(getChoice);
+
+                // 실행하면 커밋후 트랜잭션 종료
+                transactionManager.commit(status);
+                log.info(Thread.currentThread().getName() + " 커밋 후 트랜잭션 종료");
+            } catch (RuntimeException e) {
+                // 로직 실행 중 예외가 발생하면 롤백
+                transactionManager.rollback(status);
+                log.info(Thread.currentThread().getName() + " 로직 실행 실패");
+                throw new Exception(e.getMessage());
+            }
+
+        } catch (InterruptedException e) {
+            throw new Exception("Thread Interrupted");
+        } finally {
+            // 로직 수행이 끝나면 Lock 반환
+            if (rLock.isLocked() && rLock.isHeldByCurrentThread()) {
+                rLock.unlock();
+                log.info(Thread.currentThread().getName() + " Lock 해제");
+            }
         }
     }
+    //count +1
+//    @Transactional
+//    public void countChoice(Long choiceId) {
+//        Optional<Choice> findChoice = choiceRepository.findById(choiceId);
+//
+//        if (findChoice.isPresent()) {
+//            choiceRepository.incrementCount(choiceId);
+//        }
+//    }
 
     // 설문 응답자 수 + 1
     // 분산락 실행
@@ -364,6 +405,8 @@ public class SurveyDocumentService {
         ReliabilityQuestion reliabilityQuestion = null;
         QuestionDetailDto reliabilityQuestionDto = new QuestionDetailDto();
         List<ChoiceDetailDto> reliabiltyChoiceDtos = new ArrayList<>();
+        DesignResponseDto designResponse = new DesignResponseDto();
+
         if(surveyDocument.getReliability()){
             try {
                 Long l = Long.valueOf(-1);
@@ -384,17 +427,23 @@ public class SurveyDocumentService {
                 throw new RuntimeException(e);
             }
         }
-        // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
+
+        // SurveyDocument에서 SurveyDetailDto로 데이터 복사
         surveyDetailDto.setId(surveyDocument.getId());
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
         surveyDetailDto.setReliability(surveyDocument.getReliability());
+      
+        // 디자인
+        designResponse.setFont(surveyDocument.getDesign().getFont());
+        designResponse.setFontSize(surveyDocument.getDesign().getFontSize());
+        designResponse.setBackColor(surveyDocument.getDesign().getBackColor());
+        surveyDetailDto.setDesign(designResponse);
 
-        design
-        surveyDetailDto.setFont(surveyDocument.getDesign().getFont());
-        surveyDetailDto.setFontSize(surveyDocument.getDesign().getFontSize());
-        surveyDetailDto.setBackColor(surveyDocument.getDesign().getBackColor());
-
+        // 날짜
+        surveyDetailDto.setStartDate(surveyDocument.getDate().getStartDate());
+        surveyDetailDto.setEndDate(surveyDocument.getDate().getDeadline());
+        surveyDetailDto.setEnable(surveyDocument.getDate().isEnabled());
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
@@ -487,13 +536,14 @@ public class SurveyDocumentService {
         questionDocumentRepository.flush();
     }
 
-    @Transactional
-    public void countAnswer(Long id) {
-        Optional<SurveyDocument> byId = surveyDocumentRepository.findById(id);
-        if (byId.isPresent()) {
-            surveyDocumentRepository.incrementCountAnswer(id);
-        }
-    }
+    // countSurveyDocument 로 대체
+//    @Transactional
+//    public void countAnswer(Long id) {
+//        Optional<SurveyDocument> byId = surveyDocumentRepository.findById(id);
+//        if (byId.isPresent()) {
+//            surveyDocumentRepository.incrementCountAnswer(id);
+//        }
+//    }
 
     @Transactional
     public void updateSurvey(HttpServletRequest request,SurveyRequestDto requestDto, Long surveyId) {
@@ -556,21 +606,20 @@ public class SurveyDocumentService {
     public SurveyDetailDto getSurveyTemplateDetailDto(Long surveyDocumentId) {
         SurveyTemplate surveyTemplate = surveyTemplateRepository.findById(surveyDocumentId).get();
         SurveyDetailDto surveyDetailDto = new SurveyDetailDto();
+        DesignResponseDto designResponseDto = new DesignResponseDto();
 
         // SurveyDocument에서 SurveyParticipateDto로 데이터 복사
         surveyDetailDto.setTitle(surveyTemplate.getTitle());
         surveyDetailDto.setDescription(surveyTemplate.getDescription());
         surveyDetailDto.setReliability(surveyTemplate.getReliability());
 
-//        DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
-//        surveyDetailDto.setFont(designTemplate.getFont());
-//        surveyDetailDto.setFontSize(designTemplate.getFontSize());
-//        surveyDetailDto.setBackColor(designTemplate.getBackColor());
 
-        DesignResponseDto designResponseDto = new DesignResponseDto();
-        designResponseDto.setFont(surveyTemplate.getDesignTemplate().getFont());
-        designResponseDto.setFontSize(surveyTemplate.getDesignTemplate().getFontSize());
-        designResponseDto.setBackColor(surveyTemplate.getDesignTemplate().getBackColor());
+        DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
+
+        designResponseDto.setFont(designTemplate.getFont());
+        designResponseDto.setFontSize(designTemplate.getFontSize());
+        designResponseDto.setBackColor(designTemplate.getBackColor());
+
         surveyDetailDto.setDesign(designResponseDto);
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();

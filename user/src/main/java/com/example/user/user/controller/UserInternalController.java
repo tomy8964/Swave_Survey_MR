@@ -38,19 +38,19 @@ public class UserInternalController {
     @PostMapping("/survey/save")
     public void saveSurveyInUser(HttpServletRequest request, Survey survey) {
 
-        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("/survey/save"));
-
-        try {
-            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
-                // transaction
-                interRestApiUserService.saveSurveyInUser(request, survey);
-            } else {
-                throw new RuntimeException("Failed to acquire lock.");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            lock.unlock();
-        }
+//        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("/survey/save"));
+//
+//        try {
+//            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+//                // transaction
+//                interRestApiUserService.saveSurveyInUser(request, survey);
+//            } else {
+//                throw new RuntimeException("Failed to acquire lock.");
+//            }
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//            lock.unlock();
+//        }
     }
 }

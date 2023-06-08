@@ -37,22 +37,23 @@ public class SurveyAnswerExternalController {
 
     // 설문 응답 저장
     @PostMapping(value = "/response/create")
-    public String createResponse(@RequestBody SurveyResponseDto surveyForm) {
-        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("$surveyDocumentId"));
-
-        try {
-            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
-                // transaction
-                surveyService.createSurveyAnswer(surveyForm);
-                return "Success";
-            } else {
-                throw new RuntimeException("Failed to acquire lock.");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            lock.unlock();
-        }
+    public void createResponse(@RequestBody SurveyResponseDto surveyForm) {
+        surveyService.createSurveyAnswer(surveyForm);
+//
+//        RedissonRedLock lock = new RedissonRedLock(redissonClient.getLock("$surveyDocumentId"));
+//
+//        try {
+//            if (lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+//                // transaction
+//                return "Success";
+//            } else {
+//                throw new RuntimeException("Failed to acquire lock.");
+//            }
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//            lock.unlock();
+//        }
     }
 
     // 설문 응답들 조회

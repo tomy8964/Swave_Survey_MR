@@ -32,8 +32,8 @@ public class InterRestApiUserService {
     }
 
     public void saveSurveyInUser(HttpServletRequest request, Survey survey) {
-        User user = userService.getUser(request);
-        user.setSurvey(survey);
-        userRepository.flush();
+//        User user = userService.getUser(request);
+//        user.setSurvey(survey);
+//        userRepository.flush();
     }
 }

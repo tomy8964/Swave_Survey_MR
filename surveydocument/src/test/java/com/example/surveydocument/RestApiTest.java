@@ -1,7 +1,9 @@
 package com.example.surveydocument;
 
+import com.example.surveydocument.restAPI.service.InterRestApiSurveyDocumentService;
 import com.example.surveydocument.restAPI.service.OuterRestApiSurveyDocumentService;
 import com.example.surveydocument.survey.domain.Survey;
+import com.example.surveydocument.survey.repository.survey.SurveyRepository;
 import com.example.surveydocument.survey.repository.surveyDocument.SurveyDocumentRepository;
 import com.example.surveydocument.survey.service.SurveyDocumentService;
 import com.example.surveydocument.util.OAuth.JwtProperties;
@@ -24,6 +26,10 @@ public class RestApiTest {
     SurveyDocumentRepository surveyDocumentRepository;
     @Autowired
     OuterRestApiSurveyDocumentService apiService;
+    @Autowired
+    InterRestApiSurveyDocumentService interApiService;
+    @Autowired
+    SurveyRepository surveyRepository;
 
     private static MockWebServer mockWebServer;
     String host;
@@ -74,5 +80,14 @@ public class RestApiTest {
 //        // when
 //        apiService.sendSurveyToUser(request, survey);
 
+    }
+
+    @Test @DisplayName("saveUserInSurvey")
+    void API_test3() {
+        Long check = 1L;
+        interApiService.saveUserInSurvey(check);
+        Survey byUserCode = surveyRepository.findByUserCode(check);
+
+        assertThat(check).isEqualTo(byUserCode.getUserCode());
     }
 }
