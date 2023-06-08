@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/document/internal")
+@RequestMapping("/api/document/external")
 public class ChatGptController {
 
     private final ChatGptService chatGptService;
