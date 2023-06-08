@@ -30,7 +30,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     UserRepository userRepository;
 
     // 인증에서 제외할 url
-    private static final String Exclude_url = "/api/user/internal/**";
+    private static final String Exclude_url = "/api/*";
     private static final List<String> EXCLUDE_URL =
             Collections.unmodifiableList(
                     Arrays.asList(
