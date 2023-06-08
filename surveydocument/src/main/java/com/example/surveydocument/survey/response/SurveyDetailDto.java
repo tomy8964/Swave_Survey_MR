@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -17,11 +18,12 @@ public class SurveyDetailDto {
     private String description;
     private int countAnswer;
     private List<QuestionDetailDto> questionList;
-    Boolean reliability;
-//    String font;
-//    int fontSize;
-//    String backColor;
-    // getter, setter 생략
+    private Boolean reliability;
+
+    private Date startDate;
+    private Date endDate;
+    private Boolean enable;
 
     DesignResponseDto design;
+
 }

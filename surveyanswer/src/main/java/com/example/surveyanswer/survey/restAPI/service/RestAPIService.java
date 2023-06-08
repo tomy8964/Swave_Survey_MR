@@ -114,7 +114,7 @@ public class RestAPIService {
                 .block();
 
         // Process the response as needed
-        System.out.println("Request: " + get);
+        System.out.println("Request: " + get.getDesign());
 
         return get;
     }

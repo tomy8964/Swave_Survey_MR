@@ -56,7 +56,7 @@ public class SurveyAnswerExternalController {
     }
 
     // 설문 응답들 조회
-    @Cacheable(value = "get-csv", key = "#id")
+//    @Cacheable(value = "get-csv", key = "#id")
     @GetMapping(value = "/response/{id}")
     public List<SurveyAnswer> readResponse(@PathVariable Long id){
         return surveyService.getSurveyAnswersBySurveyDocumentId(id);

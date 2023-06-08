@@ -30,7 +30,7 @@ public class SurveyDocument {
 //    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_deadline")
 //    private Date deadline;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Date_id")
     private DateManagement date;
 
@@ -49,7 +49,7 @@ public class SurveyDocument {
 //    @Column(name = "backcolor")
 //    private String backColor;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JoinColumn(name = "Design_id")
     private Design design;
 
