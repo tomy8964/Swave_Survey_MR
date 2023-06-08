@@ -1,21 +1,15 @@
-FROM openjdk:17
+FROM python:3.9
 
-# Install curl and other dependencies
-RUN apt-get update && apt-get install -y curl gnupg
-
-# Download and install Python
-RUN curl https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz --output python.tgz \
-    && tar -xzf python.tgz \
-    && cd Python-3.9.7 \
-    && ./configure \
-    && make install \
-    && cd .. \
-    && rm -rf python.tgz Python-3.9.7
-
+# Set working directory
 WORKDIR /usr/src/app
 
+# Install Java runtime
+RUN apt-get update && apt-get install -y default-jre
+
+# Copy the Spring application JAR file
 COPY ./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar ./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar
 
+# Expose ports
 EXPOSE 8080
 EXPOSE 8082
 
@@ -25,9 +19,6 @@ COPY python-scripts/ /usr/src/app/python-scripts/
 # Set Python environment variables
 ENV PYTHONPATH=/usr/src/app/python-scripts
 ENV PYTHONUNBUFFERED=1
-
-# Set the working directory
-WORKDIR /usr/src/app
 
 # Run the Spring application with Python support
 CMD ["java", "-jar", "-Dspring.profiles.active=server", "./build/libs/surveyanalyze-0.0.1-SNAPSHOT.jar"]
