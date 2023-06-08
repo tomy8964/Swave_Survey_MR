@@ -119,6 +119,7 @@ public class SurveyDocumentService {
 
         // 유저 코드에 해당하는 survey 찾기
         Survey survey = surveyRepository.findByUserCode(userCode);
+        System.out.println(survey);
         Long documentId = createTest(survey, surveyRequest);
 
         // User Module 에 저장된 Survey 보내기
@@ -432,7 +433,7 @@ public class SurveyDocumentService {
         surveyDetailDto.setTitle(surveyDocument.getTitle());
         surveyDetailDto.setDescription(surveyDocument.getDescription());
         surveyDetailDto.setReliability(surveyDocument.getReliability());
-
+      
         // 디자인
         designResponse.setFont(surveyDocument.getDesign().getFont());
         designResponse.setFontSize(surveyDocument.getDesign().getFontSize());
@@ -612,6 +613,7 @@ public class SurveyDocumentService {
         surveyDetailDto.setDescription(surveyTemplate.getDescription());
         surveyDetailDto.setReliability(surveyTemplate.getReliability());
 
+
         DesignTemplate designTemplate = surveyTemplate.getDesignTemplate();
 
         designResponseDto.setFont(designTemplate.getFont());
@@ -666,7 +668,7 @@ public class SurveyDocumentService {
 
     public void managementEnable(Long id, Boolean enable) {
         SurveyDocument surveyDocument = surveyDocumentRepository.findById(id).orElse(null);
-        surveyDocument.getDate().setEnabled(enable);
+        surveyDocument.getDate().setIsEnabled(enable);
     }
 
     public ManagementResponseDto managementSurvey(Long id) {
@@ -674,7 +676,7 @@ public class SurveyDocumentService {
         return ManagementResponseDto.builder()
                 .startDate(surveyDocument.getDate().getStartDate())
                 .endDate(surveyDocument.getDate().getDeadline())
-                .enable(surveyDocument.getDate().isEnabled())
+                .enable(surveyDocument.getDate().getIsEnabled())
                 .build();
     }
 }
