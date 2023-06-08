@@ -443,7 +443,7 @@ public class SurveyDocumentService {
         // 날짜
         surveyDetailDto.setStartDate(surveyDocument.getDate().getStartDate());
         surveyDetailDto.setEndDate(surveyDocument.getDate().getDeadline());
-        surveyDetailDto.setEnable(surveyDocument.getDate().isEnabled());
+        surveyDetailDto.setEnable(surveyDocument.getDate().getIsEnabled());
 
         List<QuestionDetailDto> questionDtos = new ArrayList<>();
         for (QuestionDocument questionDocument : surveyDocument.getQuestionDocumentList()) {
