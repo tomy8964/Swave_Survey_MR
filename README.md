@@ -1,32 +1,56 @@
-# SurveyMSA
-# Ingress로 JWT 토큰 인증
-## 외부 요청 -> Ingress -> FrontEnd -> BackEnd (백엔드끼리의 통신은 REST API)
-#### ![img.png](img.png)
-#### demo2 포드에 들어가서 curl로 demo1-service:9002/api/resource 요청 받음
-# Spring Cloud Gateway로 JWT 토큰 인증
-## 외부 요청 -> Ingress -> FrontEnd -> Gateway -> BackEnd (백엔드끼리의 통신도 Gateway를 통해서)
-![](2023-05-31-00-44-06.png)
- SWAVE project to MSA
- https://malwareanalysis.tistory.com/91
- https://blog.naver.com/alice_k106/221502890249
- https://twofootdog.tistory.com/23
- https://seungjuitmemo.tistory.com/185
- https://velog.io/@sgwon1996/%EC%BF%A0%EB%B2%84%EB%84%A4%ED%8B%B0%EC%8A%A4-%ED%99%98%EA%B2%BD%EC%97%90-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%96%B4%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0
-### 인그레스 설정
- 1. 도메인 별로 나눈 모듈(스프링 프로젝트)을 각각 다른 포드로 쿠버네티스에 배포
- 2. 각각의 포드를 가르키는 서비스를 배포
- 3. 인그레스 컨트롤러를 설치해서 url에 따라 가르켜야 하는 서비스 지정
- 4. 인그레스 ip로 접속 테스트
- 5. 포드에서 포드끼리의 통신 테스트 (포드에서 서비스에게 가서 데이터 요청)
- 6. 5번을 위해 스프링 프로젝트에서는
-```java
-String url = "http://" + serviceDemo2.host + "/api/resource";
-
-@Value("${serviceDemo2.host}")
-private String serviceDemo2.host;
+# SWAVE Project - WaveForm
 
 
-application.properties 설정   
-serviceDemo2.host=demo2-service:9003
-```   
- 7. 이런식으로 application.properties에 serviceBHost를 저장하고 가져다 사용
+<div align="center">
+
+ <p>📖Tech Stack📖</p>
+
+ <p>🚉Platforms & Languages🚉</p>
+ <img src="https://img.shields.io/badge/SpringBoot-6DB33F?style=flat&logo=SpringBoot&logoColor=white" />
+
+ <img src="https://img.shields.io/badge/Java-007396?style=flat&logo=Conda-Forge&logoColor=white" />
+
+ <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white"/>
+
+ <img src="https://img.shields.io/badge/Redis-DC382D?style=flat&logo=Redis&logoColor=white"/>
+
+<p>🔋Tools🔋</p>
+
+<img src="https://img.shields.io/badge/IntelliJ IDEA-000000?style=flat&logo=IntelliJ IDEA&logoColor=white" />
+<img src="https://img.shields.io/badge/JUnit5-25A162?style=flat&logo=JUnit5&logoColor=white" />
+<img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=GitHub&logoColor=white" />
+<img src="https://img.shields.io/badge/Jenkins-D24939?style=flat&logo=Jenkins&logoColor=white" />
+
+
+ </div>
+
+## Version
+1. Spring Boot Version : 3.0.5
+2. JDK : 17
+3. MySQL : 8
+4. Build configuration
+   - local: build in Spring Boot Terminal
+   - server: Jenkins, docker
+
+
+
+
+</br>
+</br>
+<h2>소개</h2>
+
+- 본 어플리케이션은 설문조사 작성자의 효율성을 높이기 위한 기능을 제공합니다.    
+- ChatGPT를 활용하여 질문 추천 기능이 추가됩니다.    
+- 이 기능은 작성자들이 보다 쉽고 효율적으로 질문을 작성할 수 있도록 도와줍니다. 또한 이 기능을 통해 설문 조사 질문의 품질을 향상시킬 수 잇어 보
+다 정확하고 유익한 결과를 도출할 수 있습니다.    
+- 설문의 문항 수가 많을 경우 답변자의 집중력이나 동기가 감소해 답변의 신뢰도가 떨어질 수 있습니다. 이를 대비하기 위해 신뢰도 평가 문항을
+추가해 성실하게 답변하지 않은 응답은 제외시키는 기능을 제공합니다.   
+- 설문 작성자는 결과를 실시간으로 확인할 수 있으며 빠르게 결과를 분석할 수 있습니다. 또한 연관 분석, 교차 분석, 비교 분석 머신러닝 기능을
+포함한 상세 분석 리포트를 제공하여 효과적인 비즈니스 인사이트를 제공할 수 있습니다.   
+
+### 커뮤니티
+
+💬 [Join the #SWAVE Notion Community!](https://dogfactory.notion.site/KEA-PROJECT-1da977c636264af292055b41e0909454?pvs=4)
+
+# SWAVE Project - WAVEFORM
+
