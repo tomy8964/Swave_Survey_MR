@@ -9,7 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 public class Choice {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "choice_id")
     private Long id;
     @Column(name = "choice_title")
@@ -23,7 +24,7 @@ public class Choice {
     private QuestionDocument question_id;
 
     @Builder
-    public Choice(String title, QuestionDocument question_id,  int count) {
+    public Choice(String title, QuestionDocument question_id, int count) {
         this.title = title;
         this.question_id = question_id;
         this.count = count;

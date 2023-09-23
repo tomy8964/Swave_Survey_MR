@@ -3,6 +3,7 @@ package com.example.surveyanalyze.survey.request;
 import lombok.Data;
 
 import java.util.List;
+
 @Data
 public class ReliabilityQuestion {
     private String title;

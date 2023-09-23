@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ChoiceAnalyzeRepository  extends JpaRepository<ChoiceAnalyze, Long>, ChoiceAnalyzeRepositoryCustom {
+public interface ChoiceAnalyzeRepository extends JpaRepository<ChoiceAnalyze, Long>, ChoiceAnalyzeRepositoryCustom {
 }

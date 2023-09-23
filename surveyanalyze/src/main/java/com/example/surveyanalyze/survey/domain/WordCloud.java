@@ -12,7 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 public class WordCloud {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wordCloud_id")
     private Long id;
     @Column(name = "wordCloud_title")

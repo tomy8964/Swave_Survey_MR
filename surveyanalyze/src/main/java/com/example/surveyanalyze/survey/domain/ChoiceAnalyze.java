@@ -11,7 +11,8 @@ import lombok.*;
 @Getter
 @Setter
 public class ChoiceAnalyze {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "choice_analyze_id")
     private Long id;
     @Column(name = "support", nullable = false)

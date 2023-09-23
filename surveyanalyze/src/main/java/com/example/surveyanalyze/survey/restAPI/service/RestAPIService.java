@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+
 import java.util.List;
 
 @Slf4j
@@ -26,10 +27,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RestAPIService {
 
+    public WebClient webClient = WebClient.create();
     @Value("${gateway.host}")
     private String gateway;
-
-    public WebClient webClient = WebClient.create();
 
     public void setGateway(String baseUrl) {
         this.gateway = baseUrl;
@@ -50,7 +50,7 @@ public class RestAPIService {
         // Make a GET request to the API and retrieve the response
         SurveyDocument get = webClient.get()
                 .uri(apiUrl)
-                .header("Authorization","NotNull")
+                .header("Authorization", "NotNull")
                 .retrieve()
                 .bodyToMono(SurveyDocument.class)
                 .block();
@@ -68,12 +68,12 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/document/internal/getChoice/"+ choiceId;
+        String apiUrl = "http://" + gateway + "/api/document/internal/getChoice/" + choiceId;
 
         // Make a GET request to the API and retrieve the response
         Choice get = webClient.get()
                 .uri(apiUrl)
-                .header("Authorization","NotNull")
+                .header("Authorization", "NotNull")
                 .retrieve()
                 .bodyToMono(Choice.class)
                 .block();
@@ -91,12 +91,12 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/document/internal/getQuestion/"+ questionId;
+        String apiUrl = "http://" + gateway + "/api/document/internal/getQuestion/" + questionId;
 
         // Make a GET request to the API and retrieve the response
         QuestionDocument get = webClient.get()
                 .uri(apiUrl)
-                .header("Authorization","NotNull")
+                .header("Authorization", "NotNull")
                 .retrieve()
                 .bodyToMono(QuestionDocument.class)
                 .block();
@@ -114,12 +114,12 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/document/internal/getQuestionByChoiceId/"+ choiceId;
+        String apiUrl = "http://" + gateway + "/api/document/internal/getQuestionByChoiceId/" + choiceId;
 
         // Make a GET request to the API and retrieve the response
         QuestionDocument get = webClient.get()
                 .uri(apiUrl)
-                .header("Authorization","NotNull")
+                .header("Authorization", "NotNull")
                 .retrieve()
                 .bodyToMono(QuestionDocument.class)
                 .block();
@@ -137,7 +137,7 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/answer/internal/getQuestionAnswerByCheckAnswerId/"+ id;
+        String apiUrl = "http://" + gateway + "/api/answer/internal/getQuestionAnswerByCheckAnswerId/" + id;
 
         // Make a GET request to the API and retrieve the response
         List<QuestionAnswer> questionAnswerList = webClient.get()
@@ -148,7 +148,8 @@ public class RestAPIService {
                 .map(responseBody -> {
                     ObjectMapper mapper = new ObjectMapper();
                     try {
-                        return mapper.readValue(responseBody, new TypeReference<List<QuestionAnswer>>() {});
+                        return mapper.readValue(responseBody, new TypeReference<List<QuestionAnswer>>() {
+                        });
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
@@ -169,7 +170,7 @@ public class RestAPIService {
         WebClient webClient = WebClient.create();
 
         // Define the API URL
-        String apiUrl = "http://" + gateway + "/api/document/internal/setWordCloud/"+ id;
+        String apiUrl = "http://" + gateway + "/api/document/internal/setWordCloud/" + id;
 
         // Make a GET request to the API and retrieve the response
         String response = webClient.post()

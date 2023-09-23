@@ -11,7 +11,8 @@ import lombok.*;
 @Getter
 @Setter
 public class CompareAnalyze {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "compare_analyze_id")
     private Long id;
     @Column(name = "question_title")

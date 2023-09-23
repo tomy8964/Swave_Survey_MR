@@ -1,9 +1,5 @@
 package com.example.user.restAPI.service;
 
-import com.example.user.user.domain.User;
-import com.example.user.util.OAuth.JwtProperties;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,23 +8,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
 @Slf4j
+@Service
 public class OuterRestApiUserService {
-    private static String surveyDocumentInternalUrl = "/api/document/internal";
+    private static final String surveyDocumentInternalUrl = "/api/document/internal";
     @Value("${gateway.host}")
     private String gateway;
 
+    // void => 비동기식으로 변경
     // Document 에 유저 정보 보내기
     public void sendUserToSurveyDocument(Long userCode) {
         log.info("Document 에 User 정보를 보냅니다");
 
-//        String jwtHeader = ((HttpServletRequest)request).getHeader(JwtProperties.HEADER_STRING);
         WebClient webClient = WebClient.create();
         String documentUrl = "http://" + gateway + surveyDocumentInternalUrl + "/saveUser";
-
-        List<Long> resultList = new ArrayList<>();
 
         webClient.post()
                 .uri(documentUrl)
@@ -36,15 +29,7 @@ public class OuterRestApiUserService {
                 .bodyValue(userCode)
                 .retrieve()
                 .bodyToMono(Long.class)
-                .subscribe(e -> resultList.add(e));
-
-//        webClient.post()
-//                .uri(documentUrl)
-//                .header("Authorization","NouNull")
-//                .bodyValue(String.valueOf(userCode))
-//                .retrieve()
-//                .bodyToMono(String.class)
-//                .block();
+                .subscribe(((List<Long>) new ArrayList<Long>())::add);
 
         log.info(userCode + " 정보를 Document에 보냅니다");
     }

@@ -14,7 +14,10 @@ public class QuestionRequestDto {
     /*
     HttpMessageConverter Error code : no Creators, like default constructor, exist
      */
-    public QuestionRequestDto() {};
+    public QuestionRequestDto() {
+    }
+
+    ;
 
     // 객관식
     @Builder

@@ -11,7 +11,8 @@ import lombok.*;
 @Getter
 @Setter
 public class ChiAnalyze {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chi_analyze_id")
     private Long id;
     @Column(name = "question_title")

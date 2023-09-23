@@ -10,7 +10,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 public class SurveyAnalyze {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_analyze_id")
     private Long id;
 

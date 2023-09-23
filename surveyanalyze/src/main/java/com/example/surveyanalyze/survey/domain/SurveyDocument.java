@@ -14,7 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 public class SurveyDocument {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_document_id")
     private Long id;
     @Column(name = "survey_title")
@@ -25,9 +26,13 @@ public class SurveyDocument {
     private String description;
     @Column(name = "accept_response")
     private boolean acceptResponse;
-    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_start_date")
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "survey_start_date")
     private Date startDate;
-    @CreationTimestamp @Temporal(TemporalType.TIMESTAMP) @Column(name = "survey_deadline")
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "survey_deadline")
     private Date deadline;
     @Column(name = "url")
     private String url;
@@ -52,13 +57,14 @@ public class SurveyDocument {
 
 
     @Builder
-    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, String title,Boolean reliability, int type, String description,String font,int fontSize,String backColor, List<QuestionDocument> questionDocumentList) {        this.title = title;
+    public SurveyDocument(int countAnswer, List<SurveyAnswer> surveyAnswerList, String title, Boolean reliability, int type, String description, String font, int fontSize, String backColor, List<QuestionDocument> questionDocumentList) {
+        this.title = title;
         this.type = type;
         this.description = description;
-        this.reliability=reliability;
-        this.font=font;
-        this.backColor=backColor;
-        this.fontSize=fontSize;
+        this.reliability = reliability;
+        this.font = font;
+        this.backColor = backColor;
+        this.fontSize = fontSize;
         this.questionDocumentList = questionDocumentList;
         this.countAnswer = countAnswer;
     }

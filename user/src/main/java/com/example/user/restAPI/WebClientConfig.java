@@ -10,7 +10,6 @@ public class WebClientConfig {
 
     @Bean
     public WebClient webClient() {
-        final int size = 16 * 1024 * 1024;
         final ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(configurer -> configurer.defaultCodecs()
                         .maxInMemorySize(-1)) // No size limit

@@ -1,8 +1,8 @@
+import pandas as pd
 import pymysql
+import sys
 from mlxtend.frequent_patterns import apriori
 from mlxtend.preprocessing import TransactionEncoder
-import pandas as pd
-import sys
 
 
 def analyze_for_all(survey_document_id):
@@ -32,7 +32,7 @@ def analyze_for_all(survey_document_id):
         # print(resultSources)
     # print()
     # 끝
-    rdb = f'SELECT survey_answer_id FROM SURVEY_ANSWER where survey_document_id='+survey_document_id
+    rdb = f'SELECT survey_answer_id FROM SURVEY_ANSWER where survey_document_id=' + survey_document_id
 
     sourceCursor.execute(rdb)
     resultSources = sourceCursor.fetchall()
@@ -106,26 +106,25 @@ def analyze_for_all(survey_document_id):
                 tempList.append([support, itemset])
             ultimateApriori[i][k].append(tempList)
 
-
-    result_list=[]
+    result_list = []
     for i in range(0, len(ultimateApriori)):
         for t in range(0, len(ultimateApriori[i])):
-            select=[]
+            select = []
             for p in range(0, len(ultimateApriori[i][t])):
                 count = 0
                 select.append(answerKind[i][t][-1])
-                select1=[]
+                select1 = []
 
-                for p1 in range(0,len(ultimateApriori[i][t][p])):
+                for p1 in range(0, len(ultimateApriori[i][t][p])):
                     if count >= 3:
                         break
-                    if len(ultimateApriori[i][t][p][p1][1])>1:
+                    if len(ultimateApriori[i][t][p][p1][1]) > 1:
                         continue
                     elif (ultimateApriori[i][t][p][p1][1][0][-1] == answerKind[i][t][-1]):
                         continue
                     else:
-                        count+=1
-                        select.append([ultimateApriori[i][t][p][p1][0],ultimateApriori[i][t][p][p1][1][0][-1]])
+                        count += 1
+                        select.append([ultimateApriori[i][t][p][p1][0], ultimateApriori[i][t][p][p1][1][0][-1]])
 
             result_list.append(select)
     if (len(result_list) == 0):

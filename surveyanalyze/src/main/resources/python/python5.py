@@ -1,24 +1,11 @@
-import pymysql
-from mlxtend.frequent_patterns import apriori
-from mlxtend.preprocessing import TransactionEncoder
-import pandas as pd
-import sys
-from wordcloud import WordCloud, STOPWORDS
-import matplotlib.pyplot as plt
-
-# 한글 폰트 패스로 지정
-import matplotlib.font_manager as fm
-import re
-import collections
-from PIL import Image
-from io import BytesIO
 import firebase_admin
-from firebase_admin import db
+import pymysql
+import sys
 from firebase_admin import credentials
 from firebase_admin import storage
-from tqdm import tqdm
-from torch.nn import functional as F
-
+# 한글 폰트 패스로 지정
+from io import BytesIO
+from wordcloud import WordCloud, STOPWORDS
 
 
 def analyze_for_all(survey_document_id):
@@ -39,8 +26,8 @@ def analyze_for_all(survey_document_id):
     resultSource = sourceCursor.fetchall()
 
     # print('Results before insert in source mysql database ', resultSource)
-#     select question_id from question_document where survey_document_id=1 AND question_type = 0;
-#     select check_answer from question_answer where check_answer_id=3 AND question_type = 0;
+    #     select question_id from question_document where survey_document_id=1 AND question_type = 0;
+    #     select check_answer from question_answer where check_answer_id=3 AND question_type = 0;
 
     temp = resultSource
     for i in range(0, len(temp)):
@@ -50,7 +37,7 @@ def analyze_for_all(survey_document_id):
         # print(resultSources)
     # print()
     # 끝
-    rdb = f'select question_id from question_document where question_type = 0 AND survey_document_id = '+ survey_document_id
+    rdb = f'select question_id from question_document where question_type = 0 AND survey_document_id = ' + survey_document_id
 
     sourceCursor.execute(rdb)
     resultSources = sourceCursor.fetchall()
@@ -75,6 +62,7 @@ def analyze_for_all(survey_document_id):
 
     # return resultSources
 
+
 def word(str, question_document_id, survey_document_id):
     spwords = set(STOPWORDS)  # 제외할 단어
     # spwords.add('내가')  # 제외하고 싶은 단어 추가
@@ -87,11 +75,10 @@ def word(str, question_document_id, survey_document_id):
     # 워드 클라우드 생성 코드...
 
     # 이미지 파일로 저장
-    wc = WordCloud(max_font_size=200, stopwords=spwords,font_path= 'C:/Windows/Fonts/H2MJRE',
-                    background_color='white', width=800, height=800)
+    wc = WordCloud(max_font_size=200, stopwords=spwords, font_path='C:/Windows/Fonts/H2MJRE',
+                   background_color='white', width=800, height=800)
     print(str)
     wc.generate(str)
-
 
     image_data = wc.to_image()
     image_stream = BytesIO()

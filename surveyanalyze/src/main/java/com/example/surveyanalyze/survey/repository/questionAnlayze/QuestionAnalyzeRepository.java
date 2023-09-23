@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface QuestionAnalyzeRepository  extends JpaRepository<QuestionAnalyze, Long>, QuestionAnalyzeRepositoryCustom {
+public interface QuestionAnalyzeRepository extends JpaRepository<QuestionAnalyze, Long>, QuestionAnalyzeRepositoryCustom {
 
     @Transactional
     void deleteAllBySurveyAnalyzeId(SurveyAnalyze id);

@@ -92,7 +92,7 @@ tasks.named('test') {
 def querydslDir = "$buildDir/generated/querydsl"
 
 sourceSets {
-    main.java.srcDirs += [ querydslDir ]
+    main.java.srcDirs += [querydslDir]
 }
 
 tasks.withType(JavaCompile) {
@@ -103,7 +103,6 @@ clean {
     // clean 실행 시 생성된 QClass 삭제
     delete file(querydslDir)
 }
-
 
 
 //tasks.named('asciidoctor') {

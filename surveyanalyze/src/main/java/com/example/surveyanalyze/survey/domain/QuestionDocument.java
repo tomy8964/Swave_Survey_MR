@@ -11,7 +11,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 public class QuestionDocument {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
     private Long id;
     @Column(name = "question_title")

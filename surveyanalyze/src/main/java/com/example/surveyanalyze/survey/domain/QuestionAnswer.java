@@ -9,7 +9,8 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 public class QuestionAnswer {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_answer_id")
     private Long id;
     @Column(name = "question_title")

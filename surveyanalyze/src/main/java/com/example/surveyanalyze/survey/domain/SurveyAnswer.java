@@ -11,7 +11,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 public class SurveyAnswer {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_answer_id")
     private Long id;
     @Column(name = "survey_type")
